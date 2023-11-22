@@ -1,0 +1,1706 @@
+Open Watcom Linker Version 2.0 beta Nov 20 2023 01:51:09 (64-bit)
+Copyright (c) 2002-2023 The Open Watcom Contributors. All Rights Reserved.
+Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
+Created on:       23/11/21 15:10:00
+Executable Image: cloud.exe
+creating a DOS executable
+
+
+                        +------------+
+                        |   Groups   |
+                        +------------+
+
+Group                           Address              Size
+=====                           =======              ====
+
+DGROUP                          29fe:0000            000039a0
+
+
+
+                        +--------------+
+                        |   Segments   |
+                        +--------------+
+
+Segment                Class          Group          Address         Size
+=======                =====          =====          =======         ====
+
+cloud_TEXT             CODE           AUTO           0000:0000       00001803
+ezxml_TEXT             CODE           AUTO           0000:1803       00003547
+dos_scrn_TEXT          CODE           AUTO           0000:4d4a       00000127
+dos_cgui_TEXT          CODE           AUTO           0000:4e71       00000af9
+dos_neti_TEXT          CODE           AUTO           0000:596a       00000294
+list_TEXT              CODE           AUTO           0000:5bfe       00000325
+filelist_TEXT          CODE           AUTO           0000:5f23       0000020f
+cldutils_TEXT          CODE           AUTO           0000:6132       000000de
+protocol_TEXT          CODE           AUTO           0000:6210       00001492
+packet_TEXT            CODE           AUTO           0000:76a2       000005c6
+arp_TEXT               CODE           AUTO           0000:7c68       000009cd
+eth_TEXT               CODE           AUTO           0000:8635       00000000
+ip_TEXT                CODE           AUTO           0000:8635       00000a06
+tcp_TEXT               CODE           AUTO           0000:903b       00002940
+tcpsockm_TEXT          CODE           AUTO           0000:b97b       000003d7
+utils_TEXT             CODE           AUTO           0000:bd52       000010cb
+udp_TEXT               CODE           AUTO           0000:ce1d       00000429
+dns_TEXT               CODE           AUTO           0000:d246       00000db1
+timer_TEXT             CODE           AUTO           0000:dff7       0000013b
+ipasm_TEXT             CODE           AUTO           0000:e132       0000013b
+trace_TEXT             CODE           AUTO           0000:e26d       000000ef
+inputip_TEXT           CODE           AUTO           0000:e35c       00000435
+guistate_TEXT          CODE           AUTO           0000:e791       00000096
+brwsfldr_TEXT          CODE           AUTO           0000:e827       00000d47
+stablcl_TEXT           CODE           AUTO           0000:f56e       00000005
+cppdata_TEXT           CODE           AUTO           0000:f573       00000000
+fsregist_TEXT          CODE           AUTO           0000:f573       00000384
+dtorarst_TEXT          CODE           AUTO           0000:f8f7       00000029
+opdelarr_TEXT          CODE           AUTO           0000:f920       00000005
+opdel_TEXT             CODE           AUTO           0000:f925       0000000e
+_TEXT                  CODE           AUTO           0f94:0000       0000cbac
+GRAPH_TEXT             CODE           AUTO           1c4e:000c       0000468d
+opnew_TEXT             CODE           AUTO           1c4e:4699       00000078
+stabthrw_TEXT          CODE           AUTO           1c4e:4711       00000997
+opnewp_TEXT            CODE           AUTO           1c4e:50a8       00000005
+undefed_TEXT           CODE           AUTO           1c4e:50ad       00000010
+moddtorr_TEXT          CODE           AUTO           1c4e:50bd       00000000
+fsroot_TEXT            CODE           AUTO           1c4e:50bd       0000000b
+stabdtor_TEXT          CODE           AUTO           1c4e:50c8       00000368
+iofefg_TEXT            CODE           AUTO           1c4e:5430       00000036
+opnewarr_TEXT          CODE           AUTO           1c4e:5466       00000005
+pure_err_TEXT          CODE           AUTO           1c4e:546b       00000024
+stabmod_TEXT           CODE           AUTO           1c4e:548f       00000076
+stabdisp_TEXT          CODE           AUTO           1c4e:5505       0000033f
+stabadt_TEXT           CODE           AUTO           1c4e:5844       00000114
+exc_pr_TEXT            CODE           AUTO           1c4e:5958       000001ab
+vfun_err_TEXT          CODE           AUTO           1c4e:5b03       00000000
+callterm_TEXT          CODE           AUTO           1c4e:5b03       00000032
+unexpect_TEXT          CODE           AUTO           1c4e:5b35       0000008d
+tsequiv_TEXT           CODE           AUTO           1c4e:5bc2       00000194
+stabinit_TEXT          CODE           AUTO           1c4e:5d56       0000010f
+fatalerr_TEXT          CODE           AUTO           1c4e:5e65       0000001d
+allocexc_TEXT          CODE           AUTO           1c4e:5e82       000004c3
+stabtrav_TEXT          CODE           AUTO           1c4e:6345       000001e9
+ljmpinit_TEXT          CODE           AUTO           1c4e:652e       00000016
+iofnoefg_TEXT          CODE           AUTO           1c4e:6544       00000010
+prwdata_TEXT           CODE           AUTO           1c4e:6554       00000000
+termnate_TEXT          CODE           AUTO           1c4e:6554       00000049
+areaexc_TEXT           CODE           AUTO           1c4e:659d       00000000
+tssize_TEXT            CODE           AUTO           1c4e:659d       0000004d
+bittest_TEXT           CODE           AUTO           1c4e:65ea       00000044
+ljmpdtor_TEXT          CODE           AUTO           1c4e:662e       000000b2
+cloud_DATA1            FAR_CONST      AUTO           22bc:0000       000007c6
+cloud_DATA3            FAR_CONST      AUTO           2338:0006       00000087
+ezxml_DATA1            FAR_CONST      AUTO           2338:008d       00000325
+dos_cgui_DATA1         FAR_CONST      AUTO           2374:0000       0000015e
+dos_cgui_DATA3         FAR_CONST      AUTO           2389:000e       00000374
+dos_neti_DATA1         FAR_CONST      AUTO           2389:0382       0000007a
+list_DATA1             FAR_CONST      AUTO           2389:03fc       00000060
+filelist_DATA1         FAR_CONST      AUTO           2389:045c       0000000b
+cldutils_DATA2         FAR_CONST      AUTO           2389:0467       00000017
+protocol_DATA1         FAR_CONST      AUTO           23d1:0000       000008b6
+protocol_DATA2         FAR_CONST      AUTO           245c:0006       00000067
+packet_DATA1           FAR_CONST      AUTO           245c:006d       00000139
+arp_DATA1              FAR_CONST      AUTO           245c:01a6       00000279
+ip_DATA1               FAR_CONST      AUTO           245c:041f       000001d6
+tcp_DATA1              FAR_CONST      AUTO           245c:05f5       00000d83
+tcpsockm_DATA1         FAR_CONST      AUTO           245c:1378       000001b0
+utils_DATA1            FAR_CONST      AUTO           245c:1528       0000042c
+udp_DATA1              FAR_CONST      AUTO           245c:1954       0000014d
+dns_DATA1              FAR_CONST      AUTO           245c:1aa1       0000031b
+trace_DATA1            FAR_CONST      AUTO           245c:1dbc       0000002a
+inputip_DATA1          FAR_CONST      AUTO           263b:0000       0000043c
+inputip_DATA2          FAR_CONST      AUTO           267e:000c       00000062
+guistate_DATA1         FAR_CONST      AUTO           2685:0000       0000041c
+guistate_DATA2         FAR_CONST      AUTO           26c6:000c       00000038
+brwsfldr_DATA1         FAR_CONST      AUTO           26cb:0000       0000051c
+brwsfldr_DATA2         FAR_CONST      AUTO           271c:000c       0000003a
+stablcl_DATA1          FAR_CONST      AUTO           2721:0000       00000000
+cppdata_DATA1          FAR_CONST      AUTO           2721:0000       00000000
+fsregist_DATA1         FAR_CONST      AUTO           2721:0000       00000000
+dtorarst_DATA1         FAR_CONST      AUTO           2721:0000       00000000
+opdelarr_DATA1         FAR_CONST      AUTO           2721:0000       00000000
+opdel_DATA1            FAR_CONST      AUTO           2721:0000       00000000
+opnew_DATA1            FAR_CONST      AUTO           2721:0000       00000000
+stabthrw_DATA1         FAR_CONST      AUTO           2721:0000       0000022a
+stabthrw_DATA1         FAR_CONST      AUTO           2743:000a       000001a4
+opnewp_DATA1           FAR_CONST      AUTO           275e:0000       00000000
+undefed_DATA1          FAR_CONST      AUTO           275e:0000       00000000
+undefed_DATA1          FAR_CONST      AUTO           275e:0000       0000002c
+moddtorr_DATA1         FAR_CONST      AUTO           2761:0000       00000000
+fsroot_DATA1           FAR_CONST      AUTO           2761:0000       00000000
+stabdtor_DATA1         FAR_CONST      AUTO           2761:0000       00000000
+iofefg_DATA1           FAR_CONST      AUTO           2761:0000       00000000
+opnewarr_DATA1         FAR_CONST      AUTO           2761:0000       00000000
+pure_err_DATA1         FAR_CONST      AUTO           2761:0000       00000000
+pure_err_DATA1         FAR_CONST      AUTO           2761:0000       0000001e
+stabmod_DATA1          FAR_CONST      AUTO           2763:0000       00000000
+stabdisp_DATA1         FAR_CONST      AUTO           2763:0000       00000000
+stabadt_DATA1          FAR_CONST      AUTO           2763:0000       00000036
+exc_pr_DATA1           FAR_CONST      AUTO           2763:0040       00000000
+vfun_err_DATA1         FAR_CONST      AUTO           2763:0040       00000000
+vfun_err_DATA1         FAR_CONST      AUTO           2767:0000       00000032
+callterm_DATA1         FAR_CONST      AUTO           276b:0000       00000000
+callterm_DATA1         FAR_CONST      AUTO           276b:0000       0000001f
+unexpect_DATA1         FAR_CONST      AUTO           276d:0000       00000012
+unexpect_DATA1         FAR_CONST      AUTO           276e:0002       00000023
+tsequiv_DATA1          FAR_CONST      AUTO           2771:0000       00000000
+stabinit_DATA1         FAR_CONST      AUTO           2771:0000       00000000
+fatalerr_DATA1         FAR_CONST      AUTO           2771:0000       00000000
+allocexc_DATA1         FAR_CONST      AUTO           2771:0000       00000034
+allocexc_DATA1         FAR_CONST      AUTO           2774:0004       0000002b
+stabtrav_DATA1         FAR_CONST      AUTO           2777:0000       00000000
+ljmpinit_DATA1         FAR_CONST      AUTO           2777:0000       00000000
+iofnoefg_DATA1         FAR_CONST      AUTO           2777:0000       00000000
+iofnoefg_DATA1         FAR_CONST      AUTO           2777:0000       00000026
+termnate_DATA1         FAR_CONST      AUTO           277a:0000       00000000
+termnate_DATA1         FAR_CONST      AUTO           277a:0000       00000022
+areaexc_DATA1          FAR_CONST      AUTO           277d:0000       00000000
+tssize_DATA1           FAR_CONST      AUTO           277d:0000       00000000
+bittest_DATA1          FAR_CONST      AUTO           277d:0000       00000000
+ljmpdtor_DATA1         FAR_CONST      AUTO           277d:0000       00000000
+cloud_DATA2            FAR_DATA       AUTO           277d:0000       00000193
+dos_cgui_DATA2         FAR_DATA       AUTO           2796:0004       00000038
+cldutils_DATA1         FAR_DATA       AUTO           2796:003c       00000018
+protocol_DATA3         FAR_DATA       AUTO           279b:0004       000000d6
+inputip_DATA3          FAR_DATA       AUTO           279b:00da       00000000
+guistate_DATA3         FAR_DATA       AUTO           279b:00da       00000000
+brwsfldr_DATA3         FAR_DATA       AUTO           279b:00da       00000000
+stabthrw_DATA2         FAR_DATA       AUTO           279b:00da       00000066
+FAR_DATA               FAR_DATA       AUTO           279b:0140       00000000
+stabadt_DATA1          FAR_DATA       AUTO           279b:0140       00000011
+unexpect_DATA2         FAR_DATA       AUTO           279b:0151       00000000
+allocexc_DATA2         FAR_DATA       AUTO           279b:0151       00000000
+8x8font13_DATA         FAR_DATA       AUTO           27b1:0000       00000c9c
+hercfont13_DATA        FAR_DATA       AUTO           27b1:0ca0       00000e00
+StdFont_DATA           FONT_DATA      AUTO           27b1:1aa0       00000a26
+_NULL                  BEGDATA        DGROUP         29fe:0000       00000020
+_AFTERNULL             BEGDATA        DGROUP         2a00:0000       00000002
+CONST                  DATA           DGROUP         2a00:0002       00000392
+CONST2                 DATA           DGROUP         2a3a:0000       000002bc
+_DATA                  DATA           DGROUP         2a66:0000       00001122
+XIB                    DATA           DGROUP         2b78:0002       00000000
+XI                     DATA           DGROUP         2b78:0002       00000048
+XIE                    DATA           DGROUP         2b7c:000a       00000000
+YIB                    DATA           DGROUP         2b7c:000a       00000000
+YI                     DATA           DGROUP         2b7c:000a       00000024
+YIE                    DATA           DGROUP         2b7e:000e       00000000
+STRINGS                DATA           DGROUP         2b7e:000e       00000000
+DATA                   DATA           DGROUP         2b7e:000e       00000000
+_emu_init_start        EMU            DGROUP         2b7e:000e       00000000
+_emu_init_end          EMU            DGROUP         2b7e:000e       00000000
+_BSS                   BSS            DGROUP         2b7f:0000       00001158
+c_common               BSS            DGROUP         2c94:0008       00000031
+STACK                  STACK          DGROUP         2c98:0000       00001000
+
+
+                        +----------------+
+                        |   Memory Map   |
+                        +----------------+
+
+* = unreferenced symbol
++ = symbol only referenced locally
+
+Address        Symbol
+=======        ======
+
+Module: cloud.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/cloud.cpp)
+0000:04d5      __far std::exception::~exception()
+0000:0569      char const __far * __far std::exception::what() const
+0000:05b7      char const __far * __far std::bad_weak_ptr::what() const
+0000:05be      __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::iterator::iterator( std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::iterator const __far & )
+0000:05e5      __far std::less<char __far >::less()
+0000:05e6      __far protocol::~protocol()
+0000:05ee      RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far > __far  __far  __far ::iterator::iterator
+0000:0615      RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far,allocator __far  __far  __far  __far ::Node::~Node
+0000:0692      __far std::pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far >::pair( std::pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far > const __far &
+0000:071e      __far std::pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far >::~pair()
+0000:079b      __far std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far >::less()
+0000:079c      __far std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far >::less( std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > const __far & )
+0000:07a1      __far std::binary_function<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,bool __far >::binary_function( std::binary_function<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,bool
+0000:07a2      __far std::underflow_error::~underflow_error()
+0000:0868      __far std::overflow_error::~overflow_error()
+0000:092e      __far std::range_error::~range_error()
+0000:09f4      __far std::runtime_error::~runtime_error()
+0000:0aba      __far std::out_of_range::~out_of_range()
+0000:0b80      __far std::length_error::~length_error()
+0000:0c46      __far std::invalid_argument::~invalid_argument()
+0000:0d0c      __far std::domain_error::~domain_error()
+0000:0dd2      __far std::logic_error::~logic_error()
+0000:0e98      __far std::_ow::str_exception::~str_exception()
+0000:0f53      __far std::bad_weak_ptr::~bad_weak_ptr()
+0000:0ffe      __far std::bad_typeid::~bad_typeid()
+0000:10a9      __far std::bad_cast::~bad_cast()
+0000:1154      __far std::allocator<char __far >::~allocator()
+0000:1155      __far std::allocator<protocol::MessageHandlerStruct __far >::~allocator()
+0000:1156      allocator<RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<::MessageHandlerStruct __far  __far  __far  __far ::Node __far ::~allocator
+0000:1157      RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far,allocator<MessageHandlerStruct __far  __far  __far  __far  __far ::~RedBlackTree
+0000:11c4      RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far,allocator< __far  __far  __far  __far ::clear
+0000:12bf      std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node __far * __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::walk_right( std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node __far * ) const
+0000:1325      __far std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far >::basic_string( std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far & )
+0000:13d6      __far std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far >::~basic_string()
+0000:1449      __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::vector( std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > const __far & )
+0000:1543      __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::~vector()
+0000:15da      protocol::MessageHandlerStruct __far * __far std::uninitialized_copy<protocol::MessageHandlerStruct __far * __far,protocol::MessageHandlerStruct __far * __far >( protocol::MessageHandlerStruct __far *, protocol::MessageHandlerStruct __far *, protocol::MessageHandlerStruct __far * )
+0000:16ec      bool __far std::operator <char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far ><( std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far &, std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far & )
+0000:174b      char __far * __far std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far >::alloc( int unsigned, int unsigned __far & )
+0000:176d      protocol::MessageHandlerStruct __far * __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::alloc( int unsigned, int unsigned __far & )
+29fe:1814+     protocol __far p
+0000:1795      __far protocol::MessageHandlerStruct::~MessageHandlerStruct()
+0000:1796      __far protocol::MessageHandlerStruct::MessageHandlerStruct( protocol::MessageHandlerStruct const __far & )
+0000:0019*     void __far onDataReceived( char const __far * )
+0000:0146*     int __far asciitable()
+0000:01f0      main_
+29fe:03c0      int unsigned const __far std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far >::npos
+Module: ezxml.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/ezxml.c)
+0000:1803      ezxml_child_
+0000:1865+     ezxml_idx_
+0000:188b      ezxml_attr_
+0000:1a18+     ezxml __far * __far ezxml_vget( ezxml __far *, char __far * )
+0000:1a5c*     ezxml_get_
+0000:1a74*     ezxml_pi_
+0000:1b18+     ezxml __far * __far ezxml_err( ezxml_root __far *, char __far *, char const __far *, ... )
+0000:1b8a+     char __far * __far ezxml_decode( char __far *, char __far * __far *, char )
+0000:1f94+     void __far ezxml_open_tag( ezxml_root __far *, char __far *, char __far * __far * )
+0000:1ffe+     void __far ezxml_char_content( ezxml_root __far *, char __far *, int unsigned, char )
+0000:2132+     ezxml __far * __far ezxml_close_tag( ezxml_root __far *, char __far *, char __far * )
+0000:21b1+     int __far ezxml_ent_ok( char __far *, char __far *, char __far * __far * )
+0000:228c+     void __far ezxml_proc_inst( ezxml_root __far *, char __far *, int unsigned )
+0000:25bb+     short __far ezxml_internal_dtd( ezxml_root __far *, char __far *, int unsigned )
+0000:2d49+     char __far * __far ezxml_str2utf8( char __far * __far *, int unsigned __far * )
+0000:2f52+     void __far ezxml_free_attr( char __far * __far * )
+0000:3008      ezxml_parse_str_
+0000:389f+     char __far * __far ezxml_ampencode( char const __far *, int unsigned, char __far * __far *, int unsigned __far *, int unsigned __far *, short )
+0000:39fd+     char __far * __far ezxml_toxml_r( ezxml __far *, char __far * __far *, int unsigned __far *, int unsigned __far *, int unsigned, char __far * __far * __far * )
+0000:3ede      ezxml_toxml_
+0000:42a8      ezxml_free_
+0000:44f4*     ezxml_error_
+0000:4532+     ezxml_new_
+0000:45c2+     ezxml_insert_
+0000:47d2+     ezxml_add_child_
+0000:4838*     ezxml_set_txt_
+0000:4873*     ezxml_set_attr_
+0000:4b7c+     ezxml_set_flag_
+0000:4b90*     ezxml_cut_
+29fe:18c0+     char __far * __far EZXML_NIL[]
+Module: dos_scrn.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/dos_scrn.cpp)
+0000:4d4a      void __far clearscr( void __far * )
+0000:4d65      void __far flip( void __far * )
+0000:4d98      void __far writeChar( int, int, char, char, char, void __far * )
+0000:4dcf      void __far writeString( int, int, char, char, char const __far *, void __far * )
+0000:4e25+     void __far CursorRaii::hideCursor()
+0000:4e2d+     void __far CursorRaii::showCursor()
+0000:4e3b      void __far CursorRaii::placeCursor( short, short )
+0000:4e46      __far CursorRaii::CursorRaii()
+0000:4e62      __far CursorRaii::~CursorRaii()
+Module: dos_cgui.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/dos_cgui.cpp)
+0000:51fd      void __far leftFrame( void __far *, char const __far *, LinkedList __far *, std::set<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far > __far > const __far &, int unsigned, long unsigned )
+0000:5448      void __far rightFrame( void __far *, char const __far * )
+0000:573d      __far std::set<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far > __far >::~set()
+0000:5745      __far std::set<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far > __far >::set( std::less<char __far > const __far &, std::allocator<char __far > const __far & )
+0000:57f9      __far std::allocator<std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node __far >::~allocator()
+0000:57fa      __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::~RedBlackTree()
+0000:5867      void __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::clear()
+0000:5962      __far std::less<char __far >::less( std::less<char __far > const __far & )
+0000:5967      __far std::binary_function<char __far,char __far,bool __far >::binary_function( std::binary_function<char __far,char __far,bool __far > const __far & )
+0000:5968      __far std::allocator<std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node __far >::0000:5968  >ballocator( std::allocator<char __far > const __far & )
+0000:5969      __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node::~Node()
+0000:553b      int __far frameContentSize()
+0000:553f      void __far menu( void __far * )
+0000:55cf      void __far connect_window( void __far *, char __far * __far * )
+Module: dos_neti.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/dos_neti.cpp)
+0000:596a      bool __far DosMTcpIpIface::setup()
+0000:59ae      void __far DosMTcpIpIface::shutdown()
+0000:5a04      void __far * __far DosMTcpIpIface::provide_socket()
+0000:5a37      bool __far DosMTcpIpIface::connect( void __far *, char const __far * )
+0000:5abf      void __far DosMTcpIpIface::poll( void __far *, long unsigned, void (__far *)( ))
+0000:5be5      void __far DosMTcpIpIface::send( void __far *, char const __far *, short unsigned )
+Module: list.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/list.cpp)
+0000:5bfe*     int __far compareInts( void const __far *, void const __far * )
+0000:5c0c      LinkedList __far * __far createLinkedList()
+0000:5c73      void __far insertAtBeginning( LinkedList __far *, void __far * )
+0000:5cd1*     void __far insertAtEnd( LinkedList __far *, void __far * )
+0000:5d56      void __far freeLinkedList( LinkedList __far *, void (__far *)( ))
+0000:5f1b+     Node __far * __far allocate<Node __far >( long unsigned )
+0000:5de7*     void __far sortLinkedList( LinkedList __far *, int (__far *)())
+0000:5eed      int __far distance( Node __far *, Node __far * )
+Module: filelist.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/filelist.cpp)
+0000:5f23+     FileStructure __far * __far createFileStructure( find_t __far * )
+0000:5fed      LinkedList __far * __far createFileList( char const __far * )
+0000:6121      void __far deleteFileStructure( void __far * )
+Module: cldutils.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/cldutils.cpp)
+0000:6132      char const __far * __far renderHumanReadableSize( long unsigned )
+Module: protocol.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/protocol.cpp)
+0000:6595+     char const __far * __far std::_ow::str_exception::what() const
+0000:65f1+     RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<::MessageHandlerStruct __far  __far  __far  __far ::iterator_base::iterator_base
+0000:6611+     __far std::allocator<protocol::MessageHandlerStruct __far >::allocator()
+0000:6612+     __far std::allocator<std::pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far > __far >::~allocator()
+0000:6613+     __far std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far >::basic_string( char const __far *, std::allocator<char __far > const __far & )
+0000:66ba+     map<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far > __far  __far ::~map
+0000:66c2+     map<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far > __far  __far ::map
+0000:6776+     map<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far > __far  __far ::operator []
+0000:684a+     __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::vector( std::allocator<protocol::MessageHandlerStruct __far > const __far & )
+0000:68c8+     std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > __far & __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::operator =( std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far > const __far & )
+0000:6a29+     void __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::push_back( protocol::MessageHandlerStruct const __far & )
+0000:6a88+     std::allocator<protocol::MessageHandlerStruct __far > __far & __far std::allocator<protocol::MessageHandlerStruct __far >::operator =( std::allocator<protocol::MessageHandlerStruct __far > const __far & )
+0000:6a89+     __far std::allocator<protocol::MessageHandlerStruct __far >::allocator( std::allocator<protocol::MessageHandlerStruct __far > const __far & )
+0000:6a8a+     RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far,allocator<__far  __far  __far  __far  __far ::find
+0000:6b47+     RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far,allocator<> __far  __far  __far  __far ::insert
+0000:6b98+     void __far std::vector<protocol::MessageHandlerStruct __far,std::allocator<protocol::MessageHandlerStruct __far > __far >::reserve( int unsigned )
+0000:6d2d+     __far std::length_error::length_error( std::length_error const __far & )
+0000:6daa+     __far std::logic_error::logic_error( std::logic_error const __far & )
+0000:6e27+     __far std::_ow::str_exception::str_exception( std::_ow::str_exception const __far & )
+0000:6ebb+     allocator<RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,less<basic_string<char __far,::char_traits<char __far > __far  __far  __far ::Node __far ::0000:6epair_ow::str_exception::str_exception( std::_ow::str_exception const __far & ) essageHandlerStruct __far > __far >::reserve( int unsigned ) <char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std:>:
+0000:6ebc+     RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<__far  __far  __far  __far ::insert_balance_transform
+0000:72ac+     RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<::MessageHandlerStruct __far  __far  __far  __far ::unbalanced_insert
+29fe:040a+     bool const __far std::numeric_limits<int unsigned __far >::is_specialized
+29fe:040c+     int const __far std::numeric_limits<int unsigned __far >::digits
+29fe:040e+     int const __far std::numeric_limits<int unsigned __far >::digits10
+29fe:0410+     bool const __far std::numeric_limits<int unsigned __far >::is_integer
+29fe:0412+     bool const __far std::numeric_limits<int unsigned __far >::is_exact
+29fe:2968+     bool const __far std::numeric_limits<int unsigned __far >::is_signed
+29fe:296c+     int const __far std::numeric_limits<int unsigned __far >::min_exponent
+29fe:2970+     int const __far std::numeric_limits<int unsigned __far >::min_exponent10
+29fe:2974+     int const __far std::numeric_limits<int unsigned __far >::max_exponent
+29fe:2978+     int const __far std::numeric_limits<int unsigned __far >::max_exponent10
+29fe:297c+     bool const __far std::numeric_limits<int unsigned __far >::has_infinity
+29fe:2980+     bool const __far std::numeric_limits<int unsigned __far >::has_quiet_NaN
+29fe:0414+     int const __far std::numeric_limits<int unsigned __far >::radix
+29fe:2984+     bool const __far std::numeric_limits<int unsigned __far >::has_signaling_NaN
+29fe:2988+     bool const __far std::numeric_limits<int unsigned __far >::has_denorm_loss
+29fe:0416+     std::float_denorm_style const __far std::numeric_limits<int unsigned __far >::has_denorm
+29fe:0418+     bool const __far std::numeric_limits<int unsigned __far >::is_bounded
+29fe:298c+     bool const __far std::numeric_limits<int unsigned __far >::is_iec559
+29fe:2990+     bool const __far std::numeric_limits<int unsigned __far >::traps
+29fe:2994+     bool const __far std::numeric_limits<int unsigned __far >::tinyness_before
+0000:765b+     RedBlackTree<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far,std::less<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > __far > __far,allocator<pair<std::basic_string<char __far,std::char_traits<char __far > __far,std::allocator<char __far > __far > const __far,vector<protocol::MessageHandlerStruct __far,allocator __far  __far  __far  __far ::Node::Node
+0000:628a      __far protocol::protocol()
+0000:632d      void __far protocol::message( char const __far *, char const __far * )
+0000:6440+     void __far protocol::registerMessageHandler( char const __far *, void (__far *)(), void __far * )
+0000:6588*     void __far protocol::setNetworkInterface( NetworkInterface __far * )
+29fe:041a+     bool const __far std::numeric_limits<int unsigned __far >::is_modulo
+29fe:2998+     std::float_round_style const __far std::numeric_limits<int unsigned __far >::round_style
+29fe:1aa0*     long unsigned __far message::sequence_nr_counter
+Module: packet.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/packet.cpp)
+29fe:1b2e      char unsigned __far Buffer_first
+29fe:1b2f      char unsigned __far Buffer_next
+29fe:1b8a+     char unsigned __far Buffer_lowFreeCount
+29fe:1b8c+     long unsigned __far Packets_dropped
+29fe:1b90+     long unsigned __far Packets_received
+29fe:1b94+     long unsigned __far Packets_sent
+29fe:1b98+     long unsigned __far Packets_send_errs
+29fe:1b9c+     long unsigned __far Packets_send_retries
+0000:76a2      char signed __far Buffer_init()
+0000:7710      void __far Buffer_startReceiving()
+0000:7717      void __far Buffer_free( char unsigned const __far * )
+0000:7771      void __far Buffer_stopReceiving()
+0000:7778      void __far Buffer_stop()
+0000:7791      char signed __far Packet_registerEtherType( short unsigned, void (__far *)())
+0000:77cf*     void __far Packet_registerDefault( void (__far *)())
+0000:78b3      char signed __far Packet_init( char unsigned )
+0000:7998      char signed __far Packet_release_type()
+0000:7a0c      void __far Packet_get_addr( char unsigned __far * )
+0000:7a4b      void __far Packet_send_pkt( void __far *, short unsigned )
+0000:7b20      void __far Packet_process_internal()
+0000:7c14      void __far Packet_dumpStats( __iobuf __far * )
+0000:7c5e*     char unsigned __far Packet_getSoftwareInt()
+0000:7c63*     short unsigned __far Packet_getHandle()
+29fe:06ac+     char const __far * __far PKT_DRVR_EYE_CATCHER
+29fe:1ba4+     void (__far * __far Packet_EtherTypeHandler[])( char unsigned __far *, short unsigned )
+29fe:1bac+     short unsigned __far Packet_EtherTypeVal[]
+29fe:1bb0+     char unsigned __far Packet_EtherTypeHandlers
+29fe:1bb2+     void (__far * __far Packet_typeUnhandled)( char unsigned __far *, short unsigned )
+Module: arp.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/arp.cpp)
+29fe:1bc0+     Arp::__1D89CHPending_t __far Arp::pending[]
+29fe:1bd4      short unsigned __far Arp::pendingEntries
+29fe:1bd6+     Arp::__JA02NRec_t __far Arp::arpTable[]
+29fe:1c1c+     short unsigned __far Arp::entries
+29fe:1c20+     long unsigned __far Arp::RequestsReceived
+29fe:1c24+     long unsigned __far Arp::RepliesReceived
+0000:7c68      void __far Arp::dumpStats( __iobuf __far * )
+0000:7cb1      void __far Arp::init()
+0000:7e28      void __far Arp::clearPendingTable()
+0000:7e4c*     void __far Arp::dumpTable()
+0000:7ee7+     char signed __far Arp::findEth( char unsigned const __far *, char unsigned __far * )
+0000:7f5d      void __far Arp::processArp( char unsigned __far *, short unsigned )
+0000:817e      void __far Arp::driveArp2()
+0000:8262+     void __far Arp::updateEntry( short unsigned, char unsigned const __far * )
+0000:82d3+     void __far Arp::updateOrAddCache( char unsigned __far *, char unsigned __far * )
+0000:843f+     void __far Arp::sendArpRequest( char unsigned __far * )
+0000:850f+     void __far Arp::sendArpRequest2( char unsigned __far * )
+0000:857d+     void __far Arp::sendArpResponse( ArpHeader __far * )
+0000:8615      char signed __far Arp::resolve( char unsigned __far *, char unsigned __far * )
+29fe:1c28+     long unsigned __far Arp::RequestsSent
+29fe:1c2c+     long unsigned __far Arp::RepliesSent
+29fe:1c30+     long unsigned __far Arp::CacheModifiedCount
+29fe:1c34+     long unsigned __far Arp::CacheEvictions
+29fe:1c38+     __48KK6EArpPacket_t __far Arp_prebuiltResponse
+29fe:1c74+     __48KK6EArpPacket_t __far Arp_prebuiltRequest
+Module: eth.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/eth.cpp)
+29fe:0420      char unsigned const __far Eth::Eth_Broadcast[]
+29fe:06c2      short unsigned __far MyMTU
+29fe:1cb0      char unsigned __far MyEthAddr[]
+Module: ip.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/ip.cpp)
+29fe:1cc0      char unsigned __far Gateway[]
+29fe:1cc4      char unsigned const __far IpInvalid[]
+29fe:1cc8+     long unsigned __far Ip::icmpRecvPackets
+29fe:1ccc*     long unsigned __far Ip::ptrWrapCorrected
+29fe:1cd0+     long unsigned __far Ip::badChecksum
+29fe:1cd4+     long unsigned __far Ip::unhandledProtocol
+29fe:1cd8+     long unsigned __far Ip::fragsReceived
+29fe:1cdc+     long unsigned __far Ip::goodReassemblies
+29fe:1ce0+     long unsigned __far Ip::timeoutReassemblies
+29fe:1ce4+     long unsigned __far Ip::notEnoughSlots
+29fe:1ce8+     long unsigned __far Ip::tooManyInFlight
+29fe:1cec+     long unsigned __far Ip::payloadTooBig
+29fe:1cf0+     short unsigned __far IpHeader::IpIdent
+29fe:1cf2      char unsigned __far * __far Ip::ipReassemblyMemoryStart
+29fe:1cf6      char unsigned __far * __far Ip::ipReassemblyMemoryEnd
+29fe:1cfa      char unsigned __far Ip::fragsInReassembly
+29fe:06d0      char __far MyHostname[]
+29fe:06e4      char unsigned __far MyIpAddr[]
+29fe:06e8      char unsigned __far Netmask[]
+29fe:06ec      long unsigned __far MyIpAddr_u
+29fe:06f0      long unsigned __far Netmask_u
+0000:8635      void __far Ip::dumpStats( __iobuf __far * )
+0000:877f      int __far Ip::initForReassembly()
+0000:87ea      void __far Ip::reassemblyStop()
+0000:8826      void __far Ip::returnBigPacket( char unsigned __far * )
+0000:8841      void __far Ip::purgeOverdue()
+0000:8d7d      void __far Ip::process( char unsigned __far *, short unsigned )
+0000:8ea1      void __far IpHeader::set( char unsigned, char unsigned const __far *, short unsigned, char unsigned, short unsigned )
+0000:8f81      char signed __far IpHeader::setDestEth( char unsigned __far * )
+29fe:0430      char unsigned const __far IpBroadcastNonRoutable[]
+Module: tcp.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/tcp.cpp)
+29fe:1e90+     long unsigned __far Tcp::Packets_Sent
+29fe:1e94+     long unsigned __far Tcp::Packets_Received
+29fe:1e98+     long unsigned __far Tcp::Packets_Retransmitted
+29fe:1e9c+     long unsigned __far Tcp::Packets_SeqOrAckError
+29fe:1ea0+     long unsigned __far Tcp::Packets_DroppedNoSpace
+29fe:1ea4+     long unsigned __far Tcp::OurWindowReopened
+29fe:1ea8+     long unsigned __far Tcp::SentZeroWindowProbe
+29fe:1eac+     long unsigned __far Tcp::ChecksumErrors
+29fe:1eb0      short unsigned __far Tcp::Pending_Sent
+29fe:1eb2      short unsigned __far Tcp::Pending_Outgoing
+29fe:1eb4+     TcpBuffer __far * __far TcpBuffer::xmitBuffers[]
+29fe:1f04+     char unsigned __far TcpBuffer::freeXmitBuffers
+29fe:0720+     char __far * __far TcpSocket::StateDesc[]
+0000:903b      void __far Tcp::dumpStats( __iobuf __far * )
+0000:9084      char signed __far TcpBuffer::init( char unsigned )
+0000:916f      void __far TcpBuffer::stop()
+0000:9188*     __far TcpSocket::TcpSocket()
+0000:9199      void __far TcpSocket::reinit()
+0000:92a5      char signed __far TcpSocket::setRecvBuffer( short unsigned )
+0000:939a+     char signed __near TcpSocket::connect2( short unsigned, char unsigned __far *, short unsigned )
+0000:947f      char signed __far TcpSocket::connect( short unsigned, char unsigned __far *, short unsigned, long unsigned )
+0000:95ad*     char signed __far TcpSocket::connectNonBlocking( short unsigned, char unsigned __far *, short unsigned )
+0000:95c0*     char signed __far TcpSocket::listen( short unsigned, short unsigned )
+0000:96ad+     char signed __far TcpSocket::shutdown( char unsigned )
+0000:96f8+     char signed __near TcpSocket::closeLocal()
+0000:9852      void __far TcpSocket::close()
+0000:98f5*     void __far TcpSocket::closeNonblocking()
+0000:9938+     char signed __far TcpSocket::isCloseDone()
+0000:99dc+     void __near TcpSocket::clearQueues()
+0000:9adf      void __far TcpSocket::destroy()
+0000:9b5e+     void __near TcpSocket::setMaxEnqueueSize( TcpHeader __far * )
+0000:9ba1+     short __far TcpSocket::enqueue( TcpBuffer __far * )
+0000:9d46+     void __near TcpSocket::resendPacket( TcpBuffer __far * )
+0000:9dd4+     char signed __near TcpSocket::sendPacket( TcpBuffer __far * )
+0000:a263+     void __near TcpSocket::sendResetPacket( IpHeader __far *, TcpHeader __far *, short unsigned )
+0000:a394+     void __near TcpSocket::sendPureAck( bool )
+0000:a45e      void __far Tcp::process( char unsigned __far *, IpHeader __far * )
+0000:a69d+     void __near Tcp::process2( char unsigned __far *, IpHeader __far *, TcpHeader __far *, TcpSocket __far * )
+0000:ad72+     int __far Tcp::processPacketData( TcpSocket __far *, short unsigned, char unsigned __far *, IpHeader __far *, TcpHeader __far * )
+0000:af5a+     void __near TcpSocket::processSyn( IpHeader __far *, TcpHeader __far *, long unsigned )
+0000:b0a2+     void __near TcpSocket::removeSentPackets( long unsigned )
+0000:b290+     char signed __near TcpSocket::addToRcvBuf( char unsigned __far *, short unsigned )
+0000:b36a      short __far TcpSocket::recv( char unsigned __far *, short unsigned )
+0000:b4d4      short __far TcpSocket::send( char unsigned __far *, short unsigned )
+0000:b5e8      void __far Tcp::drivePackets2()
+0000:b922+     short unsigned __near TcpHeader::readMSS( TcpHeader __far * )
+29fe:1f05+     char unsigned __far TcpBuffer::allocatedXmitBuffers
+29fe:1f06+     void __far * __far TcpBuffer::xmitBuffersMemPtr
+Module: tcpsockm.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/tcpsockm.cpp)
+29fe:1f0a      TcpSocket __far * __far TcpSocketMgr::socketTable[]
+29fe:1f16+     TcpSocket __far * __far TcpSocketMgr::availSocketTable[]
+29fe:1f22+     TcpSocket __far * __far TcpSocketMgr::socketsMemPtr
+29fe:1f26      char unsigned __far TcpSocketMgr::activeSockets
+29fe:1f27+     char unsigned __far TcpSocketMgr::availSockets
+0000:b97b      char signed __far TcpSocketMgr::init( char unsigned )
+0000:ba64      void __far TcpSocketMgr::stop()
+0000:ba7d      TcpSocket __far * __far TcpSocketMgr::getSocket()
+0000:baf2      char signed __far TcpSocketMgr::freeSocket( TcpSocket __far * )
+0000:bb62*     TcpSocket __far * __far TcpSocketMgr::accept()
+0000:bc67      void __far TcpSocketMgr::makeActive( TcpSocket __far * )
+0000:bce9      void __far TcpSocketMgr::makeInactive( TcpSocket __far * )
+29fe:1f28+     char unsigned __far TcpSocketMgr::allocatedSockets
+29fe:1f29      char unsigned __far TcpSocketMgr::pendingAccepts
+29fe:1f2a      short unsigned __far TcpSocketMgr::MSS_to_advertise
+Module: utils.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/utils.cpp)
+29fe:0440+     char const __far Parm_PacketInt[]
+29fe:0450+     char const __far Parm_Hostname[]
+29fe:0460*     char const __far Parm_Hostname_Assigned[]
+29fe:0478+     char const __far Parm_Domain[]
+29fe:0480+     char const __far Parm_IpAddr[]
+29fe:0488+     char const __far Parm_Gateway[]
+29fe:0490+     char const __far Parm_Netmask[]
+29fe:0498+     char const __far Parm_Nameserver[]
+29fe:04a8+     char const __far Parm_Nameserver_preferred[]
+29fe:04c0+     char const __far Parm_Mtu[]
+29fe:04c8+     char const __far Parm_HostsFilename[]
+29fe:04d8*     char const __far Parm_DHCPLeaseRequest[]
+29fe:1f30      char unsigned __far mTCP_releaseTimesliceEnabled
+29fe:1f34+     char unsigned __far Preferred_nameserver[]
+29fe:1f38+     bool __far Preferred_nameserver_set
+29fe:1f39+     char unsigned __far Utils::packetInt
+29fe:1f3a+     __iobuf __far * __far Utils::CfgFile
+29fe:1f3e+     char __far * __far Utils::CfgFilenamePtr
+29fe:1f42+     void (__far * __far Utils::oldCtrlBreakHandler)()
+29fe:1f48+     char __far Utils::lineBuffer[]
+29fe:1fe8+     char __far Utils::parmName[]
+0000:bd52      void __far Utils::dumpBytes( __iobuf __far *, char unsigned __far *, int unsigned )
+0000:be4d+     bool __far Utils::rtrim( char __far * )
+0000:be77+     int __far Utils::getLine( __iobuf __far *, bool, char __far *, int, int )
+0000:bf22      char signed __far Utils::parseEnv()
+0000:c5b3+     void __far Utils::parseOptionalEnvVars()
+0000:c640*     __iobuf __far * __far Utils::openCfgFile()
+0000:c68e*     void __far Utils::closeCfgFile()
+0000:c69f*     char signed __far Utils::getAppValue( char const __far *, char __far *, short unsigned )
+0000:c787      char signed __far Utils::initStack( char unsigned, char unsigned, void (__far *)(), void (__far *)())
+0000:cb0f      void __far Utils::endStack()
+0000:cb90+     void __far Utils::dumpStats( __iobuf __far * )
+0000:cbb9*     long unsigned __far Utils::timeDiff( dostime_t, dostime_t )
+0000:cc9a      char __far * __far Utils::getNextToken( char __far *, char __far *, short unsigned )
+29fe:0767      char unsigned __far mTCP_sleepCallEnabled
+Module: udp.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/udp.cpp)
+29fe:2060+     char unsigned __far Udp::callbackPorts
+29fe:2062+     short unsigned __far Udp::callbackList[]
+29fe:2064+     void (__far * __far Udp::callbackFunctions[])( char unsigned const __far *, UdpHeader const __far * )
+29fe:2068+     long unsigned __far Udp::Packets_Sent
+29fe:206c+     long unsigned __far Udp::Fragments_Sent
+29fe:2070+     long unsigned __far Udp::Packets_Received
+0000:ce1d*     void __far Udp::dumpStats( __iobuf __far * )
+0000:ce5e*     short unsigned __far Udp::getUnusedCallbackPort()
+0000:ce97      char signed __far Udp::registerCallback( short unsigned, void (__far *)())
+0000:ceef      char signed __far Udp::unregisterCallback( short unsigned )
+0000:cf52      char signed __far Udp::sendUdp( char unsigned const __far *, short unsigned, short unsigned, short unsigned, char unsigned __far *, char unsigned )
+0000:d0fb*     void __far Udp::process( char unsigned const __far *, IpHeader __far * )
+29fe:2074+     long unsigned __far Udp::NoHandler
+29fe:2078+     long unsigned __far Udp::ChecksumErrors
+Module: dns.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/dns.cpp)
+29fe:2080      char unsigned __far Dns::NameServer[]
+29fe:2084+     char unsigned __far Dns::queryPending
+29fe:2085+     __anonymous_enum __far Dns::lastQueryRc
+29fe:2086+     Dns::__7BAFF2DNS_Pending_Rec_t __far Dns::pendingQuery
+29fe:2194+     Dns::__4RNKJHDNS_Rec_t __far Dns::dnsTable[]
+29fe:221c+     char unsigned __far Dns::entries
+29fe:0770      char __far Dns::Domain[]
+29fe:07a8      char __far Dns::HostsFilename[]
+0000:d246*     void __far Dns::flushCache()
+0000:d265+     char signed __far Dns::find( char const __far * )
+0000:d2b3+     void __far Dns::addOrUpdate( char const __far *, char unsigned __far * )
+0000:d3a6*     void __far Dns::deleteFromCache( char const __far * )
+0000:d3ed      char signed __far Dns::init()
+0000:d43b      void __far Dns::stop()
+0000:d443      char signed __far Dns::resolve( char const __far *, char unsigned __far *, char unsigned )
+0000:d692+     void __far Dns::sendRequest( char unsigned __far *, char const __far *, short unsigned )
+0000:d9ab+     void __far Dns::udpHandler( char unsigned const __far *, UdpHeader const __far * )
+0000:ddab*     void __far Dns::drivePendingQuery1()
+0000:de38+     void __far Dns::drivePendingQuery2()
+0000:de68+     void __far Dns::scanHostsFile( char const __far *, char const __far *, char unsigned __far * )
+Module: timer.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/timer.cpp)
+29fe:23a0      long unsigned volatile __far Timer_CurrentTicks
+0000:dff7+     void __far Timer_tick_handler()
+0000:e04a      void __far Timer_start()
+0000:e07c      void __far Timer_stop()
+0000:e0a5*     void __far Timer_manageTimer( short unsigned __far * )
+0000:e0c8*     void __far Timer_stopManagingTimer( short unsigned __far * )
+29fe:23d0+     void (__far * __far Timer_old_tick_handler)()
+Module: ipasm.o(IPASM)
+0000:e132      _ipchksum
+0000:e162      _ip_p_chksum
+0000:e1d7*     _ip_p_chksum2
+Module: trace.o(/home/fld/work/p/dosbox/WORK/tcp/api/tcplib/trace.cpp)
+0000:e26d      void __far Trace_beginTracing()
+0000:e2c1      void __far Trace_endTracing()
+0000:e2d2      void __far Trace_tprintf( char __far *, ... )
+29fe:0808      __iobuf __far * __far Trace_Stream
+29fe:080c      char __far Trace_Severity
+29fe:23d4      short unsigned __far Trace_Debugging
+29fe:23d6      char __far * __far Trace_LogFile
+Module: inputip.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/inputip.cpp)
+0000:e77e+     void __far InputIpState::onInsert()
+0000:e77f+     void __far InputIpState::onDownArrow()
+0000:e780+     void __far InputIpState::onUpArrow()
+0000:e35c      __far InputIpState::InputIpState( State __far *, State __far * )
+0000:e477*     __far InputIpState::~InputIpState()
+0000:e4da+     void __far InputIpState::paint( void __far * )
+0000:e581+     void __far InputIpState::onEnter()
+0000:e5f5+     void __far InputIpState::onRightArrow()
+0000:e5f6+     void __far InputIpState::onRefreshContent()
+0000:e781+     __far DosMTcpIpIface::DosMTcpIpIface()
+0000:e639+     void __far InputIpState::onChar( char )
+0000:e6c2+     void __far InputIpState::onTab()
+0000:e6d7+     void __far InputIpState::onBackspace()
+0000:e742+     char const __far * __far InputIpState::getIp()
+Module: guistate.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/guistate.cpp)
+0000:e791      __far State::State( State __far *, State __far * )
+0000:e7b9*     void __far State::setNextState( State __far * )
+0000:e7b9      void __far GuiState::init( State __far * )
+0000:e7c5      void __far State::setrPreviousState( State __far * )
+0000:e7d2      CursorRaii __far * __far State::getCursor() const
+0000:e7df      void __far State::setCursor( CursorRaii __far * )
+0000:e7ec      GuiState __far & __far GuiState::instance()
+0000:e7f2*     void __far GuiState::next()
+0000:e809*     void __far GuiState::previous()
+0000:e81b      State __far * __far GuiState::getCurrentState() const
+Module: brwsfldr.o(/home/fld/work/p/dosbox/WORK/tcp/api/apps/cloud/brwsfldr.cpp)
+0000:e827      __far BrowseFoldersState::BrowseFoldersState( State __far *, State __far * )
+0000:e9b4*     __far BrowseFoldersState::~BrowseFoldersState()
+0000:ea50+     void __far BrowseFoldersState::onEnter()
+0000:eb30+     void __far BrowseFoldersState::paint( void __far * )
+0000:eb85+     void __far BrowseFoldersState::onUpArrow()
+0000:ec8f+     void __far BrowseFoldersState::onDownArrow()
+0000:ed1d+     void __far BrowseFoldersState::onInsert()
+0000:ed3d+     void __far BrowseFoldersState::onChar( char )
+0000:ed3d+     void __far BrowseFoldersState::onTab()
+0000:ed3d+     void __far BrowseFoldersState::onBackspace()
+0000:ed9a+     std::pair<std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::iterator __far,bool __far > __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::insert( char const __far & )
+0000:edeb+     void __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::insert_balance_transform( std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node __far * )
+0000:f1db+     std::pair<std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::iterator __far,bool __far > __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::unbalanced_insert( char const __far & )
+0000:f532+     __far std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node::Node( std::_ow::RedBlackTree<char __far,std::less<char __far > __far,std::allocator<char __far > __far,std::_ow::TreeKeyWrapper<char __far > __far >::Node const __far & )
+0000:ed3d+     void __far BrowseFoldersState::onRightArrow()
+0000:ed3e+     void __far BrowseFoldersState::onRefreshContent()
+Module: /home/fld/watcom//lib286/plbxl.lib(stablcl.cpp)
+0000:f56e      __wcpp_4_lcl_register__
+Module: /home/fld/watcom//lib286/plbxl.lib(cppdata.cpp)
+29fe:2464      __wint_thread_data
+29fe:2488      __compiled_under_generic
+Module: /home/fld/watcom//lib286/plbxl.lib(fsregist.cpp)
+0000:f573+     __wcpp_4_dispatch_dummy__
+0000:f5ac      __wcpp_4_fs_lookup__
+0000:f6bb      __wcpp_4_fs_handler_rtn__
+0000:f829      __wcpp_4_unwind_global__
+0000:f8a2      __wcpp_4_raise_exception__
+Module: /home/fld/watcom//lib286/plbxl.lib(dtorarst.cpp)
+0000:f8f7      __wcpp_4_dtor_array_store__
+Module: /home/fld/watcom//lib286/plbxl.lib(opdelarr.cpp)
+0000:f920      void __far operator delete []( void __far * )
+Module: /home/fld/watcom//lib286/plbxl.lib(opdel.cpp)
+0000:f925      void __far operator delete( void __far * )
+Module: /home/fld/watcom//lib286/dos/clibl.lib(iob.c)
+29fe:080e      ___iob
+29fe:248a      ___OpenStreams
+29fe:248e      ___ClosedStreams
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fprintf.c)
+0f94:0000      fprintf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strlen.c)
+0f94:0021      strlen_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ffree.c)
+0f94:0036      _ffree_
+0f94:0036      free_
+Module: /home/fld/watcom//lib286/dos/graph.lib(setvideo)
+1c4e:0264      _setvideomode_
+1c4e:0325      _PaletteInit_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(sprintf.c)
+0f94:007e      sprintf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(getch.c)
+0f94:009f      getch_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(exit.c)
+0f94:00b9+     __null_int23_exit_
+0f94:00ba      exit_
+0f94:00e9*     _exit_
+29fe:09d2+     ___int23_exit
+29fe:09d6      ___FPE_handler_exit
+Module: /home/fld/watcom//lib286/dos/clibl.lib(calloc.c)
+0f94:0101      calloc_
+Module: /home/fld/watcom//lib286/plbxl.lib(opnew.cpp)
+1c4e:4699      void __far * __far operator new( int unsigned )
+Module: /home/fld/watcom//lib286/dos/clibl.lib(gtcwd.c)
+0f94:0140      getcwd_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(kbhit.c)
+0f94:01ee      kbhit_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(isprint.c)
+0f94:0209      isprint_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(_ichdir_.gas)
+0f94:0232      _chdir_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(memcpy.c)
+0f94:0237      memcpy_
+Module: /home/fld/watcom//lib286/plbxl.lib(stabthrw.cpp)
+1c4e:4f8c+     __far std::bad_exception::bad_exception( std::bad_exception const __far & )
+1c4e:4fea+     __far std::bad_exception::~bad_exception()
+1c4e:4e00*     __wcpp_4_catch_done__
+1c4e:4e91      __wcpp_4_throw__
+1c4e:4eed*     __wcpp_4_throw_zero__
+1c4e:4f2d      __wcpp_4_rethrow__
+Module: /home/fld/watcom//lib286/dos/clibl.lib(stjmp086.asm)
+0f94:025a      _setjmp_
+0f94:02af      longjmp_
+Module: /home/fld/watcom//lib286/plbxl.lib(opnewp.cpp)
+1c4e:50a8      void __far * __far operator new( int unsigned, void __far * )
+Module: /home/fld/watcom//lib286/dos/clibl.lib(memcmp.c)
+0f94:030c      memcmp_
+Module: /home/fld/watcom//lib286/plbxl.lib(undefed.cpp)
+1c4e:50ad      __wcpp_4_undefed_cdtor__
+Module: /home/fld/watcom//lib286/dos/clibl.lib(cstart)
+29fe:0000*     __nullarea
+29fe:09da*     __ovlflag
+29fe:09db*     __intno
+29fe:09dc*     __ovlvec
+0f94:0332      _cstart_
+0f94:04e3      __exit_
+0f94:0500      __do_exit_with_msg_
+0f94:05df      __GETDS
+Module: /home/fld/watcom//lib286/dos/clibl.lib(argcv.c)
+29fe:2492      __argv
+29fe:2496      ___argv
+29fe:249a      __argc
+29fe:249c      ___argc
+Module: /home/fld/watcom//lib286/plbxl.lib(moddtorr.cpp)
+29fe:17f6      ___wcpp_4_data_module_dtor_ref_
+Module: /home/fld/watcom//lib286/plbxl.lib(fsroot.cpp)
+29fe:17b4      ___wcpp_4_data_init_fs_root_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strcmp.c)
+0f94:05e9      strcmp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(snprintf.c)
+0f94:0648      vsnprintf_
+0f94:06cc      snprintf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(memmove.c)
+0f94:06ed      memmove_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(isspace.c)
+0f94:0763      isspace_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strncmp.c)
+0f94:078c      strncmp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strtol.c)
+0f94:0a1a*     strtoul_
+0f94:0a2c      strtol_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(i4d.asm)
+0f94:0a36      __I4D
+0f94:0a85      __U4D
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strchr.c)
+0f94:0b09      strchr_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fmalloc.c)
+0f94:0b28      _fmalloc_
+0f94:0b28      malloc_
+29fe:0a6c      ___fheapbeg
+29fe:0a6e      ___fheapRover
+29fe:0a70      ___LargestSizeB4Rover
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strcpy.c)
+0f94:0c38      strcpy_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(frealloc.c)
+0f94:0c83*     _frealloc_
+0f94:0c83      realloc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strncpy.c)
+0f94:0d5b      strncpy_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strspn.c)
+0f94:0d97      strspn_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strcspn.c)
+0f94:0dec      strcspn_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strstr.c)
+0f94:0e41      strstr_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strdup.c)
+0f94:0f01*     __clib_strdup_
+0f94:0f01      strdup_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(isalpha.c)
+0f94:0f53      isalpha_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(memset.c)
+0f94:0f7c      memset_
+Module: /home/fld/watcom//lib286/dos/graph.lib(outtext)
+1c4e:03e9+     _CharLen_
+1c4e:056b*     _outtext_
+1c4e:05a0*     _outmem_
+1c4e:05c0*     _scrolltextwindow_
+1c4e:0605      _gettextcursor_
+1c4e:0613      _settextcursor_
+Module: /home/fld/watcom//lib286/dos/graph.lib(textpos)
+1c4e:0650+     _gettextposition_
+1c4e:066c      _settextposition_
+Module: /home/fld/watcom//lib286/dos/emu87.lib(initemu.asm)
+0000:8000      FJSRQQ
+0000:0632      FISRQQ
+0000:1632*     FIERQQ
+0000:5c32      FIDRQQ
+0000:a23d      FIWRQQ
+0000:c000      FJCRQQ
+0000:4000*     FJARQQ
+0000:0e32      FICRQQ
+0000:fe32*     FIARQQ
+0f94:0fcc      __init_87_emulator
+0f94:105f*     __fini_87_emulator
+Module: /home/fld/watcom//lib286/math87l.lib(fchop87.asm)
+0f94:10d6      __CHP
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strcat.c)
+0f94:10fd      strcat_
+Module: /home/fld/watcom//lib286/plbxl.lib(stabdtor.cpp)
+1c4e:53e3      __wcpp_4_destruct_internal__
+1c4e:5401      __wcpp_4_destruct_all__
+1c4e:5403*     __wcpp_4_destruct__
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fltused.c)
+29fe:0a9a      _fltused_
+Module: /home/fld/watcom//lib286/plbxl.lib(iofefg.cpp)
+29fe:17cc      __ppfltused_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(_8087086.asm)
+29fe:0a9c      __8087
+29fe:0a9d      __real87
+29fe:0a9e      __dos87emucall
+29fe:0aa0      __dos87real
+Module: /home/fld/watcom//lib286/dos/clibl.lib(rand.c)
+0f94:1128      rand_
+0f94:116a      srand_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(i4m.asm)
+0f94:118e      __I4M
+0f94:118e      __U4M
+Module: /home/fld/watcom//lib286/dos/clibl.lib(perror.c)
+0f94:11a6      perror_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(qsort.c)
+0f94:127b      qsort_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(finddos.c)
+0f94:17eb      _dos_findfirst_
+0f94:181e      _dos_findnext_
+0f94:1831      _dos_findclose_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fmemcmp.c)
+0f94:1834      _fmemcmp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(intx086.c)
+0f94:185c      int86x_
+0f94:18fd*     int86_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(getenv.c)
+0f94:192a      getenv_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(time.c)
+0f94:19f9      time_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fputs.c)
+0f94:1a44      fputs_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fgets.c)
+0f94:1ae3      fgets_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(feof.c)
+0f94:1b72      feof_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(errno.c)
+0f94:1b7f      __get_errno_ptr_
+29fe:249e+     _errno
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strerror.c)
+0f94:1b86      strerror_
+0f94:1bae*     _strerror_
+29fe:0aa6+     __sys_errlist
+29fe:0b4a+     __sys_nerr
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fopen.c)
+0f94:1c79+     __open_flags_
+0f94:1e7b+     _fsopen_
+0f94:1edf      fopen_
+0f94:1fb7*     freopen_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(_istricm.gas)
+0f94:2024      stricmp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(sscanf.c)
+0f94:2054+     vsscanf_
+0f94:208a      sscanf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fclose.c)
+0f94:20aa      __doclose_
+0f94:216e      __shutdown_stream_
+0f94:2188      fclose_
+29fe:25a0+     ___RmTmpFileFn
+Module: /home/fld/watcom//lib286/dos/clibl.lib(atoi.c)
+0f94:21d3      atoi_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fseek.c)
+0f94:22ae      fseek_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(d_getvec.c)
+0f94:2416      _dos_getvect_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(d_setvec.c)
+0f94:2421      _dos_setvect_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fheapchk.c)
+0f94:24d5*     _fheapchk_
+0f94:24d5      _heapchk_
+29fe:25a4+     ___fheapchk_current
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fflush.c)
+0f94:254f      fflush_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(isdigit.c)
+0f94:2564      isdigit_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(puts.c)
+0f94:258d      puts_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(chainint)
+0f94:25be      _chain_intr_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(gtime086.asm)
+0f94:25de      _dos_getdate_
+0f94:25fc      _dos_gettime_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(vfprintf.c)
+0f94:261a      vfprintf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(flushall.c)
+0f94:262c      __flushall_
+0f94:2689      flushall_
+Module: /home/fld/watcom//lib286/plbxl.lib(opnewarr.cpp)
+1c4e:5466      void __far * __far operator new []( int unsigned )
+Module: /home/fld/watcom//lib286/plbxl.lib(pure_err.cpp)
+1c4e:546b      __wcpp_4_pure_error__
+Module: /home/fld/watcom//lib286/dos/clibl.lib(drive086.asm)
+0f94:268e      _dos_getdrive_
+0f94:26a2      _dos_setdrive_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ddisk086.asm)
+0f94:26b8      _dos_getdiskfree_
+Module: /home/fld/watcom//lib286/plbxl.lib(stabmod.cpp)
+1c4e:548f      __wcpp_4_module_dtor__
+1c4e:54e1      __wcpp_4_mod_register__
+Module: /home/fld/watcom//lib286/plbxl.lib(stabdisp.cpp)
+1c4e:57c9      __wcpp_4_dispatchable__
+Module: /home/fld/watcom//lib286/plbxl.lib(stabadt.cpp)
+1c4e:5844+     void __far * __far dtor_the_array( _RTARCTOR __far * )
+1c4e:58a6+     __far _RTARCTOR::~_RTARCTOR()
+1c4e:58c1      __wcpp_4_dtor_array__
+Module: /home/fld/watcom//lib286/dos/clibl.lib(initfile.c)
+0f94:26e6      __InitFiles_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ioexit.c)
+0f94:2841*     fcloseall_
+0f94:2848      __full_io_exit_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fprtf.c)
+0f94:286e      __fprtf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(nmalloc.c)
+0f94:2939      _nmalloc_
+29fe:0b4c      ___nheapbeg
+29fe:0b4e      ___MiniHeapRover
+29fe:0b50      ___LargestSizeB4MiniHeapRover
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mem.c)
+0f94:2a10      __MemAllocator
+0f94:2ad6      __MemFree
+Module: /home/fld/watcom//lib286/dos/clibl.lib(nfree.c)
+0f94:2c4d      _nfree_
+29fe:25a8+     ___MiniHeapFreeRover
+Module: /home/fld/watcom//lib286/dos/graph.lib(grcga)
+29fe:0b52      __GrCGA_4
+29fe:0b7a      __GrCGA_6
+29fe:0ba2      __TextDevice
+Module: /home/fld/watcom//lib286/dos/graph.lib(grhgc)
+29fe:0bd6      __GrHGC_11
+Module: /home/fld/watcom//lib286/dos/graph.lib(grega)
+1c4e:0a3c      _EGASet_
+1c4e:0a55+     _EGASetEO_
+1c4e:0a6e      _EGAReset_
+1c4e:0adc      _EGASetup80_
+29fe:0c06      __GrEGA_13
+29fe:0c2e      __GrEGA_14
+29fe:0c56      __GrEGA_15
+29fe:0c7e      __GrEGA_16
+29fe:0ca6+     __GrEGA_EO
+Module: /home/fld/watcom//lib286/dos/graph.lib(grvga)
+29fe:0cce      __GrVGA_17
+29fe:0cf6      __GrVGA_18
+29fe:0d1e      __GrVGA_19
+Module: /home/fld/watcom//lib286/dos/graph.lib(grsvga)
+29fe:0e0a      __GrSVGA_100
+29fe:0e32      __GrSVGA_102
+29fe:0e5a      __GrSVGA_103
+29fe:0e82      __GrSVGA_104
+29fe:0eaa      __GrSVGA_105
+Module: /home/fld/watcom//lib286/dos/graph.lib(global)
+29fe:25aa      __SetVGAPage
+29fe:25ae      __TextPos
+29fe:25b2      __ConfigBuffer
+29fe:25e8      __Screen
+29fe:25f2      __DBCSPairs
+29fe:25fc      __StackSeg
+29fe:25fe      __VGAStride
+29fe:2600      __SVGAType
+29fe:2602      __DefMode
+29fe:2604      __DefTextRows
+29fe:2606      __CursorShape
+29fe:2608      __Tx_Row_Max
+29fe:260a      __Tx_Col_Max
+29fe:0ed2      __StartUp
+29fe:0ed3      __GrMode
+29fe:0ed4      __ErrorStatus
+29fe:0ed6      __CurrPos
+29fe:0eda      __LogOrg
+29fe:0ede      __Clipping
+29fe:0edf      __CharAttr
+29fe:0ee0      __Wrap
+29fe:0ee2      __CursState
+29fe:0ee4      __GrCursor
+29fe:0ee6      __CurrActivePage
+29fe:0ee8      __CurrVisualPage
+29fe:0eea      __CurrBkColor
+29fe:0eee      __CurrColor
+29fe:0ef0*     __Palette
+29fe:0ef2      __FillMask
+29fe:0efa      __DefMask
+29fe:0f02      __HaveMask
+29fe:0f03      __Transparent
+29fe:0f05      __PaRf_x
+29fe:0f07      __PaRf_y
+29fe:0f09      __LineStyle
+29fe:0f0b      __StyleWrap
+29fe:0f0d      __PlotAct
+29fe:0f0f      __TextSettings
+29fe:0f1f*     __CurrFont
+29fe:0f23*     __ArcInfo
+29fe:0f41      __CurrPos_w
+29fe:0f51      __Window
+29fe:0f63*     __BiosSeg
+29fe:0f65      __MonoSeg
+29fe:0f67      __CgaSeg
+29fe:0f69      __EgaSeg
+29fe:0f6b      __RomSeg
+29fe:0f6d*     __BiosOff
+29fe:0f6f      __MonoOff
+29fe:0f71      __CgaOff
+29fe:0f73      __EgaOff
+29fe:0f75      __RomOff
+29fe:0f77*     __CurrState
+29fe:260c      __Tx_Col_Min
+29fe:260e      __Tx_Row_Min
+29fe:2610      __IsDBCS
+29fe:2611      __VGAPage
+29fe:2612      __VGAGran
+Module: /home/fld/watcom//lib286/dos/graph.lib(i4m.asm)
+1c4e:112e      _GR__I4M
+1c4e:112e*     _GR__U4M
+Module: /home/fld/watcom//lib286/dos/graph.lib(i4d.asm)
+1c4e:1146      _GR__I4D
+1c4e:118f*     _GR__U4D
+Module: /home/fld/watcom//lib286/dos/graph.lib(setchsiz)
+1c4e:1213      _setcharsize_
+Module: /home/fld/watcom//lib286/dos/graph.lib(settxtor)
+1c4e:1233      _settextorient_
+Module: /home/fld/watcom//lib286/dos/graph.lib(settxpth)
+1c4e:1254      _settextpath_
+Module: /home/fld/watcom//lib286/dos/graph.lib(setchspc)
+1c4e:1261      _setcharspacing_
+Module: /home/fld/watcom//lib286/dos/graph.lib(settxtal)
+1c4e:126e      _settextalign_
+Module: /home/fld/watcom//lib286/dos/graph.lib(clip)
+1c4e:127f      _setclip_
+Module: /home/fld/watcom//lib286/dos/graph.lib(sysmtype)
+1c4e:1426      _SysMonType_
+Module: /home/fld/watcom//lib286/dos/graph.lib(getconf)
+1c4e:14ce*     _getvideoconfig_
+1c4e:14f3      _CalcNumPages_
+1c4e:1540      _GetState_
+1c4e:1600      _InitState_
+1c4e:1652      _GrInit_
+Module: /home/fld/watcom//lib286/dos/graph.lib(devutils)
+1c4e:16ad      _GraphMode_
+1c4e:16c4*     _GrProlog_
+1c4e:16dd      _GrEpilog_
+1c4e:16e7      _InitDevice_
+1c4e:16f0      _FiniDevice_
+1c4e:16fa      _StartDevice_
+1c4e:1704      _ResetDevice_
+Module: /home/fld/watcom//lib286/dos/graph.lib(setrows)
+1c4e:1a54      _SetRows_
+1c4e:1ada*     _settextrows_
+1c4e:1af0*     _setvideomoderows_
+Module: /home/fld/watcom//lib286/dos/graph.lib(remappal)
+1c4e:1c0c      _RemapNum_
+1c4e:1c4c      _remappalette_
+1c4e:1c8e*     _remapallpalette_
+Module: /home/fld/watcom//lib286/dos/graph.lib(cnvcolor)
+1c4e:1cd0      _CnvColour_
+29fe:0fd6      __VGA_Colours
+Module: /home/fld/watcom//lib286/dos/clibl.lib(vsprintf.c)
+0f94:2d63      vsprintf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(crwdata)
+29fe:1016      __curbrk
+29fe:101e      __STACKLOW
+29fe:1020      __STACKTOP
+29fe:1022      __cbyte
+29fe:1024      __child
+29fe:1026      __no87
+29fe:1033      ___FPE_handler
+29fe:1018      __psp
+29fe:1027      __get_ovl_stack
+29fe:102b      __restore_ovl_stack
+29fe:102f      __close_ovl_file
+29fe:1037      __LpCmdLine
+29fe:103b      __LpPgmName
+29fe:101a      __osmajor
+29fe:101b      __osminor
+29fe:101c      __osmode
+29fe:101d      __HShift
+Module: /home/fld/watcom//lib286/dos/clibl.lib(initrtns.c)
+0f94:2dc0      __InitRtns
+0f94:2dc0*     __FInitRtns
+0f94:2e17      __FiniRtns
+0f94:2e17*     __FFiniRtns
+Module: /home/fld/watcom//lib286/dos/clibl.lib(_getdcwd.c)
+0f94:2e77      __getdcwd_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(istable.c)
+29fe:0542      __IsTable
+Module: /home/fld/watcom//lib286/dos/clibl.lib(chdir.c)
+0f94:2e8c      chdir_
+Module: /home/fld/watcom//lib286/plbxl.lib(exc_pr.cpp)
+1c4e:5958      __far _EXC_PR::_EXC_PR( _RTCTL __far *, RW_DTREG __far *, EXCSTATE )
+1c4e:59d1      __far _EXC_PR::~_EXC_PR()
+1c4e:59f0      __far _EXC_PR_FREE::_EXC_PR_FREE( _RTCTL __far *, RW_DTREG __far *, EXCSTATE, ACTIVE_EXC __far * )
+1c4e:5a1e      __far _EXC_PR_FREE::~_EXC_PR_FREE()
+1c4e:5a5f      __far _EXC_PR_DTOR::_EXC_PR_DTOR( _RTCTL __far *, RW_DTREG __far *, EXCSTATE, ACTIVE_EXC __far * )
+1c4e:5a7e      __far _EXC_PR_FNEXC::_EXC_PR_FNEXC( _RTCTL __far *, RW_DTREG __far *, RW_DTREG __far *, ACTIVE_EXC __far * )
+1c4e:5acc      __far _EXC_PR_FNEXC::~_EXC_PR_FNEXC()
+1c4e:5acf      __far _EXC_PR_DTOR::~_EXC_PR_DTOR()
+Module: /home/fld/watcom//lib286/plbxl.lib(callterm.cpp)
+1c4e:5b03      __wcpp_4_corrupted_stack__
+1c4e:5b0f      __wcpp_4_call_terminate__
+Module: /home/fld/watcom//lib286/plbxl.lib(unexpect.cpp)
+1c4e:5b35      void __far std::unexpected()
+Module: /home/fld/watcom//lib286/plbxl.lib(tsequiv.cpp)
+1c4e:5bc2      __wcpp_4_ts_refed__
+1c4e:5be0+     __wcpp_4_ts_pnted__
+1c4e:5bfa      __wcpp_4_ts_equiv__
+Module: /home/fld/watcom//lib286/plbxl.lib(stabinit.cpp)
+1c4e:5d56      __wcpp_4_exc_setup__
+Module: /home/fld/watcom//lib286/plbxl.lib(fatalerr.cpp)
+1c4e:5e65      __wcpp_4_fatal_runtime_error__
+Module: /home/fld/watcom//lib286/plbxl.lib(allocexc.cpp)
+1c4e:5e94      __wcpp_4_alloc_exc__
+1c4e:6176      __wcpp_4_free_exc__
+1c4e:61df      __wcpp_4_find_active__
+1c4e:623e      __wcpp_4_dtor_free_exc__
+Module: /home/fld/watcom//lib286/plbxl.lib(stabtrav.cpp)
+1c4e:6345      __wcpp_4_stab_entry__
+1c4e:635e*     __wcpp_4_stab_trav_comp__
+1c4e:647b      __wcpp_4_stab_trav_init__
+1c4e:64a9      __wcpp_4_stab_trav_next__
+1c4e:651f      __wcpp_4_stab_trav_move__
+Module: /home/fld/watcom//lib286/plbxl.lib(ljmpinit.cpp)
+29fe:17d8      ___wcpp_4_data_init_longjmp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ljmphdl.c)
+29fe:1040      ___longjmp_handler
+Module: /home/fld/watcom//lib286/dos/clibl.lib(xmsg.c)
+0f94:2e9c      __exit_with_msg_
+0f94:2ea1      __fatal_runtime_error_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(cmain086.c)
+0f94:2ebb      __CMain
+Module: /home/fld/watcom//lib286/dos/clibl.lib(uselfn.c)
+29fe:1044      ___uselfn
+Module: /home/fld/watcom//lib286/dos/clibl.lib(initargv.c)
+0f94:30d8      __Init_Argv_
+0f94:313a      __Fini_Argv_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(prtf.c)
+0f94:3cb5      __prtf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(tolower.c)
+0f94:3eed      tolower_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(growseg.c)
+0f94:3efb      __GrowSeg_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(allocseg.c)
+0f94:3fca      __AllocSeg_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fmemneed.c)
+0f94:4069      __fmemneed_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(heapgrow.c)
+0f94:406c*     _heapgrow_
+0f94:406c*     _fheapgrow_
+0f94:406d      _nheapgrow_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fmsize.c)
+0f94:40e4*     _msize_
+0f94:40e4      _fmsize_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(nexpand.c)
+0f94:40f5      _nexpand_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fexpand.c)
+0f94:4145      _fexpand_
+0f94:4145*     _expand_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(setbits.c)
+0f94:417a      __setbits_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(bits.c)
+29fe:0644      __Bits
+Module: /home/fld/watcom//lib286/dos/graph.lib(scrollw)
+1c4e:1e94      _ScrollWindow_
+Module: /home/fld/watcom//lib286/dos/graph.lib(putchar)
+1c4e:1fcb      _PutChar_
+Module: /home/fld/watcom//lib286/dos/graph.lib(cursor)
+1c4e:225f      _CursorOn_
+1c4e:227f      _CursorOff_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ini87086.asm)
+0f94:41ce      __init_8087_emu
+0f94:41d4      __x87id
+Module: /home/fld/watcom//lib286/dos/emu87.lib(emu8087.asm)
+0f94:4347      __int34
+0f94:4384      __int3c
+Module: /home/fld/watcom//lib286/dos/emu87.lib(dosinit.asm)
+0f94:6caa      ___dos87emucall
+Module: /home/fld/watcom//lib286/dos/clibl.lib(setefg.c)
+0f94:6ce8      __setEFGfmt_
+Module: /home/fld/watcom//lib286/plbxl.lib(iofnoefg.cpp)
+29fe:10b0      ___EFG_cnvs2d
+29fe:10b4      ___EFG_cnvd2f
+29fe:10b8      ___EFG_cvtld
+29fe:10bc      ___EFG_cnvd2ld
+Module: /home/fld/watcom//lib286/math87l.lib(cnvs2d.c)
+0f94:6d06      __cnvs2d_
+Module: /home/fld/watcom//lib286/math87l.lib(cnvd2f.c)
+0f94:6d45      __cnvd2f_
+Module: /home/fld/watcom//lib286/math87l.lib(ldcvt.c)
+0f94:6f1d      _LDScale10x_
+0f94:7480      __cvtld_
+0f94:79b6      __LDcvt_
+Module: /home/fld/watcom//lib286/math87l.lib(cnvd2ld.c)
+0f94:79c7      __cnvd2ld_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(chk8087.c)
+0f94:79f6*     _fpreset_
+0f94:7a21      __init_8087_
+0f94:7aa0      __chk8087_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fputc.c)
+0f94:7b10      fputc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(error086.asm)
+0f94:7be6      __doserror_
+0f94:7bf4      __doserror1_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(dointr)
+0f94:7c00      _DoINTR_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(segread.c)
+0f94:7f75      segread_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(environ.c)
+29fe:2618      ___env_mask
+29fe:261c      _environ
+29fe:2620      __wenviron
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbterm.c)
+0f94:7f95      _mbterm_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbsnextc.c)
+0f94:7fd7      _mbsnextc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbcupper.c)
+0f94:8008      _mbctoupper_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbsinc.c)
+0f94:802b      _mbsinc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(gtctm.c)
+0f94:8067      __getctime_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mktime.c)
+0f94:80f0      mktime_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(flush.c)
+0f94:81aa      __flush_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ioalloc.c)
+0f94:82e2      __ioalloc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fgetc.c)
+0f94:837c+     __fill_buffer_
+0f94:8471      fgetc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(comtflag.c)
+29fe:116a      __commode
+Module: /home/fld/watcom//lib286/dos/clibl.lib(textmode.c)
+29fe:116c      __fmode
+Module: /home/fld/watcom//lib286/dos/clibl.lib(open.c)
+0f94:8717*     open_
+0f94:873e      _sopen_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(chktty.c)
+0f94:875d      __chktty_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(freefp.c)
+0f94:8788      __freefp_
+0f94:87fd      __purgefp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(allocfp.c)
+0f94:8839      __allocfp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(stricmp.c)
+0f94:894f      _stricmp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(scnf.c)
+0f94:97a6      __scnf_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(__lseek.c)
+0f94:9a0d      __lseek_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(_clse.c)
+0f94:9a47      __close_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(lseek.c)
+0f94:9a7f      lseek_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(tell.c)
+0f94:9ab0      _tell_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(heapwalk.c)
+0f94:9b03      __HeapWalk_
+Module: /home/fld/watcom//lib286/plbxl.lib(prwdata.cpp)
+29fe:2624      __wint_pure_error_flag
+29fe:2626      __wint_undef_vfun_flag
+29fe:2628      __wint_module_init
+Module: /home/fld/watcom//lib286/dos/clibl.lib(seterrno.c)
+0f94:9c0e*     __set_EDOM_
+0f94:9c20      __set_ERANGE_
+0f94:9c32      __set_EINVAL_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(nmemneed.c)
+0f94:9c47      __nmemneed_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(grownear.c)
+0f94:9cc9      __LastFree_
+0f94:9d41      __ExpandDGROUP_
+Module: /home/fld/watcom//lib286/dos/graph.lib(cgautils.asm)
+1c4e:22cd      _CoRep_
+1c4e:22bf      _CoXor_
+1c4e:22c4      _CoAnd_
+1c4e:22d9      _CoOr_
+1c4e:2302      _MoveUp_
+1c4e:230e      _MoveDown_
+1c4e:22f9      _Move1Left_
+1c4e:22f0      _Move2Left_
+1c4e:22e7      _Move1Right_
+1c4e:22de      _Move2Right_
+1c4e:2319      _Get1Dot_
+1c4e:2328      _Get2Dot_
+1c4e:2371      _Pix1Zap_
+1c4e:240d      _Pix2Zap_
+1c4e:2381      _Pix1Fill_
+1c4e:2421      _Pix2Fill_
+1c4e:2339      _Pix1Copy_
+1c4e:2337      _Pix2Copy_
+1c4e:234b      _Pix1Read_
+1c4e:2349      _Pix2Read_
+1c4e:24e5      _CGAScanLeft_
+1c4e:2511      _CGAScan1Right_
+1c4e:2566      _CGAScan2Right_
+Module: /home/fld/watcom//lib286/dos/graph.lib(setmode)
+1c4e:261b      _SetMode_
+29fe:11b6+     __NoClear
+Module: /home/fld/watcom//lib286/dos/graph.lib(hgcutils.asm)
+1c4e:267f      _HercMoveUp_
+1c4e:268e      _HercMoveDown_
+Module: /home/fld/watcom//lib286/dos/graph.lib(egautils.asm)
+1c4e:26a1      _EGAMoveUpHi_
+1c4e:26ab      _EGAMoveUpLo_
+1c4e:26a6      _EGAMoveDownHi_
+1c4e:26b0      _EGAMoveDownLo_
+1c4e:26b5      _EGAMoveLeft_
+1c4e:26bc      _EGAMoveRight_
+1c4e:26c3      _EGARep_
+1c4e:26e9      _EGAGetDot_
+1c4e:26db      _EGAGetDotEO_
+1c4e:26d5      _EGAGetDotMono_
+1c4e:2908      _EGAZap_
+1c4e:2903      _EGAZapEO_
+1c4e:2903      _EGAZapMono_
+1c4e:296f      _EGAFill_
+1c4e:2968      _EGAFillEO_
+1c4e:2968      _EGAFillMono_
+1c4e:277c      _EGAPixCopy_
+1c4e:2713      _EGAPixCopyEO_
+1c4e:276b      _EGAPixCopyMono_
+1c4e:28b2      _EGAReadRow_
+1c4e:2866      _EGAReadRowEO_
+1c4e:28a0      _EGAReadRowMono_
+1c4e:2a56      _EGAScanLeft_
+1c4e:2a0e      _EGAScanLeftEO_
+1c4e:2a52      _EGAScanLeftMono_
+1c4e:2afa      _EGAScanRight_
+1c4e:2a8d      _EGAScanRightEO_
+1c4e:2af6      _EGAScanRightMono_
+Module: /home/fld/watcom//lib286/dos/graph.lib(vgautils.asm)
+1c4e:2b69      _MoveUp19_
+1c4e:2b6f      _MoveDown19_
+1c4e:2b75      _MoveLeft19_
+1c4e:2b78      _MoveRight19_
+1c4e:2b64      _Rep19_
+1c4e:2b5f      _And19_
+1c4e:2b88      _Zap19_
+1c4e:2b7a      _GetDot19_
+1c4e:2ba2      _Fill19_
+1c4e:2bdd      _PixCopy19_
+1c4e:2c04      _PixRead19_
+1c4e:2c0d      _ScanLeft19_
+1c4e:2c37      _ScanRight19_
+Module: /home/fld/watcom//lib286/dos/graph.lib(svgautil.asm)
+1c4e:2e1f      _MoveUp100_
+1c4e:2e24      _MoveDown100_
+1c4e:2e29      _MoveUp128_
+1c4e:2e3d      _MoveDown128_
+1c4e:2e51      _MoveLeft256_
+1c4e:2e64      _MoveRight256_
+1c4e:2e77      _MoveUp640_
+1c4e:2e8c      _MoveDown640_
+1c4e:2ea1      _MoveUp800_
+1c4e:2eb6      _MoveDown800_
+1c4e:2ecb      _MoveUp1024_
+1c4e:2ee0      _MoveDown1024_
+1c4e:2ef4      _Zap256_
+1c4e:2f18      _Fill256_
+1c4e:2f43      _PixCopy256_
+1c4e:2f6e      _PixRead256_
+1c4e:2f97      _ScanLeft256_
+1c4e:2fc0      _ScanRight256_
+1c4e:2c54      _PageVESA_
+1c4e:2c7f      _PageVideo7_
+1c4e:2ce9      _PageParadise_
+1c4e:2d07      _PageATI_
+1c4e:2d2d      _PageTseng3_
+1c4e:2d4b      _PageTseng4_
+1c4e:2d69      _PageOak_
+1c4e:2d87      _PageTrident_
+1c4e:2da7      _PageChips_
+1c4e:2dcd      _PageGenoa_
+1c4e:2df4      _PageS3_
+1c4e:2ce9      _PageCirrus_
+1c4e:2d4b      _PageViper_
+Module: /home/fld/watcom//lib286/dos/graph.lib(svgainfo)
+1c4e:302f      _SuperVGAType_
+1c4e:32e6*     _SetSVGAType_
+Module: /home/fld/watcom//lib286/dos/graph.lib(std.asm)
+27b1:1aa0      __StdFont
+Module: /home/fld/watcom//lib286/dos/graph.lib(windfunc)
+1c4e:32ea*     _WtoPhysX_
+1c4e:331c*     _WtoPhysY_
+1c4e:3365*     _WtoScaleX_
+1c4e:339f*     _WtoScaleY_
+1c4e:33cf*     _getwindowcoord_
+1c4e:351f+     _getviewcoord_w_
+1c4e:3562*     _getviewcoord_w_87_
+1c4e:3590*     _getviewcoord_wxy_
+1c4e:35ca*     _getcurrentposition_w_
+1c4e:35f8      _resetscalefactor_
+Module: /home/fld/watcom//lib286/dos/graph.lib(seginit)
+1c4e:369f      _InitSegments_
+Module: /home/fld/watcom//lib286/dos/graph.lib(fast256)
+1c4e:36fc      _FastMap_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(sgdef086)
+29fe:17a2      __Start_XI
+29fe:17ea      __End_XI
+29fe:17ea      __Start_YI
+29fe:180e      __End_YI
+Module: /home/fld/watcom//lib286/plbxl.lib(termnate.cpp)
+1c4e:6554      void __far std::terminate()
+Module: /home/fld/watcom//lib286/dos/clibl.lib(enterdb.c)
+0f94:9e46      __EnterWVIDEO_
+29fe:11b8+     __WD_Present
+Module: /home/fld/watcom//lib286/plbxl.lib(areaexc.cpp)
+29fe:11ba      ___EXC_AREA
+Module: /home/fld/watcom//lib286/plbxl.lib(tssize.cpp)
+1c4e:65af      __wcpp_4_ts_size__
+Module: /home/fld/watcom//lib286/plbxl.lib(bittest.cpp)
+1c4e:65ea      __wcpp_4_bit_test__
+1c4e:660d      __wcpp_4_bit_off__
+Module: /home/fld/watcom//lib286/plbxl.lib(ljmpdtor.cpp)
+1c4e:66d9      __wcpp_4_lj_handler__
+Module: /home/fld/watcom//lib286/dos/clibl.lib(___argc.c)
+29fe:263c      ____Argv
+29fe:2640      ____Argc
+Module: /home/fld/watcom//lib286/dos/clibl.lib(histsplt.c)
+29fe:2642      ___historical_splitparms
+Module: /home/fld/watcom//lib286/dos/clibl.lib(wctomb.c)
+0f94:9e6a      wctomb_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(itoa.c)
+0f94:9e93+     utoa_
+0f94:9ef0      itoa_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(strupr.c)
+0f94:9f14      _strupr_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(noefgfmt.c)
+29fe:15d0      ___EFG_printf
+29fe:15d4      ___EFG_scanf
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbisdbcs.c)
+29fe:15d8      ___IsDBCS
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbislead.c)
+0f94:9f46*     _ismbblead_
+29fe:2644      ___MBCSIsTable
+Module: /home/fld/watcom//lib286/dos/clibl.lib(lltoa.c)
+0f94:9f62      ulltoa_
+0f94:a046*     lltoa_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(ltoa.c)
+0f94:a0a8      ultoa_
+0f94:a117*     ltoa_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(heapen.c)
+29fe:15da      ___heap_enabled
+Module: /home/fld/watcom//lib286/dos/clibl.lib(amblksiz.c)
+29fe:15dc      __amblksiz
+Module: /home/fld/watcom//lib286/dos/clibl.lib(_expand.c)
+0f94:a146      __HeapManager_expand_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(bexpand.c)
+0f94:a2c6      _bexpand_
+Module: /home/fld/watcom//lib286/dos/graph.lib(imagesiz)
+1c4e:3785*     _imagesize_
+1c4e:37b4+     _L2imagesize_
+1c4e:37ef      _RowLen_
+Module: /home/fld/watcom//lib286/dos/graph.lib(gstklow)
+1c4e:381e      _GetStackLow_
+Module: /home/fld/watcom//lib286/dos/graph.lib(plotactn)
+1c4e:3822+     _getplotaction_
+1c4e:384f      _setplotaction_
+Module: /home/fld/watcom//lib286/dos/graph.lib(clearscr)
+1c4e:3896+     _L2clearscreen_
+1c4e:3910*     _clearscreen_
+1c4e:3978      _GrClear_
+1c4e:39d4      _TxtClear_
+Module: /home/fld/watcom//lib286/dos/graph.lib(8x8font)
+27b1:0000      __8x8Font
+27b1:0c00*     __8x8FontDef
+Module: /home/fld/watcom//lib286/dos/graph.lib(hercfont)
+27b1:0ca0      __HercFont
+Module: /home/fld/watcom//lib286/dos/graph.lib(l1line)
+1c4e:3afe      _L1SLine_
+1c4e:3b33*     _L1Line_
+Module: /home/fld/watcom//lib286/dos/graph.lib(color)
+1c4e:3bb6      _getcolor_
+1c4e:3bc1      _setcolor_
+1c4e:3be2+     _L2setcolor_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(8087cw.c)
+29fe:15de      __8087cw
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fpexcept.c)
+0f94:a31f      __FPE_exception_
+Module: /home/fld/watcom//lib286/math87l.lib(efgfmt.c)
+0f94:a32b      _EFG_Format_
+Module: /home/fld/watcom//lib286/math87l.lib(strtod.c)
+0f94:a839+     __Strtold_
+0f94:a9c3      strtod_
+Module: /home/fld/watcom//lib286/math87l.lib(ldclass.c)
+0f94:ab65      __LDClass_
+0f94:abb3*     _FLClass_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(save8087.c)
+29fe:15e0      ___Save8087
+29fe:15e4      ___Rest8087
+Module: /home/fld/watcom//lib286/dos/clibl.lib(grabfp87.c)
+0f94:abc8      __GrabFP87_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(dosret.c)
+0f94:abfa      __set_errno_dos_
+0f94:ac86*     __set_errno_dos_reterr_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(setenvp.c)
+0f94:acaf      __setenvp_
+0f94:adb4      __freeenvp_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbinit.c)
+0f94:ae9d      __mbinit_
+29fe:15fc      ___MBCodePage
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbdtoupp.c)
+0f94:af12      _mbdtoupper_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(toupper.c)
+0f94:af20      toupper_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(locmktim.c)
+0f94:af2e      __local_mktime_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(gmtime.c)
+0f94:b138      __brktime_
+0f94:b29b+     _gmtime_
+0f94:b2bf*     gmtime_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(tzset.c)
+29fe:15fe      ___start_dst
+29fe:1610      ___end_dst
+29fe:1724*     _tzname
+29fe:172c      _timezone
+29fe:1730      _daylight
+29fe:1732      ___dst_adjust
+0f94:b2d1*     __DontCacheOSTZ_
+0f94:b2ea*     __CacheOSTZ_
+0f94:b84c+     __parse_tz_
+0f94:b998      tzset_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(timeutil.c)
+0f94:baf8      __isindst_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(qwrit.c)
+0f94:bdeb      __qwrite_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fsync.c)
+0f94:be4d      fsync_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(gtche.c)
+0f94:be52      getche_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(qread.c)
+0f94:be6c      __qread_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(opendos.c)
+0f94:be8c      _dos_open_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(iomode.c)
+0f94:beb2      __GetIOMode_
+0f94:bed7      __SetIOMode_nogrow_
+29fe:175a      ___NFiles
+29fe:175c      ___init_mode
+29fe:1784      ___io_mode
+Module: /home/fld/watcom//lib286/dos/clibl.lib(isatt.c)
+0f94:befa      isatty_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(doserrno.c)
+0f94:bf16      __get_doserrno_ptr_
+29fe:275c+     __doserrno
+Module: /home/fld/watcom//lib286/dos/clibl.lib(umaskval.c)
+29fe:1788      ___umaskval
+Module: /home/fld/watcom//lib286/dos/clibl.lib(creatdos.c)
+0f94:bf1d      _dos_creat_
+0f94:bf41*     _dos_creatnew_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(stiomode.c)
+0f94:bf62+     __grow_iomode_
+0f94:c028+     __shrink_iomode_
+0f94:c063      __SetIOMode_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(mbtowc.c)
+0f94:c0c6      mbtowc_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fdfs086.asm)
+0f94:c1c8      __FDFS
+Module: /home/fld/watcom//lib286/dos/clibl.lib(i8m086.asm)
+0f94:c22b*     __I8M
+0f94:c22b      __U8M
+0f94:c210*     __I8ME
+0f94:c210*     __U8ME
+Module: /home/fld/watcom//lib286/dos/clibl.lib(sbrk.c)
+0f94:c375      __brk_
+0f94:c3da*     sbrk_
+Module: /home/fld/watcom//lib286/dos/graph.lib(bit.asm)
+1c4e:3c7d      BitReplace
+1c4e:3c8c      BitAnd
+1c4e:3caa      BitXor
+1c4e:3c9b      BitOr
+1c4e:3cb9      BitCopy
+Module: /home/fld/watcom//lib286/dos/graph.lib(fdfs086.asm)
+1c4e:3d44      _GR__FDFS
+Module: /home/fld/watcom//lib286/dos/graph.lib(/home/runner/work/open-watcom-v2/open-watcom-v2/bld/graphlib/asm/fsmath.asm)
+1c4e:3d91      _GR__FSA
+1c4e:3d8c      _GR__FSS
+1c4e:3e4f      _GR__FSM
+1c4e:3eeb      _GR__FSD
+Module: /home/fld/watcom//lib286/dos/graph.lib(fsi4086.asm)
+1c4e:3f8c      _GR__FSI4
+1c4e:3f94*     _GR__FSU4
+1c4e:3f9c*     _GR__FSI2
+1c4e:3fa4*     _GR__FSU2
+1c4e:3fac*     _GR__FSI1
+1c4e:3fb4*     _GR__FSU1
+Module: /home/fld/watcom//lib286/dos/graph.lib(i4fs086.asm)
+1c4e:4016      _GR__I4FS
+1c4e:4028*     _GR__U4FS
+Module: /home/fld/watcom//lib286/dos/graph.lib(fsfd086.asm)
+1c4e:407e      _GR__FSFD
+Module: /home/fld/watcom//lib286/dos/graph.lib(getltdos.c)
+1c4e:40dc      _GRdos_get_dbcs_lead_table_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(alphabet.c)
+0f94:c3ea      ___Alphabet
+Module: /home/fld/watcom//lib286/dos/clibl.lib(bfree.c)
+0f94:c40f      _bfree_
+Module: /home/fld/watcom//lib286/dos/graph.lib(fillmask)
+1c4e:4105      _getfillmask_
+1c4e:4149      _setfillmask_
+Module: /home/fld/watcom//lib286/dos/graph.lib(l1block)
+1c4e:41ba      _L1Block_
+Module: /home/fld/watcom//lib286/dos/graph.lib(l0drwlin)
+1c4e:41f9      _L0DrawLine_
+Module: /home/fld/watcom//lib286/dos/graph.lib(l1clip)
+1c4e:4351+     _L1OutCode_
+1c4e:440c      _L0LineClip_
+1c4e:4556*     _L0BlockClip_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(rtcntrl.c)
+0f94:c434*     _SetLD64bit_
+0f94:c43f*     _SetLD80bit_
+0f94:c44a      _LDisDouble_
+Module: /home/fld/watcom//lib286/math87l.lib(zbuf2ld.c)
+0f94:c481      __ZXBuf2LD_
+Module: /home/fld/watcom//lib286/math87l.lib(bufld086.asm)
+0f94:c596      __ZBuf2LD
+Module: /home/fld/watcom//lib286/math87l.lib(inf_nan.c)
+29fe:064c*     ___f_infinity
+29fe:0650*     ___f_posqnan
+29fe:0654      ___d_infinity
+29fe:065c      ___d_posqnan
+29fe:0664*     ___ld_infinity
+29fe:066c*     ___ld_posqnan
+Module: /home/fld/watcom//lib286/dos/clibl.lib(hugeval.c)
+29fe:0674      __HugeValue
+Module: /home/fld/watcom//lib286/dos/clibl.lib(fpe87.asm)
+0f94:c662      __Init_FPE_handler_
+0f94:c699      __Fini_FPE_handler_
+0f94:c6cf*     __FPEHandler
+Module: /home/fld/watcom//lib286/dos/clibl.lib(clearenv.c)
+0f94:c961      clearenv_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(getltdos.c)
+0f94:caaa      dos_get_dbcs_lead_table_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(getcpdos.c)
+0f94:cad3      dos_get_code_page_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(leapyear.c)
+0f94:cae3      ___diyr
+0f94:cafd      ___dilyr
+0f94:cb17      __leapyear_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(filedos.c)
+0f94:cb41*     _dos_close_
+0f94:cb4f      _dos_commit_
+Module: /home/fld/watcom//lib286/dos/clibl.lib(iomodtty.c)
+0f94:cb5e      __ChkTTYIOMode_
+0f94:cb9c*     __IOMode_
+Module: /home/fld/watcom//lib286/dos/graph.lib(dummy)
+1c4e:45c7      _GRF4UnderFlow
+1c4e:45cc      _GRF4DivZero
+1c4e:45d7      _GRF4OverFlow
+29fe:2964*     _GR_fltused_
+29fe:2966*     _GR_small_code_
+Module: /home/fld/watcom//lib286/dos/graph.lib(l1fill)
+1c4e:45e2      _L1Fill_
+1c4e:466b*     _L1ClipFill_
+
+
+                        +--------------------+
+                        |   Libraries Used   |
+                        +--------------------+
+
+/home/fld/watcom//lib286/dos/graph.lib
+/home/fld/watcom//lib286/dos/emu87.lib
+/home/fld/watcom//lib286/math87l.lib
+/home/fld/watcom//lib286/plbxl.lib
+/home/fld/watcom//lib286/dos/clibl.lib
+
+
+                        +-----------------------+
+                        |   Linker Statistics   |
+                        +-----------------------+
+
+Stack size:  1000 (4096.)
+Memory size:  0002d980 (186752.)
+Entry point address: 0f94:0332
+Link time: 00:00.10
