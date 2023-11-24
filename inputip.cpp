@@ -1,14 +1,13 @@
 #include "inputip.h"
 #include "dos_cgui.h"
 #include "dos_scrn.h"
-#include "dos_neti.h"
 
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <strstream.h>
 
-InputIpState::InputIpState(State* next, State* prev) : State(next, prev),
+InputIpState::InputIpState(GuiState* next, GuiState* prev) : GuiState(next, prev),
     ip (new char*[4]), currentSegment(0)
 {
 
@@ -61,22 +60,7 @@ void InputIpState::paint(void *screen)
 
 void InputIpState::onEnter()
 {
-    // the network interface
-    DosMTcpIpIface netIface;
-    if(!netIface.setup())
-    {
-        fprintf(stderr, "Network setup failed");
-        return;
-    }
-
-    void* clientSocket = netIface.provide_socket();
-    if(!netIface.connect(clientSocket, getIp()))
-    {
-        netIface.shutdown();
-        return;
-    }
-
-
+    GuiStatemachine::instance().next((void*)getIp());
 }
 
 void InputIpState::onRightArrow()

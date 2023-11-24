@@ -17,11 +17,16 @@ filelist.h
 filestrc.h
 guistate.cpp
 guistate.h
+inc/miststrm.h
+inc/mstrstrm.h
+inc/strngify.h
 inputip.cpp
 inputip.h
 list.cpp
 list.h
 memhandl.h
 net_ifce.h
+net_state.h
 protocol.cpp
 protocol.h
+src/utils/miststrm.cpp

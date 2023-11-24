@@ -8,11 +8,11 @@
 /**
  * @brief The BrowseFoldersState class The state in which the Gui is, when we browse two folders
  */
-class BrowseFoldersState : public State
+class BrowseFoldersState : public GuiState
 {
 public:
 
-    BrowseFoldersState(State* next, State* prev);
+    BrowseFoldersState(GuiState* next, GuiState* prev);
     ~BrowseFoldersState();
 
 

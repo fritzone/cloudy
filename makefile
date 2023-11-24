@@ -28,10 +28,16 @@
 tcp_h_dir = ../../tcpinc/
 tcp_c_dir = ../../tcplib
 common_h_dir = ../../include
+msg_prot_dir = ./msg_prot
+include_dir = ./inc
+src_dir = ./src
+
+!include $(msg_prot_dir)/makefile
+!include $(src_dir)/makefile
 
 memory_model = -ml
-compile_options = -0 -q -oa -os -s -xs $(memory_model) -DCFG_H=\"cloud.cfg\"
-compile_options += -i=$(tcp_h_dir) -i=$(common_h_dir) -i=.
+compile_options = -0 -oh -q -oa -os -s -xs $(memory_model) -DCFG_H=\"cloud.cfg\"
+compile_options += -i=$(tcp_h_dir) -i=$(common_h_dir) -i=. -i=$(msg_prot_dir) -i=$(include_dir)
 
 tcpobjs = packet.o arp.o eth.o ip.o tcp.o tcpsockm.o utils.o udp.o dns.o timer.o ipasm.o trace.o
 objs = cloud.o ezxml.o dos_scrn.o dos_cgui.o dos_neti.o list.o filelist.o cldutils.o protocol.o inputip.o guistate.o brwsfldr.o
@@ -45,7 +51,7 @@ clean : .symbolic
 
 .asm : $(tcp_c_dir)
 
-.cpp : $(tcp_c_dir)
+.cpp : $(tcp_c_dir);$(msg_prot_dir);$(src_dir);$(utils_dir)
 
 .c : $(tcp_c_dir)
 
@@ -58,5 +64,6 @@ clean : .symbolic
 .c.o :
   wpp $[* $(compile_options)
 
-cloud.exe: $(tcpobjs) $(objs)
-  wlink System dos OPtion map OPtion eliminate OPtion stack=4096 Name $@ File cloud.o,ezxml.o,dos_scrn.o,dos_cgui.o,dos_neti.o,list.o,filelist.o,cldutils.o,protocol.o,packet.o,arp.o,eth.o,ip.o,tcp.o,tcpsockm.o,utils.o,udp.o,dns.o,timer.o,ipasm.o,trace.o,inputip.o,guistate.o,brwsfldr.o
+cloud.exe: $(tcpobjs) $(objs) $(protocol_objs) $(util_objs)
+  wlink System dos OPtion map OPtion eliminate OPtion stack=4096 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs)}
+

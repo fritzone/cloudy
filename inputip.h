@@ -7,10 +7,10 @@
  * @brief The InputIpState class is the state in which the GUI expects for an IP to be entered in the
  * right side of the frame, there is no right frame shown
  */
-class InputIpState : public State
+class InputIpState : public GuiState
 {
 public:
-    InputIpState(State* next, State* prev);
+    InputIpState(GuiState* next, GuiState* prev);
 
     ~InputIpState();
 

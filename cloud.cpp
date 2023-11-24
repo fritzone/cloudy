@@ -22,6 +22,7 @@
 #include "guistate.h"
 #include "inputip.h"
 #include "brwsfldr.h"
+#include "net_state.h"
 
 #include <set>
 
@@ -133,6 +134,16 @@ int asciitable()
     exit(1);
 }
 
+// Global, since some callbacks need to access it
+NetState* netState = new NetState_NoOp;
+
+int advanceNetState(void* data)
+{
+    netState = new NetState_TryConnect;
+    netState->stateData = data;
+    return 0;
+}
+
 /*
  * Main entrypoint
  */
@@ -150,13 +161,13 @@ int main(int argc, char* argv[])
     // manage the cursor
     CursorRaii cursor;
 
-
-    State* brFoldState = new BrowseFoldersState(NULL, NULL);
-    State* ipInputState = new InputIpState(brFoldState, NULL);
+    GuiState* brFoldState = new BrowseFoldersState(NULL, NULL);
+    GuiState* ipInputState = new InputIpState(brFoldState, NULL);
     brFoldState->setrPreviousState(ipInputState);
 
-    GuiState::instance().init(ipInputState);
-    GuiState::instance().getCurrentState()->setCursor(&cursor);
+    GuiStatemachine::instance().init(ipInputState);
+    GuiStatemachine::instance().getCurrentState()->setCursor(&cursor);
+    GuiStatemachine::instance().onNext(ipInputState, &advanceNetState);
 
     // current working directory
     char startupDir[PATH_MAX + 1] = {0};
@@ -166,11 +177,13 @@ int main(int argc, char* argv[])
 
     // show the gui, the code below goes to the gui part after connect
 
+    netState = new NetState_NoOp;
+
     while(1)
     {
-        GuiState::instance().getCurrentState()->onRefreshContent();
+        GuiStatemachine::instance().getCurrentState()->onRefreshContent();
         clearscr(screen);
-        GuiState::instance().getCurrentState()->paint(screen);
+        GuiStatemachine::instance().getCurrentState()->paint(screen);
         flip(screen);
 
         if(kbhit())
@@ -184,22 +197,22 @@ int main(int argc, char* argv[])
 
             if(c== 9) // Tab
             {
-                GuiState::instance().getCurrentState()->onTab();
+                GuiStatemachine::instance().getCurrentState()->onTab();
             }
 
             if(c== 8) // Backspace
             {
-                GuiState::instance().getCurrentState()->onBackspace();
+                GuiStatemachine::instance().getCurrentState()->onBackspace();
             }
 
             if(c == 13) // Enter?
             {
-                GuiState::instance().getCurrentState()->onEnter();
+                GuiStatemachine::instance().getCurrentState()->onEnter();
             }
 
             if(isprint(c))
             {
-                GuiState::instance().getCurrentState()->onChar(c);
+                GuiStatemachine::instance().getCurrentState()->onChar(c);
             }
 
             // special key?
@@ -212,28 +225,30 @@ int main(int argc, char* argv[])
 
                 if(c == 82) // Insert - Select/Deselect, usually used only in the browse panel
                 {
-                    GuiState::instance().getCurrentState()->onInsert();
+                    GuiStatemachine::instance().getCurrentState()->onInsert();
                     c = 80; // and move to the next element
                 }
 
                 if(c == 80) // Down arrow
                 {
-                    GuiState::instance().getCurrentState()->onDownArrow();
+                    GuiStatemachine::instance().getCurrentState()->onDownArrow();
                 }
 
                 if(c == 72) // Up arrow
                 {
-                    GuiState::instance().getCurrentState()->onUpArrow();
+                    GuiStatemachine::instance().getCurrentState()->onUpArrow();
                 }
 
                 if(c==72) // right
                 {
-                    GuiState::instance().getCurrentState()->onRightArrow();
+                    GuiStatemachine::instance().getCurrentState()->onRightArrow();
                 }
             }
         }
 
 //        netIface.poll(clientSocket, 300, onDataReceived);
+        netState->execute();
+
     }
 
     delete brFoldState;

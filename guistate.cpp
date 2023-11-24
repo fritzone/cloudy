@@ -2,54 +2,71 @@
 
 #include <string.h>
 
-State::State(State *next, State *prev) : next(NULL), prev(NULL)
+GuiState::GuiState(GuiState *next, GuiState *prev) : next(NULL), prev(NULL)
 {
 }
 
-void State::setNextState(State *nexts)
+void GuiState::setNextState(GuiState *nexts)
 {
     next = nexts;
 }
 
-void State::setrPreviousState(State *prevs)
+void GuiState::setrPreviousState(GuiState *prevs)
 {
     prev = prevs;
 }
 
-CursorRaii *State::getCursor() const
+CursorRaii *GuiState::getCursor() const
 {
     return cursor;
 }
 
-void State::setCursor(CursorRaii *newCursor)
+void GuiState::setCursor(CursorRaii *newCursor)
 {
     cursor = newCursor;
 }
 
-GuiState &GuiState::instance()
+GuiStatemachine &GuiStatemachine::instance()
 {
-    static GuiState st;
+    static GuiStatemachine st;
     return st;
 }
 
-void GuiState::init(State *s)
+void GuiStatemachine::init(GuiState *s)
 {
     currentState = s;
 }
 
-void GuiState::next()
+void GuiStatemachine::next(void *d)
 {
+    if(stateNextOps.count(currentState))
+    {
+        if(stateNextOps[currentState](d) == 1)
+        {
+            return;
+        }
+    }
     currentState = currentState->next;
 }
 
-void GuiState::previous()
+void GuiStatemachine::previous()
 {
     currentState = currentState->prev;
 }
 
-State *GuiState::getCurrentState() const
+GuiState *GuiStatemachine::getCurrentState() const
 {
     return currentState;
+}
+
+void GuiStatemachine::addState(GuiState *s)
+{
+    states.push_back(s);
+}
+
+void GuiStatemachine::onNext(GuiState *s, int (*cb)(void *))
+{
+    stateNextOps[s] = cb;
 }
 
 

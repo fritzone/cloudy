@@ -5,14 +5,27 @@ import string
 builtin_types = ["bool", "char", "unsigned char", "short", "unsigned short", "float", "int", "unsigned int", "long",
                  "unsigned long", "double", "long double", "long long", "unsigned long long"]
 
+restrictions = {}
+
+def open_file(fn, mode):
+    path = "generated"
+    does_exist = os.path.exists(path)
+    if not does_exist:
+        # Create a new directory because it does not exist
+        os.makedirs(path)
+
+    fn_with_path = os.getcwd() + "/generated/" + fn
+    return open(fn_with_path, mode)
 
 # returns the 8 character long filename for the given message name, to be used as the header name
 # limited to 8.3 under DOS
 eight_names = {}
 def eight_len_fn(name):
     if name in eight_names:
+        print("1. " + name + " -> " + eight_names[name])
         return eight_names[name]
-    eight_name = name[0:8]
+
+    eight_name = name.lower()[0:8]
     used = False
     # See if it is already used or not
     for enk in eight_names:
@@ -21,13 +34,14 @@ def eight_len_fn(name):
             used = True
             break
     if not used:
-        eight_names[name] = eight_name
-        return eight_name
+        eight_names[name] = eight_name.lower()
+        print("2. " + name + " -> " + eight_name.lower())
+        return eight_name.lower()
     else:
         name_ctr = 1
         flen = 6
         while used:
-            eight_name = name[0:flen] + str(name_ctr)
+            eight_name = name.lower()[0:flen] + str(name_ctr)
             used = False
             for enk in eight_names:
                 env = eight_names[enk]
@@ -35,8 +49,9 @@ def eight_len_fn(name):
                     used = True
                     break
             if not used:
-                eight_names[name] = eight_name
-                return eight_name
+                eight_names[name] = eight_name.lower()
+                print("3. " + name + " -> " + eight_name.lower())
+                return eight_name.lower()
             else:
                 name_ctr += 1
                 flen -= 1
@@ -47,7 +62,7 @@ def eight_len_fn(name):
 
 # Used for the member declarations
 def valid_attribute_type(attr, cls):
-    if attr == "string":
+    if attr.startswith("string"):
         return "std::string"
     if attr in builtin_types:
         return attr
@@ -63,7 +78,7 @@ def valid_attribute_type(attr, cls):
 
 # Used in the function calls, to pass in a const reference if possible
 def const_if_can_attribute_type(attr, cls):
-    if attr == "string":
+    if attr.startswith("string"):
         return "const std::string&"
     if attr in builtin_types:
         return attr
@@ -136,17 +151,18 @@ def cfn(clsname, pclasses):
 
 # Generates the required header and cpp files
 def generate(pclasses):
+    global restrictions
 
     # first, the header
     for cls in pclasses:
-        f = open(eight_len_fn(cls["name"]) + ".h", "w")
+        f = open_file(eight_len_fn(cls["name"]) + ".h", "w")
         f.write("#ifndef __" + cls["name"].upper() + "_H__\n")
         f.write("#define __" + cls["name"].upper() + "_H__\n")
 
         # what needs to be included
         if len(cls["extends"]) > 0:
             for e in cls["extends"]:
-                f.write("#include \"" + e + ".h\"\n")
+                f.write("#include \"" + eight_len_fn(e)+ ".h\"\n")
 
         # the headers for the message types
         msg_includes = gather_atr_includes(cls, classes)
@@ -175,9 +191,55 @@ def generate(pclasses):
             f.write(",".join(publics))
         f.write("\n{\npublic:\n")
 
+        restrictions[cls["name"]] = {}
+
         # Constructor
         f.write("    " + cls["name"] + "(")
         generate_constructor_init_list(cls, f, pclasses, True)
+        # let's see if any of the values are restricted to something
+        restricted = False
+        opp_written = False
+        for a in cls["attributes"]:
+            attr = a["type"]
+            if attr.find(" of ") != -1:
+                restricted = True
+                if not opp_written:
+                    f.write("\n    {")
+                    opp_written = True
+                spltd_type = a["type"].split('[')
+                if len(spltd_type) != 2:
+                    print("Invalid attribute: ", attr, ". Missing [ from the restriction list")
+                    exit(2)
+                list_of_values = spltd_type[1].split(",")
+                if not list_of_values[-1].endswith("]"):
+                    print("Invalid attribute: ", attr, ". Missing ] from the restriction list")
+                    exit(2)
+                if len(list_of_values) > 0:
+                    restrictions[cls["name"]][a["name"]] = []
+                    f.write("\n        if(")
+                    to_join = []
+                    for rv in list_of_values:
+                        rv = rv.replace("]", "")
+                        if not rv.startswith('"') or not rv.endswith('"'):
+                            print("Invalid attribute: ", attr, ". String not quoted properly")
+                            exit(2)
+
+                        restrictions[cls["name"]][a["name"]].append(rv)
+                        to_join.append(a["name"] + " != " + rv)
+                    f.write(" && ".join(to_join))
+                    f.write(")\n        {\n            ")
+                    if a["type"] in builtin_types:
+                        f.write(a["name"] + " =  0")
+                    else:
+                        f.write(a["name"] + " = " + valid_attribute_type(a["type"], cls) + "();")
+                    f.write("\n        }")
+
+
+        if opp_written:
+            f.write("\n    }\n")
+
+        if not restricted:
+            f.write("\n    {}\n")
 
         # Now the setters for the attributes
         f.write("\n    // setters\n")
@@ -185,7 +247,7 @@ def generate(pclasses):
             attr_names = [d.get("name", '') for d in cls["attributes"]]
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
-                f.write("    void set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ");\n" )
+                f.write("    void set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ");\n")
 
         # Now the getters for the attributes
         f.write("\n    // getters\n")
@@ -193,7 +255,9 @@ def generate(pclasses):
             attr_names = [d.get("name", '') for d in cls["attributes"]]
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
-                f.write("    " + valid_attribute_type(t, cls) + " get_" + a + "();\n" )
+                f.write("    " + valid_attribute_type(t, cls) + " get_" + a + "() const\n    {\n")
+                f.write("        return " + a + ";\n")
+                f.write("    }\n")
 
         # serializer
         f.write("\n    // serializer\n")
@@ -218,7 +282,7 @@ def generate(pclasses):
         f.close()
 
         # Then the cpp
-        f = open(eight_len_fn(cls["name"]) + ".cpp", "w")
+        f = open_file(eight_len_fn(cls["name"]) + ".cpp", "w")
         f.write("#include \"" + eight_len_fn(cls["name"]) + ".h\"\n")
         f.write("#include \"strngify.h\"\n\n")
         f.write("#include \"ezxml.h\"\n\n")
@@ -232,7 +296,7 @@ def generate(pclasses):
             for a in cls["attributes"]:
                 f.write("    // attribute:" + a["name"] + "\n")
                 f.write('    result += "<' + a["name"] + '>";\n')
-                if a["type"] in builtin_types or a["type"] == "string":
+                if a["type"] in builtin_types or a["type"].startswith("string"):
                     f.write('    result += stringify(' + a["name"] + ');')
                 else:
                     f.write('    for(int i=0; i<' + a["name"] + '.size(); i++) result += "<item i=\\"" + stringify(i) + "\\">" + ' + a["name"] + '[i].serialize() + "</item>\";')
@@ -252,7 +316,7 @@ def generate(pclasses):
             f.write('    if(!attrs_node) return 0;\n')
             for a in cls["attributes"]:
                 f.write('    ezxml_t attr_node_' + a["name"] + ' = ezxml_child(attrs_node, "' + a["name"] + '");\n')
-                if a["type"] in builtin_types or a["type"] == "string":
+                if a["type"] in builtin_types or a["type"].startswith("string"):
                     f.write('    destringify(' + a["name"] + ', attr_node_' + a["name"] + '->txt);\n')
                 else:
                     f.write('    for (ezxml_t item = ezxml_child(attr_node_' + a["name"] + ', "item"); item; item = item->next) {\n')
@@ -273,13 +337,29 @@ def generate(pclasses):
         f.write('\n    return 1;\n}\n')
 
         # Comparison operator implemented
-        f.write('bool ' + cls["name"] + '::operator == (const ' + cls["name"] + "& rhs) const {\n")
+        f.write('bool ' + cls["name"] + '::operator == (const ' + cls["name"] + "& rhs) const\n{\n")
         for e in cls["extends"]:
             f.write("    if(!" + e + "::operator ==(rhs)) return false;\n")
         for a in cls["attributes"]:
             f.write("    if(" + a["name"] + " != " + "rhs." + a["name"] + ") return false;\n")
 
         f.write('\n    return true;\n}\n')
+
+        # setter implemented
+        if len(cls["attributes"]) > 0:
+            attr_names = [d.get("name", '') for d in cls["attributes"]]
+            attr_types = [d.get("type", '') for d in cls["attributes"]]
+            for a, t in zip(attr_names, attr_types):
+                f.write("void " + cls["name"]+ "::set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ")\n")
+                f.write("{")
+                if a in restrictions[cls["name"]]:
+                    to_join = []
+                    for r in restrictions[cls["name"]][a]:
+                        to_join.append("p_" + a + " != " + r)
+                    f.write("\n    if (" + " && ".join(to_join) + ") { return; }")
+                f.write("\n    " + a + " = p_" + a + ";")
+                f.write("\n}\n")
+
 
         f.close()
 
@@ -318,7 +398,6 @@ def generate_constructor_init_list(cls, f, pclasses, default_v):
         attr_par_values = ['p_' + element for element in attr_names]
         result_list = [str(val1) + "(" + str(val2) + ")" for val1, val2 in zip(attr_names, attr_par_values)]
         f.write(", ".join(result_list))
-    f.write("\n    {}\n")
 
 
 def remove_spaces_around_character(line, character):
@@ -432,7 +511,7 @@ def build_structures(filename):
 # Generates a CMakeLists.txt for the project
 #
 def generate_make(pclasses):
-    f = open("CMakeLists.txt", "w")
+    f = open_file("CMakeLists.txt", "w")
     f.write('project(test)\n')
     f.write('set(CMAKE_CXX_STANDARD 98)\n')
     f.write('include_directories(${CMAKE_SOURCE_DIR})\n')
@@ -442,20 +521,36 @@ def generate_make(pclasses):
     for cls in pclasses:
         f.write('    ' + eight_len_fn(cls["name"]) + ".cpp\n")
     f.write("\n)")
+    f.close()
+
+    mf = open_file("makefile", "w")
+    mf.write("protocol_objs = ")
+    to_join = []
+    for cls in pclasses:
+        to_join.append(eight_len_fn(cls["name"]) + ".o")
+    mf.write(" ".join(to_join) + "\n")
+    mf.close()
+
 
 
 #
 # Will generate some test cases. Just in case.
 #
 def generate_tests(pclasses):
-    path = "tests"
+    path = "generated"
+    does_exist = os.path.exists(path)
+    if not does_exist:
+        # Create a new directory because it does not exist
+        os.makedirs(path)
+
+    path = "generated/tests"
     # Check whether the specified path exists or not
     does_exist = os.path.exists(path)
     if not does_exist:
         # Create a new directory because it does not exist
         os.makedirs(path)
 
-    cm = open("tests/CMakeLists.txt", "w")
+    cm = open_file("tests/CMakeLists.txt", "w")
     cm.write('''
 project("idl-test")    
 Include(FetchContent)
@@ -474,10 +569,9 @@ list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests)
-    '''
-    )
+    ''')
 
-    f = open("tests/tests.cpp", "w")
+    f = open_file("tests/tests.cpp", "w")
 
     # The includes
     f.write("# include <catch2/catch_test_macros.hpp>\n")
@@ -531,8 +625,6 @@ catch_discover_tests(tests)
         f.write("\n}\n")
 
 
-
-
 #
 # Main
 #
@@ -541,3 +633,5 @@ if __name__ == "__main__":
     generate(classes)
     generate_tests(classes)
     generate_make(classes)
+
+    print(restrictions)

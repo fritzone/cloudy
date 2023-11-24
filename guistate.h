@@ -6,18 +6,18 @@
 #include <stdio.h>
 
 #include <vector>
-
+#include <map>
 
 class CursorRaii;
 
 /**
  * @brief The GuiState class represents a class that holds the state of the current GUI
  */
-class State
+class GuiState
 {
 public:
 
-    State(State* next, State* prev);
+    GuiState(GuiState* next, GuiState* prev);
 
     virtual void onRefreshContent() = 0;
 
@@ -51,34 +51,40 @@ public:
 
 public:
 
-    void setNextState(State* nexts);
-    void setrPreviousState(State* prevs);
+    void setNextState(GuiState* nexts);
+    void setrPreviousState(GuiState* prevs);
     CursorRaii *getCursor() const;
     void setCursor(CursorRaii *newCursor);
 
 public:
 
-    State* next;
-    State* prev;
+    GuiState* next;
+    GuiState* prev;
     CursorRaii* cursor;
 };
 
 
-class GuiState
+class GuiStatemachine
 {
 public:
 
-    static GuiState& instance();
+    static GuiStatemachine& instance();
 
-    void init(State* s);
-    void next();
+    void init(GuiState* s);
+    void next(void*);
     void previous();
 
-    State *getCurrentState() const;
+    GuiState *getCurrentState() const;
+    void addState(GuiState*);
+
+    // The callback is called when the given state has called "next"
+    void onNext(GuiState* s, int(*cb)(void*));
 
 private:
 
-    State* currentState;
+    GuiState* currentState;
+    std::vector<GuiState*> states;
+    std::map<GuiState*, int(*)(void*)> stateNextOps;
 };
 
 #endif // GUISTATE_H
