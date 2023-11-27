@@ -10,6 +10,7 @@
 
 #include <types.h>
 
+#include "log.h"
 #include "ezxml.h"
 #include "dos_scrn.h"
 #include "dos_cgui.h"
@@ -134,13 +135,11 @@ int asciitable()
     exit(1);
 }
 
-// Global, since some callbacks need to access it
-NetState* netState = new NetState_NoOp;
-
-int advanceNetState(void* data)
+// Will advance the state of the network state object to the netstate try to connect
+int advanceNetStateToConnect(void* data)
 {
-    netState = new NetState_TryConnect;
-    netState->stateData = data;
+    NetStatemachine::instance().advance(data);
+    log_info() << "Advanced network";
     return 0;
 }
 
@@ -161,13 +160,20 @@ int main(int argc, char* argv[])
     // manage the cursor
     CursorRaii cursor;
 
+    // Gui statemachine
     GuiState* brFoldState = new BrowseFoldersState(NULL, NULL);
     GuiState* ipInputState = new InputIpState(brFoldState, NULL);
     brFoldState->setrPreviousState(ipInputState);
 
     GuiStatemachine::instance().init(ipInputState);
     GuiStatemachine::instance().getCurrentState()->setCursor(&cursor);
-    GuiStatemachine::instance().onNext(ipInputState, &advanceNetState);
+    GuiStatemachine::instance().onNext(ipInputState, &advanceNetStateToConnect);
+
+    // Network statemachine
+    NetState* netStateNoOp = new NetState_NoOp;
+    NetState* netStateTryConnect = new NetState_TryConnect;
+    NetStatemachine::instance().addState(netStateNoOp);
+    NetStatemachine::instance().addState(netStateTryConnect);
 
     // current working directory
     char startupDir[PATH_MAX + 1] = {0};
@@ -177,10 +183,10 @@ int main(int argc, char* argv[])
 
     // show the gui, the code below goes to the gui part after connect
 
-    netState = new NetState_NoOp;
-
     while(1)
     {
+        log_debug() << "Next";
+
         GuiStatemachine::instance().getCurrentState()->onRefreshContent();
         clearscr(screen);
         GuiStatemachine::instance().getCurrentState()->paint(screen);
@@ -247,7 +253,7 @@ int main(int argc, char* argv[])
         }
 
 //        netIface.poll(clientSocket, 300, onDataReceived);
-        netState->execute();
+        NetStatemachine::instance().currentState->execute(NULL);
 
     }
 
@@ -268,3 +274,4 @@ int main(int argc, char* argv[])
     _chdir(startupDir);
 
 }
+

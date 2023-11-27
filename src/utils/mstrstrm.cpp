@@ -10,9 +10,16 @@ const char *MyStringStream::str() const
     return buffer.c_str();
 }
 
+
+MyStringStream &MyStringStream::operator<<(unsigned int value)
+{
+    append((int)value);
+    return *this;
+}
+
 MyStringStream &MyStringStream::operator<<(int value)
 {
-    appendInteger(value);
+    append(value);
     return *this;
 }
 
@@ -39,23 +46,24 @@ MyStringStream &MyStringStream::operator<<(bool value)
     return *this;
 }
 
-void MyStringStream::appendInteger(int value)
+MyStringStream &MyStringStream::operator<<(long value)
 {
-    if (value < 0)
-    {
-        buffer += '-';
-        value = -value;
-    }
-    int divisor = 1;
-    while (divisor <= value / 10)
-    {
-        divisor *= 10;
-    }
-    while (divisor > 0)
-    {
-        int digit = value / divisor;
-        buffer += '0' + digit;
-        value %= divisor;
-        divisor /= 10;
-    }
+    append(value);
+    return *this;
+}
+
+MyStringStream &MyStringStream::operator<<(unsigned long value)
+{
+    append((long)value);
+    return *this;
+}
+
+MyStringStream &MyStringStream::operator<<(double value) {
+    append(value);
+    return *this;
+}
+
+MyStringStream &MyStringStream::operator<<(float value) {
+    append(value);
+    return *this;
 }

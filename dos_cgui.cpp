@@ -25,6 +25,10 @@ static const char* __far header_3_connect_win = "บ       host you want to connec
 static const char* __far header_4_connect_win = "ฬออออออออออออออออออออออออออออออออออออออออออน";
 static const char* __far header_5_connect_win = "บ                 .   .   .                บ";
 static const char* __far header_6_connect_win = "ศออออออออออออออออออออออออออออออออออออออออออผ";
+static const char* __far footer_err_1_connect = "ฬออออออออออออออออออออออออออออออออออออออออออน";
+static const char* __far footer_err_2_connect = "บ                                          บ";
+
+
 /*
  * The bottom of the frame
  */
@@ -240,7 +244,7 @@ void menu(void* scrSeg)
 
 }
 
-void connect_window(void* scrSeg, char *ip[])
+void connect_window(void* scrSeg, char *ip[], int error, const char* errorText)
 {
     writeString(0,0, Red, White, main_header_connect_screen, scrSeg);
     writeString(64,0, Red, LightYellow, main_header_connect_http_screen, scrSeg);
@@ -250,7 +254,16 @@ void connect_window(void* scrSeg, char *ip[])
     writeString(18, 12, Blue, White, header_3_connect_win , scrSeg);
     writeString(18, 13, Blue, White, header_4_connect_win , scrSeg);
     writeString(18, 14, Blue, White, header_5_connect_win , scrSeg);
-    writeString(18, 15, Blue, White, header_6_connect_win , scrSeg);
+    if(error == 0)
+    {
+        writeString(18, 15, Blue, White, header_6_connect_win , scrSeg);
+    }
+    else
+    {
+        writeString(18, 15, Blue, White, footer_err_1_connect, scrSeg);
+        writeString(18, 16, Blue, White, footer_err_2_connect, scrSeg);
+        writeString(18, 15, Blue, White, header_6_connect_win , scrSeg);
+    }
 
     writeString(33,14, Black, White, "   ", scrSeg);
     writeString(37,14, Black, White, "   ", scrSeg);

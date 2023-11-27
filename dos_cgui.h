@@ -51,7 +51,7 @@ void menu(void* scrSeg);
 /**
  * The windows shown when the application tries to connect to an IP
  */
-void connect_window(void* scrSeg, char *ip[4]);
+void connect_window(void* scrSeg, char *ip[4], int error, const char *errorText);
 
 #endif
 

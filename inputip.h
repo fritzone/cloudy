@@ -34,6 +34,8 @@ public:
     int currentSegment;
     int ipPosCtrs[4];
     int ipPositions[4];
+
+    bool errorMode;
 };
 
 #endif // INPUTIP_H

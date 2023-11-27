@@ -37,21 +37,32 @@ void GuiStatemachine::init(GuiState *s)
     currentState = s;
 }
 
-void GuiStatemachine::next(void *d)
+int GuiStatemachine::next(void *d)
 {
     if(stateNextOps.count(currentState))
     {
         if(stateNextOps[currentState](d) == 1)
         {
-            return;
+            return 1;
         }
     }
     currentState = currentState->next;
+    return 0;
 }
 
 void GuiStatemachine::previous()
 {
     currentState = currentState->prev;
+}
+
+void GuiStatemachine::reportError(const char *s)
+{
+    instance().error = s;
+}
+
+const char *GuiStatemachine::getError()
+{
+    return instance().error.c_str();
 }
 
 GuiState *GuiStatemachine::getCurrentState() const

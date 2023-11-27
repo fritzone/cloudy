@@ -24,9 +24,15 @@ inputip.cpp
 inputip.h
 list.cpp
 list.h
+log.h
+logstrm.cpp
+logstrm.h
+logstrmh.h
+logtypes.h
 memhandl.h
 net_ifce.h
 net_state.h
 protocol.cpp
 protocol.h
 src/utils/miststrm.cpp
+src/utils/mstrstrm.cpp

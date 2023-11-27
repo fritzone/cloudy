@@ -1,6 +1,7 @@
 #include "inputip.h"
 #include "dos_cgui.h"
 #include "dos_scrn.h"
+#include "log.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -8,7 +9,7 @@
 #include <strstream.h>
 
 InputIpState::InputIpState(GuiState* next, GuiState* prev) : GuiState(next, prev),
-    ip (new char*[4]), currentSegment(0)
+    ip (new char*[4]), currentSegment(0), errorMode (0)
 {
 
     ipPositions[0] = 33; ipPositions[1] = 37; ipPositions[2] = 41; ipPositions[3] = 45;
@@ -42,7 +43,7 @@ InputIpState::~InputIpState()
 
 void InputIpState::paint(void *screen)
 {
-    connect_window(screen, ip);
+    connect_window(screen, ip, errorMode, GuiStatemachine::getError());
 
     for(int i=0; i<4; i++)
     {
@@ -60,7 +61,13 @@ void InputIpState::paint(void *screen)
 
 void InputIpState::onEnter()
 {
-    GuiStatemachine::instance().next((void*)getIp());
+    log_info() << "Trying to advance";
+
+    errorMode = 0;
+    if(GuiStatemachine::instance().next((void*)getIp()) == 1)
+    {
+        errorMode = 1;
+    }
 }
 
 void InputIpState::onRightArrow()

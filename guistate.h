@@ -71,8 +71,11 @@ public:
     static GuiStatemachine& instance();
 
     void init(GuiState* s);
-    void next(void*);
+    int next(void*);
     void previous();
+
+    static void reportError(const char*);
+    static const char* getError();
 
     GuiState *getCurrentState() const;
     void addState(GuiState*);
@@ -85,6 +88,7 @@ private:
     GuiState* currentState;
     std::vector<GuiState*> states;
     std::map<GuiState*, int(*)(void*)> stateNextOps;
+    std::string error;
 };
 
 #endif // GUISTATE_H
