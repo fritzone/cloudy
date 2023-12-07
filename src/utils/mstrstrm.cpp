@@ -67,3 +67,9 @@ MyStringStream &MyStringStream::operator<<(float value) {
     append(value);
     return *this;
 }
+
+MyStringStream &MyStringStream::operator<<(void *value)
+{
+    append(value);
+    return *this;
+}

@@ -25,6 +25,7 @@ public:
     virtual void onChar(char c);
     virtual void onTab();
     virtual void onBackspace();
+    virtual const char* name() const {return "IpInput";}
 
     const char* getIp();
 

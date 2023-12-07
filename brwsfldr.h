@@ -28,6 +28,8 @@ public:
 
     virtual void onRefreshContent();
 
+    virtual const char* name() const {return "BrowseFolders";}
+
     // All the drives in the system
     std::set<char> drives;
     char cwd[PATH_MAX + 1 ];

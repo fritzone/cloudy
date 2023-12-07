@@ -11,37 +11,43 @@ class NetworkInterface
 {
 public:
 
-  /**
+    NetworkInterface() : connected(true) {}
+    virtual ~NetworkInterface() {}
+
+    /**
    * Sets up the network, returns true if success, false otherwise
    */
-  virtual bool setup() = 0;
+    virtual bool setup() = 0;
 
-  /**
+    /**
    * Shuts down the network interface
    */
-  virtual void shutdown() = 0;
+    virtual void shutdown() = 0;
 
-  /**
+    /**
    * Will create a socket, and provide an opaque pointer to it.
    * Deriving interfaces are required to manage the sockets they create.
    */
-  virtual void* provide_socket() = 0;
+    virtual void* provide_socket() = 0;
 
-  /**
+    /**
    * Will connect the given socket to the given address.
    */
-  virtual bool connect(void* sock, const char* where) = 0;
+    virtual bool connect(void* sock, const char* where, uint16_t port) = 0;
 
-  /**
+    /**
    * Polls the socket, waiting for the specific timeout, upon data it calls the callback
    */
-  virtual void poll(void *sock, uint32_t timeout, void(*callback)(const char*) ) = 0;
+    virtual void poll(void *sock, uint32_t timeout, void* data, void(*callback)(void*, const char*) ) = 0;
 
-  /**
+    /**
    * Will send the data through the socket
    */
-  virtual void send(void* sock, const char* data, unsigned short length) = 0;
+    virtual void send(void* sock, const char* data, unsigned short length) = 0;
 
+private:
+
+    bool connected;
 };
 
 #endif

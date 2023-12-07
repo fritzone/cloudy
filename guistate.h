@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 #include <vector>
-#include <map>
 
 class CursorRaii;
 
@@ -49,6 +48,9 @@ public:
     // The parameter is the addres of the screen we paint to
     virtual void paint(void*) = 0;
 
+    // the name of the state
+    virtual const char* name() const = 0;
+
 public:
 
     void setNextState(GuiState* nexts);
@@ -70,8 +72,10 @@ public:
 
     static GuiStatemachine& instance();
 
+    void logStates();
+
     void init(GuiState* s);
-    int next(void*);
+    int advance(void*);
     void previous();
 
     static void reportError(const char*);
@@ -80,14 +84,14 @@ public:
     GuiState *getCurrentState() const;
     void addState(GuiState*);
 
-    // The callback is called when the given state has called "next"
-    void onNext(GuiState* s, int(*cb)(void*));
+private:
+
+    GuiStatemachine();
 
 private:
 
     GuiState* currentState;
     std::vector<GuiState*> states;
-    std::map<GuiState*, int(*)(void*)> stateNextOps;
     std::string error;
 };
 

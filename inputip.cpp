@@ -2,6 +2,7 @@
 #include "dos_cgui.h"
 #include "dos_scrn.h"
 #include "log.h"
+#include "messager.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -43,7 +44,10 @@ InputIpState::~InputIpState()
 
 void InputIpState::paint(void *screen)
 {
-    connect_window(screen, ip, errorMode, GuiStatemachine::getError());
+    const char* errStr = GuiStatemachine::instance().getError();
+    log_debug() << "*********************' Error:" << errStr << ":" << strlen((char*)errStr);
+
+    connect_window(screen, ip, errorMode, errStr);
 
     for(int i=0; i<4; i++)
     {
@@ -61,13 +65,10 @@ void InputIpState::paint(void *screen)
 
 void InputIpState::onEnter()
 {
-    log_info() << "Trying to advance";
+    log_info() << "Trying to advance ...........................................................";
+    messager(MSG_IP_ENTERED, (void*)getIp());
+    log_info() << "Advanced with error" << errorMode;
 
-    errorMode = 0;
-    if(GuiStatemachine::instance().next((void*)getIp()) == 1)
-    {
-        errorMode = 1;
-    }
 }
 
 void InputIpState::onRightArrow()

@@ -5,76 +5,57 @@
 #include "ezxml.h"
 #include "protocol.h"
 
-unsigned long message::sequence_nr_counter = 0;
+int Protocol::messageId = 0;
 
 
-/**
- * This is a welcome message handler. Contains just an ID, so that the host knows we exist.
- *
- * The following is the format of the XML we expect:
- *
- *  <?xml version="1.0">
- *  <protocol>
- *   <cld v="1.0">
- *    <msg t="welcome">
- *     <id>12345</id>
- *    <msg>
- *   </cld>
- *  </protocol>
- */
-static void welcomeHandler(const char* welcomeMessage, void*)
+Protocol::Protocol()
 {
-  ezxml_t doc = ezxml_parse_str((char*)welcomeMessage, strlen(welcomeMessage));
-  char* s = ezxml_toxml(doc);
-
-  ezxml_t id_node = ezxml_child(doc, "id");
-  const char* id = id_node->txt;
-  fprintf(stderr, "Welcome: %s as %s \n", s, id);
-
-  free(s);
-  ezxml_free(doc);
 }
 
 
-protocol::protocol()
+std::string Protocol::envelope(const Message *m)
 {
-  registerMessageHandler("welcome", welcomeHandler, NULL);
+    std::string scr = m->serialize();
+    static const std::string envelope_part1 = "<?xml version=\"1.0\"><protocol><cld v=\"1.0\" msg=\"";
+    return envelope_part1 + m->get_name() + "\">" + scr + "</cld></protocol>";
 }
 
-void protocol::message(const char* type, const char* data)
+ConnectRequest* Protocol::createConnectRequest()
 {
-   std::string key(type);
-   if(handlers.count(key))
-   {
-     std::vector<MessageHandlerStruct>& mh = handlers[key];
-     for(int i=0; i<mh.size(); i++)
-     {
-       mh[i].messageHandler(data, mh[i].userParameter);
-     }
-   }
+    ConnectRequest *cr = new ConnectRequest;
+    cr->set_message_id(nextMessageId());
+    cr->set_platform("dos");
+    cr->set_unique_id(rand_string(12));
+
+    return cr;
 }
 
-void protocol::registerMessageHandler(const char* message_type, MessageHandler mh, void* up)
+int Protocol::nextMessageId()
 {
-  struct MessageHandlerStruct mhs;
-  mhs.userParameter = up;
-  mhs.messageHandler = mh;
-  std::string key = message_type;
-  if(handlers.count(key))
-  {
-    handlers[key].push_back(mhs);
-  }
-  else
-  {
-    std::vector<MessageHandlerStruct> tvmhs;
-    tvmhs.push_back(mhs);
-    handlers[key] = tvmhs;
-  }
-
+    return ++messageId;
 }
 
-void protocol::setNetworkInterface(NetworkInterface* iface)
+char *Protocol::rand_string(size_t size)
 {
-  network = iface;
+    static char str[128];
+    memset(str, 0, 128);
+
+    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJK123456789";
+    if (size)
+    {
+        --size;
+        for (size_t n = 0; n < size; n++)
+        {
+            int key = rand() % (int) (sizeof charset - 1);
+            str[n] = charset[key];
+        }
+        str[size] = '\0';
+    }
+    return str;
+}
+
+void Protocol::setNetworkInterface(NetworkInterface* iface)
+{
+    network = iface;
 }
 

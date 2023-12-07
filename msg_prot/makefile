@@ -1,0 +1,1 @@
+protocol_objs = authen1.o authenti.o connectr.o message.o welcome.o

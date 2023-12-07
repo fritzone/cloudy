@@ -40,7 +40,7 @@ compile_options = -0 -oh -q -oa -os -s -xs $(memory_model) -DCFG_H=\"cloud.cfg\"
 compile_options += -i=$(tcp_h_dir) -i=$(common_h_dir) -i=. -i=$(msg_prot_dir) -i=$(include_dir)
 
 tcpobjs = packet.o arp.o eth.o ip.o tcp.o tcpsockm.o utils.o udp.o dns.o timer.o ipasm.o trace.o
-objs = cloud.o ezxml.o dos_scrn.o dos_cgui.o dos_neti.o list.o filelist.o cldutils.o protocol.o inputip.o guistate.o brwsfldr.o logstrm.o
+objs = cloud.o ezxml.o dos_scrn.o dos_cgui.o dos_neti.o list.o filelist.o cldutils.o protocol.o inputip.o guistate.o brwsfldr.o logstrm.o net_stts.o
 
 all : clean cloud.exe
 
@@ -65,5 +65,5 @@ clean : .symbolic
   wpp $[* $(compile_options)
 
 cloud.exe: $(tcpobjs) $(objs) $(protocol_objs) $(util_objs)
-  wlink System dos OPtion map OPtion eliminate OPtion stack=4096 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs)}
+  wlink System dos debug watcom all OPtion map OPtion eliminate OPtion stack=4096 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs)}
 

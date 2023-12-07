@@ -5,90 +5,57 @@
 #include <map>
 #include <vector>
 
+#include "msg_prot/connectr.h"
+
 class NetworkInterface;
 
-void onDataReceived(const char* data);
-
-/**
- * The base class for all messages.
- */
-struct message
-{
-  message() : sequence_nr(sequence_nr_counter ++) {}
-
-  // the unique identifier of the message in the system is a sequence number
-  unsigned long sequence_nr;
-
-  // this is incremented with each creation of any message
-  static unsigned long sequence_nr_counter;
-};
-
-struct welcome : public message
-{
-};
+void onDataReceived(void *object, const char* data);
 
 /**
   * The way this works is like:
   *
   *  - in the main receiver function we get XML data
   *  - we parse out a message from it
-  *  - we send it to the protocol.message
+  *  - we send it to the Protocol.message
   *  - that identifies the message type
   *  - and calls the corresponding function pointer which was registered
   *  - the corresponding message handler handles the message, and it might call
   *    a callback function with the message data
- *
  */
-class protocol
+class Protocol
 {
+    static int messageId; // the zero based messageID used for the messages
+
 public:
-  protocol();
+    Protocol();
 
-  /**
-   * This gets the parsed out message from the layer above, with the message type specified
-   */
-  void message(const char* message_type, const char* message_data);
+    /**
+     * Sets the network interface used in this Protocol
+     */
+    void setNetworkInterface(NetworkInterface* iface);
 
-  /**
-   * Sets the network interface used in this protocol
-   */
-  void setNetworkInterface(NetworkInterface* iface);
+    /**
+     * @brief envelope will pack the serialized message m into an XML envelop, ready to be sent
+     * @param m the message to pack
+     * @return the enveloped serialized message
+     */
+    std::string envelope(const Message *m);
 
-  /**
-   * The typedef for the error handler and callback functions.
-   * The first parameter is the error message.
-   * The second parameter is the message object that generated the error.
-   * The third parameter is a user defined pointer.
-   */
-  typedef void(*ErrorHandler)(const char*, struct message*, void*);
-  typedef void(*Callback)(const char*, struct message*, void*);
-  /**
-   * The typedef for the message handler function.
-   *
-   * @param data - the data of the message, in XML format for now
-   * @param eh - the error handler function
-   * @param cb - the callback function
-   */
-  typedef void(*MessageHandler)(const char* data, void*);
-
-  /**
-   * Registers a message handler function for the given message type
-   */
-  void registerMessageHandler(const char* message_type, MessageHandler mh, void* up);
+    /**
+     * @brief createConnectRequest Will create a connection request message
+     * @return
+     */
+    ConnectRequest *createConnectRequest();
 
 private:
 
-  struct MessageHandlerStruct
-  {
-    void* userParameter;
-    MessageHandler messageHandler;
-  };
+    int nextMessageId();
 
-  // the map of message handlers. A message can be handled by more than one
-  // handler, hence we store them in a vector
-  std::map<std::string, std::vector<MessageHandlerStruct> > handlers;
+    static char *rand_string(size_t size);
 
-  NetworkInterface* network;
+private:
+
+    NetworkInterface* network;
 };
 
 #endif

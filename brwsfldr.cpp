@@ -3,6 +3,7 @@
 #include "filelist.h"
 #include "list.h"
 #include "dos_cgui.h"
+#include "log.h"
 
 #include <dos.h>
 #include <string.h>
@@ -28,7 +29,7 @@ BrowseFoldersState::BrowseFoldersState(GuiState *next, GuiState *prev) : GuiStat
 
     // the current working directory
 
-    getcwd(cwd, PATH_MAX + 1);
+    getcwd(cwd, PATH_MAX);
 
 
     localFiles = createFileList(cwd);
@@ -134,8 +135,10 @@ void BrowseFoldersState::onChar(char c)
 
 void BrowseFoldersState::onRefreshContent()
 {
+    log_info() << "entered" << (void*)this;
+
     // Need to do it again for the display
-    getcwd(cwd, PATH_MAX + 1);
+    getcwd(cwd, PATH_MAX);
 
     // calculate the disk free
     struct diskfree_t diskspc;
@@ -149,4 +152,9 @@ void BrowseFoldersState::onRefreshContent()
     }
 
     _dos_getdrive(&workDrive);
+    GuiStatemachine::instance().logStates();
+    log_info() << "leaves" << (void*)this;
+
+
+
 }

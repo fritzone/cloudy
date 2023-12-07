@@ -59,7 +59,7 @@ static void __far footer(int col, int fg, int bg, LinkedList* files,
                          unsigned long selectedBytes,
                          void* scrSeg)
 {
-  char s[81] = {0};
+  char s[128] = {0};
   sprintf(s, "ºTot:%3d   %8sºSel:%3d   %8lubº",
              files ? files->count : 0 , files ? renderHumanReadableSize(files->size) : "0K",
              selectedCount, selectedBytes
@@ -69,7 +69,7 @@ static void __far footer(int col, int fg, int bg, LinkedList* files,
   writeString(col, 22, bg, fg, s, scrSeg);
 
   // disk free status
-  char dfree[81] = {0};
+  char dfree[128] = {0};
   sprintf(dfree, "º                  º  %c Free: %7s  º",
     workDrive == 0 ? ' ' : workDrive + 'A' - 1,
     renderHumanReadableSize(diskFree)
@@ -84,7 +84,7 @@ static void __far footer(int col, int fg, int bg, LinkedList* files,
     char cdrvstring[2] = {workDrive + 'A' - 1, 0}; // current drive ,will be highlighted
     int cdrvidx = -1;
     int i = 0;
-    char drvstring[40] = {0}; // all drives
+    char drvstring[128] = {0}; // all drives
 
     strcpy(drvstring, "[");
     std::set<char>::iterator it = drives.begin();
@@ -143,7 +143,7 @@ void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
   int ctr = 0;
   while(ctr < frameContentSize() && q)
   {
-    static char rendered[64] = {0};
+    char rendered[128] = {0};
     FileStructure* fs =((FileStructure*)(q->data));
     renderString(rendered, fs);
 
@@ -173,7 +173,7 @@ void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
 
   while(ctr < frameContentSize())
   {
-    static char rendered[64] = {0};
+    char rendered[128] = {0};
     renderString(rendered, NULL);
     writeString(0, 3 + ctr, Blue, BrightWhite, rendered, scrSeg);
     ctr ++;
@@ -246,6 +246,8 @@ void menu(void* scrSeg)
 
 void connect_window(void* scrSeg, char *ip[], int error, const char* errorText)
 {
+
+
     writeString(0,0, Red, White, main_header_connect_screen, scrSeg);
     writeString(64,0, Red, LightYellow, main_header_connect_http_screen, scrSeg);
 
@@ -254,7 +256,8 @@ void connect_window(void* scrSeg, char *ip[], int error, const char* errorText)
     writeString(18, 12, Blue, White, header_3_connect_win , scrSeg);
     writeString(18, 13, Blue, White, header_4_connect_win , scrSeg);
     writeString(18, 14, Blue, White, header_5_connect_win , scrSeg);
-    if(error == 0)
+
+    if(errorText != NULL && strlen((char*)errorText) == 0)
     {
         writeString(18, 15, Blue, White, header_6_connect_win , scrSeg);
     }
@@ -262,7 +265,10 @@ void connect_window(void* scrSeg, char *ip[], int error, const char* errorText)
     {
         writeString(18, 15, Blue, White, footer_err_1_connect, scrSeg);
         writeString(18, 16, Blue, White, footer_err_2_connect, scrSeg);
-        writeString(18, 15, Blue, White, header_6_connect_win , scrSeg);
+        writeString(18, 17, Blue, White, header_6_connect_win , scrSeg);
+
+        // and the error
+        writeString(19, 16, Blue, Red, errorText, scrSeg);
     }
 
     writeString(33,14, Black, White, "   ", scrSeg);

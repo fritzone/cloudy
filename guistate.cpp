@@ -1,4 +1,5 @@
 #include "guistate.h"
+#include "log.h"
 
 #include <string.h>
 
@@ -32,21 +33,45 @@ GuiStatemachine &GuiStatemachine::instance()
     return st;
 }
 
+void GuiStatemachine::logStates()
+{
+    log_info() << "----- StateCount:" << states.size();
+    for(int i=0; i<states.size(); i++)
+    {
+        log_info() << "State:" << states[i]->name() << " at " << (void*)states[i]
+                   <<  (states[i] == currentState ? " ***" : "");
+    }
+    log_info() << "----- StateCount:" << states.size();
+
+}
+
 void GuiStatemachine::init(GuiState *s)
 {
     currentState = s;
+    logStates();
 }
 
-int GuiStatemachine::next(void *d)
+int GuiStatemachine::advance(void *d)
 {
-    if(stateNextOps.count(currentState))
+    logStates();
+
+    if(!currentState)
     {
-        if(stateNextOps[currentState](d) == 1)
-        {
-            return 1;
-        }
+        log_error() << "No current state for gui statemachine";
+        return 1;
     }
-    currentState = currentState->next;
+
+    log_info() << "Trying to advance from" << currentState->name();
+
+    if(currentState->next)
+    {
+        currentState = currentState->next;
+    }
+    else
+    {
+        log_error()  << "No next for" << currentState->name();
+        return 1;
+    }
     return 0;
 }
 
@@ -57,6 +82,7 @@ void GuiStatemachine::previous()
 
 void GuiStatemachine::reportError(const char *s)
 {
+    log_debug() << "Gui:" << (void*)&instance() << "Reporting error:" << s;
     instance().error = s;
 }
 
@@ -67,6 +93,7 @@ const char *GuiStatemachine::getError()
 
 GuiState *GuiStatemachine::getCurrentState() const
 {
+    log_info() << "Returns:" <<(void*)currentState;
     return currentState;
 }
 
@@ -75,9 +102,9 @@ void GuiStatemachine::addState(GuiState *s)
     states.push_back(s);
 }
 
-void GuiStatemachine::onNext(GuiState *s, int (*cb)(void *))
+GuiStatemachine::GuiStatemachine() : currentState(NULL), states(), error("")
 {
-    stateNextOps[s] = cb;
 }
+
 
 

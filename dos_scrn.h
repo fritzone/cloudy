@@ -37,20 +37,20 @@ public:
   /**
    * Will hide the command cursor
    */
-  void hideCursor();
+  static void hideCursor();
 
   /**
    * Will show the command cursor
    */
-  void showCursor();
+  static void showCursor();
 
   /**
    * Will put the cursos to the specific location
    */
-  void placeCursor(short x, short y);
+  static void placeCursor(short x, short y);
 
 private:
-  short previousCursor;
+  static short previousCursor;
 };
 
 #endif

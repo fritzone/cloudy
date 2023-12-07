@@ -17,6 +17,7 @@ public:
     MyStringStream& operator<<(unsigned long value);
     MyStringStream& operator<<(unsigned int value);
 
+    MyStringStream& operator<<(void* value);
 
     // Overloaded operator<< for doubles
     MyStringStream& operator<<(double value);
@@ -61,6 +62,15 @@ private:
         // Convert the long to string and append
         char temp[32];
         snprintf(temp, sizeof(temp), "%ld", value);
+        buffer += temp;
+    }
+
+
+    //Helper function to append a pointer to the buffer
+    void append(void* value) {
+        // Convert the long to string and append
+        char temp[32];
+        snprintf(temp, sizeof(temp), "0x%p", value);
         buffer += temp;
     }
 

@@ -7,6 +7,9 @@
 #include <graph.h>
 #include <conio.h>
 
+short CursorRaii::previousCursor = 0;
+
+
 static const int ROWS = 25;
 static const int COLS = 80;
 

@@ -1,3 +1,4 @@
+#include <dos.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -17,13 +18,14 @@
 #include "list.h"
 #include "filelist.h"
 #include "memhandl.h"
-#include "protocol.h"
+#include "messager.h"
+#include "shared_pointer.h"
 
 // the various states of the gui
 #include "guistate.h"
 #include "inputip.h"
 #include "brwsfldr.h"
-#include "net_state.h"
+#include "net_stts.h"
 
 #include <set>
 
@@ -32,44 +34,11 @@
 // This is the global screen, used to hold the backbuffer
 static void* screen = 0;
 
-protocol p;
-
 /* Will parse the arguments as came in from the command line, nothing for now */
 static void parseArgs(int argc, char* argv[])
 {
 }
 
-void onDataReceived(const char* data)
-{
-    fprintf(stderr, "%s\n", data);
-    ezxml_t doc = ezxml_parse_str((char*)data, strlen(data));
-    char* s;
-    s = ezxml_toxml(doc);
-    fprintf(stderr, "%s\n", s);
-    free(s);
-
-    ezxml_t cld = ezxml_child(doc, "cld");
-    if(cld == NULL)
-    {
-        fprintf(stderr, "cannot get cloud tag");
-        return;
-    }
-    const char* cloud_version = ezxml_attr(cld, "v");
-    fprintf(stderr, "cloud version: %s\n", cloud_version);
-
-    ezxml_t msg = ezxml_child(cld, "msg");
-    const char* msg_t = ezxml_attr(msg, "t");
-    fprintf(stderr, "message_t: %s\n", msg_t);
-
-    char* msg_data = ezxml_toxml(msg);
-
-    p.message(msg_t, msg_data);
-
-    free(msg_data);
-
-    ezxml_free(doc);
-
-}
 
 /*
 static void testRun()
@@ -135,12 +104,67 @@ int asciitable()
     exit(1);
 }
 
-// Will advance the state of the network state object to the netstate try to connect
-int advanceNetStateToConnect(void* data)
+int messager(int m, void* data)
 {
-    NetStatemachine::instance().advance(data);
-    log_info() << "Advanced network";
-    return 0;
+    switch(m)
+    {
+    case MSG_IP_ENTERED:
+    {
+        log_info() << "Advancing network from:" << NetStatemachine::instance().currentState->name() << " data is:" << (char*)data;
+        NetStatemachine::instance().advance(data);
+        log_info() << "Advanced network to:" << NetStatemachine::instance().currentState->name();
+
+        GuiStatemachine::instance().logStates();
+
+        return 0;
+    }
+    case MSG_CONNECTED:
+    {
+        log_info() << "Advancing from" << GuiStatemachine::instance().getCurrentState()->name();
+        GuiStatemachine::instance().advance(data);
+        log_info() << "Advanced gui to:" << GuiStatemachine::instance().getCurrentState()->name();
+
+        GuiStatemachine::instance().logStates();
+
+        log_info() << "Advancing network from:" << NetStatemachine::instance().currentState->name();
+        NetStatemachine::instance().advance(data);
+        log_info() << "Advanced network to:" << NetStatemachine::instance().currentState->name();
+        CursorRaii::hideCursor();
+
+        return 0;
+    }
+
+    case MSG_CONNECTION_FAILED:
+    {
+        log_info() << "Recede network from:" << NetStatemachine::instance().currentState->name();
+        NetStatemachine::instance().go_back(data);
+        log_info() << "Recede network to:" << NetStatemachine::instance().currentState->name();
+
+        return 0;
+    }
+
+    }
+
+    return 1;
+}
+
+void interrupt newInt6Handler() {
+    // Your custom interrupt handling code
+    printf("int6 handler!\n");
+
+    unsigned int _cs, _ip;
+    _asm {
+        mov ax,word ptr [bp + 4]
+        mov _cs, ax
+        mov ax, word ptr [bp + 6]
+        mov _ip, ax
+    }
+
+    printf("CS:IP pair at the time of interrupt: %x:%x\n", _cs , _ip);
+
+    printf("currentGuiState: %p\n", (void*)GuiStatemachine::instance().getCurrentState());
+    printf("currentNetState: %p\n", (void*)NetStatemachine::instance().getCurrentState());
+    exit(1);
 }
 
 /*
@@ -148,10 +172,15 @@ int advanceNetStateToConnect(void* data)
  */
 int main(int argc, char* argv[])
 {
+    size_t avl_beg = _memavl(), max_meg = _memmax();
+
+    log_info() << "===============================[Starting]=======================";
+
+     _dos_setvect(6, newInt6Handler);
     // read command line, act accordingly
     parseArgs(argc, argv);
 
-    screen = calloc(2000, 2); // the size of the screen: 80 x 25, 1 uint16 for each position
+    screen = calloc(4000, 2); // the size of the screen: 80 x 25, 1 uint16 for each position
     if(screen == NULL)
     {
         exit(1);
@@ -163,17 +192,28 @@ int main(int argc, char* argv[])
     // Gui statemachine
     GuiState* brFoldState = new BrowseFoldersState(NULL, NULL);
     GuiState* ipInputState = new InputIpState(brFoldState, NULL);
-    brFoldState->setrPreviousState(ipInputState);
 
+    GuiStatemachine::instance().addState(ipInputState);
+    GuiStatemachine::instance().addState(brFoldState);;
     GuiStatemachine::instance().init(ipInputState);
     GuiStatemachine::instance().getCurrentState()->setCursor(&cursor);
-    GuiStatemachine::instance().onNext(ipInputState, &advanceNetStateToConnect);
+    brFoldState->setrPreviousState(ipInputState);
+    ipInputState->setNextState(brFoldState);
 
     // Network statemachine
     NetState* netStateNoOp = new NetState_NoOp;
     NetState* netStateTryConnect = new NetState_TryConnect;
+    NetState* netStateTryPoll = new NetState_TryPoll;
+    NetState* netStateConnectRequest = new NetState_ConnectRequest;
+    netStateNoOp->setNext(netStateTryConnect);
+    netStateTryConnect->setNext(netStateConnectRequest);
+    netStateTryConnect->setPrev(netStateNoOp);
+
     NetStatemachine::instance().addState(netStateNoOp);
     NetStatemachine::instance().addState(netStateTryConnect);
+    NetStatemachine::instance().addState(netStateTryPoll);
+    NetStatemachine::instance().addState(netStateConnectRequest);
+    NetStatemachine::instance().setCurrentState(netStateNoOp);
 
     // current working directory
     char startupDir[PATH_MAX + 1] = {0};
@@ -185,15 +225,20 @@ int main(int argc, char* argv[])
 
     while(1)
     {
-        log_debug() << "Next";
+        log_debug() << "Loop start:";
+        log_debug() << "Net:" << NetStatemachine::instance().currentState->name();
+        log_debug() << "Gui:" << GuiStatemachine::instance().getCurrentState()->name();
 
         GuiStatemachine::instance().getCurrentState()->onRefreshContent();
+
         clearscr(screen);
         GuiStatemachine::instance().getCurrentState()->paint(screen);
         flip(screen);
 
         if(kbhit())
         {
+            log_debug() << "Keypress";
+
             int c = getch();
 
             if(c == 27) // Escape
@@ -252,8 +297,15 @@ int main(int argc, char* argv[])
             }
         }
 
-//        netIface.poll(clientSocket, 300, onDataReceived);
-        NetStatemachine::instance().currentState->execute(NULL);
+        if(NetStatemachine::instance().currentState != NULL)
+        {
+            NetStatemachine::instance().currentState->execute(NetStatemachine::instance().currentState->stateData);
+        }
+        else
+        {
+            log_info() << "Null net state";
+        }
+
 
     }
 
@@ -272,6 +324,7 @@ int main(int argc, char* argv[])
     }
 
     _chdir(startupDir);
+    fprintf(stderr, "Available at begin:%zu/%zu end:%zu/%zu\n", avl_beg, max_meg, _memavl(), _memmax());
 
 }
 

@@ -19,7 +19,7 @@ std::string timeToStr(time_t &time)
     MyStringStream ss;
     const std::string format = "%Y-%m-%d %H:%M:%S";
     std::tm* tmInfo = std::localtime(&time); // Locale time-zone, usually UTC by default.
-    char buffer[80];
+    static char buffer[128];
     if (std::strftime(buffer, sizeof(buffer), format.c_str(), tmInfo) != 0)
     {
         ss << buffer;
@@ -34,7 +34,11 @@ void do_log(const std::string& msg)
     fs.open("dds.log", std::ios::app | std::ios::out);
 
     std::time_t currentTime = std::time(NULL);
-    fs /*<< "[" << timeToStr(currentTime) << "] "*/ << msg.c_str();
+    std::string cts = timeToStr(currentTime);
+    cts = "[" + cts + "]" + msg;
+    fs << cts.c_str();
+    fs.flush();
+    fs.close();
 }
 
 logstream::~logstream()
@@ -130,6 +134,6 @@ logstream &logstream::operator<<(const std::string &rString)
 
 logstream &logstream::operator<<(const void *pData)
 {
-    mOutputStream << pData;
+    mOutputStream << (void*)pData;
     return appendSpace();
 }
