@@ -1,47 +1,45 @@
 #ifndef SHARED_POINTER_H
 #define SHARED_POINTER_H
 
-
-
 template <typename T, typename Freer>
-class Sp
+class shared_pointer
 {
     Freer freer;
     struct deleter
     {
-        deleter(T* o, Sp<T,Freer>* par) : obj(o), parent(par) {}
+        deleter(T* o, shared_pointer<T,Freer>* par) : obj(o), parent(par) {}
         ~deleter() {
             parent->freer(obj);
         }
         T* obj;
-        Sp<T,Freer>* parent;
+        shared_pointer<T,Freer>* parent;
 
         T* release()
         {
             T* emp = obj;
-            obj = nullptr;
+            obj = NULL;
             return emp;
         }
     };
 
 
 public:
-    Sp(Freer f) : freer(f), obj(nullptr), count(0)
+    shared_pointer(Freer f) : freer(f), obj(NULL), count(0)
     {}
 
-    Sp(T* t, Freer f) : freer(f)
+    shared_pointer(T* t, Freer f) : freer(f)
     {
         deleter d(t, this);
         count = new size_t(1);
         obj = d.release();
     }
 
-    ~Sp()
+    ~shared_pointer()
     {
         destroy();
     }
 
-    Sp(const Sp& other) : obj(other.obj), count(other.count)
+    shared_pointer(const shared_pointer& other) : obj(other.obj), count(other.count)
     {
         if(count)
         {
@@ -49,13 +47,13 @@ public:
         }
     }
 
-    void swap(Sp& other)
+    void swap(shared_pointer& other)
     {
         std::swap(count, other.count);
         std::swap(obj, other.obj);
     }
 
-    Sp& operator =(T* newValue)
+    shared_pointer& operator =(T* newValue)
     {
         destroy();
         count = new size_t(1);
@@ -63,9 +61,9 @@ public:
         return *this;
     }
 
-    Sp& operator = (const Sp& rhs)
+    shared_pointer& operator = (const shared_pointer& rhs)
     {
-        Sp temp(rhs);
+        shared_pointer temp(rhs);
         swap(temp);
         return *this;
     }

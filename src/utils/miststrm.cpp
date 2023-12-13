@@ -127,3 +127,34 @@ void MyIStringStream::readBoolean(bool &value)
             position += 5;
         }
 }
+
+MyIStringStream &MyIStringStream::operator>>(long &value)
+{
+    readLong(value);
+    return *this;
+}
+
+void MyIStringStream::readLong(long &value)
+{
+    while (position < buffer.size() && std::isspace(buffer[position]))
+    {
+        ++position;
+    }
+
+    int result = 0;
+    bool isNegative = false;
+
+    if (buffer[position] == '-')
+    {
+        isNegative = true;
+        ++position;
+    }
+
+    while (position < buffer.size() && std::isdigit(buffer[position]))
+    {
+        result = result * 10 + (buffer[position] - '0');
+        ++position;
+    }
+
+    value = isNegative ? -result : result;
+}

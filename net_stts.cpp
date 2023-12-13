@@ -6,11 +6,12 @@
 
 #include "net_ifce.h"
 #include "dos_neti.h"
-#include "protocol.h"
-#include "msg_prot/connectr.h"
+#include "prot.h"
 
 #include <string.h>
 #include <stdlib.h>
+
+static ProtocolImpl p;
 
 NetState_TryConnect::~NetState_TryConnect()
 {
@@ -157,9 +158,6 @@ NetState *NetStatemachine::go_back(void *stdata)
 
 }
 
-#include "protocol.h"
-
-Protocol p;
 
 void onDataReceived(void* object, const char* data)
 {
@@ -185,7 +183,7 @@ void onDataReceived(void* object, const char* data)
 
     char* msg_data = ezxml_toxml(msg);
 
-    //p.message(msg_t, msg_data);
+    p.receive(msg_t, msg_data);
 
     free(msg_data);
 
@@ -221,7 +219,7 @@ int NetState_ConnectRequest::execute(void *d)
     if(!sent)
     {
 
-        ConnectRequest* cr = p.createConnectRequest();
+        ConnectRequest* cr = p.create_ConnectRequest();
 
         std::string scr = p.envelope(cr);
         log_info() << "Sending" << scr;

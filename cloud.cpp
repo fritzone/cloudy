@@ -19,7 +19,7 @@
 #include "filelist.h"
 #include "memhandl.h"
 #include "messager.h"
-#include "shared_pointer.h"
+#include <shar_ptr.h>
 
 // the various states of the gui
 #include "guistate.h"

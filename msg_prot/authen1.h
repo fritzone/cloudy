@@ -5,12 +5,12 @@
 class AuthenticationStatus: public Message
 {
 public:
-    AuthenticationStatus(bool p_success =  0, const std::string& p_rights = std::string(), int p_message_id =  0) : Message(p_message_id), success(p_success), rights(p_rights)
+    AuthenticationStatus(bool p_success =  0, const std::string& p_rights = std::string(), int p_message_id =  0) : Message(p_message_id), m_success(p_success), m_rights(p_rights)
     {}
 
     virtual ~AuthenticationStatus() {}
 
-    virtual std::string get_name() const { return "AuthenticationStatus";}
+    virtual std::string name() const { return "AuthenticationStatus";}
 
     // setters
     void set_success(bool p_success);
@@ -19,11 +19,11 @@ public:
     // getters
     bool get_success() const
     {
-        return success;
+        return  m_success;
     }
     std::string get_rights() const
     {
-        return rights;
+        return  m_rights;
     }
 
     // serializer
@@ -34,7 +34,7 @@ public:
     bool operator == (const AuthenticationStatus&) const;
 
 private:
-    bool success;
-    std::string rights;
+    bool m_success;
+    std::string m_rights;
 };
 #endif

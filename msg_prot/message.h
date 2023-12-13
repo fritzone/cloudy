@@ -4,20 +4,19 @@
 class Message
 {
 public:
-    Message(int p_message_id =  0) : message_id(p_message_id)
+    Message(int p_message_id =  0) : m_message_id(++ seq_message_id)
     {}
 
     virtual ~Message() {}
 
-    virtual std::string get_name() const { return "Message";}
+    virtual std::string name() const { return "Message";}
 
     // setters
-    void set_message_id(int p_message_id);
 
     // getters
     int get_message_id() const
     {
-        return message_id;
+        return  m_message_id;
     }
 
     // serializer
@@ -28,6 +27,9 @@ public:
     bool operator == (const Message&) const;
 
 private:
-    int message_id;
+    int m_message_id;
+
+private:
+    static int seq_message_id;
 };
 #endif

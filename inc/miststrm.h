@@ -12,6 +12,7 @@ class MyIStringStream
 public:
     MyIStringStream(const std::string& str);
     MyIStringStream& operator>>(int& value);
+    MyIStringStream& operator>>(long& value);
     MyIStringStream& operator>>(double& value);
     MyIStringStream& operator>>(std::string& value);
     MyIStringStream& operator>>(bool& value);
@@ -21,6 +22,7 @@ private:
     void readDouble(double& value);
     void readString(std::string& value);
     void readBoolean(bool& value);
+    void readLong(long &value);
 
 private:
     std::string buffer;

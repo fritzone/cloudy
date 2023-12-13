@@ -2,6 +2,29 @@ import os
 import random
 import string
 
+import inspect
+
+
+class defer:
+    """
+    Proof of concept for a python equivalent of golang's defer statement
+
+    Note that the callback order is probably not guaranteed
+
+    """
+    def __init__(self, callback, *args, **kwargs):
+        self.callback = callback
+        self.args = args
+        self.kwargs = kwargs
+
+        # Add a reference to self in the caller variables so our __del__
+        # method will be called when the function goes out of scope
+        caller = inspect.currentframe().f_back
+        caller.f_locals[b'_' + os.urandom(48)] = self
+
+    def __del__(self):
+        self.callback(*self.args, **self.kwargs)
+
 builtin_types = ["bool", "char", "unsigned char", "short", "unsigned short", "float", "int", "unsigned int", "long",
                  "unsigned long", "double", "long double", "long long", "unsigned long long"]
 
@@ -22,7 +45,6 @@ def open_file(fn, mode):
 eight_names = {}
 def eight_len_fn(name):
     if name in eight_names:
-        print("1. " + name + " -> " + eight_names[name])
         return eight_names[name]
 
     eight_name = name.lower()[0:8]
@@ -35,7 +57,6 @@ def eight_len_fn(name):
             break
     if not used:
         eight_names[name] = eight_name.lower()
-        print("2. " + name + " -> " + eight_name.lower())
         return eight_name.lower()
     else:
         name_ctr = 1
@@ -50,7 +71,6 @@ def eight_len_fn(name):
                     break
             if not used:
                 eight_names[name] = eight_name.lower()
-                print("3. " + name + " -> " + eight_name.lower())
                 return eight_name.lower()
             else:
                 name_ctr += 1
@@ -61,8 +81,30 @@ def eight_len_fn(name):
 
 
 # Used for the member declarations
+def contained_attribute_type(attr, cls):
+    if attr.strip().startswith("string"):
+        return "std::string"
+    if attr in builtin_types:
+        return attr
+    if attr.startswith("list"):
+        spltd = attr.split()
+        if len(spltd) < 3 or spltd[1] != "of":
+            print("[3] Invalid attribute: ", attr, ". Missing 'of' keyword")
+            exit(2)
+        return spltd[2]
+    if attr == "sequence":
+        return "int"
+    if attr == cls["name"]:
+        return "const " + attr + "*"
+    # Last resort
+    return attr
+    print("[1] Invalid attribute:", attr, " for ", cls["name"])
+    exit(2)
+
+
+# Used for the member declarations
 def valid_attribute_type(attr, cls):
-    if attr.startswith("string"):
+    if attr.strip().startswith("string"):
         return "std::string"
     if attr in builtin_types:
         return attr
@@ -71,8 +113,14 @@ def valid_attribute_type(attr, cls):
         if spltd[1] != "of":
             print("Invalid attribute: ", attr, ". Missing 'of' keyword")
             exit(2)
-        return "std::vector<" + spltd[2] + ">"
-    print("Invalid attribute:", attr, " for ", cls["name"])
+        return "std::vector<" + valid_attribute_type(spltd[2], cls) + ">"
+    if attr == "sequence":
+        return "int"
+    if attr == cls["name"]:
+        return "const " + attr + "*"
+    # Last resort
+    return attr
+    print("[1] Invalid attribute:", attr, " for ", cls["name"])
     exit(2)
 
 
@@ -87,8 +135,12 @@ def const_if_can_attribute_type(attr, cls):
         if spltd[1] != "of":
             print("Invalid attribute: ", attr, ". Missing 'of' keyword")
             exit(2)
-        return "const std::vector<" + spltd[2] + ">&"
-    print("Invalid attribute: ", attr, " for ", cls["name"])
+        return "const std::vector<" + valid_attribute_type(spltd[2], cls) + ">&"
+    if attr == "sequence":
+        return "int"
+    if attr == cls["name"]:
+        return "const " + attr + "*"
+    print("[2] Invalid attribute: ", attr, " for ", cls["name"])
     exit(2)
 
 
@@ -106,6 +158,8 @@ def gather_atr_includes(cls, classes):
     if len(cls["attributes"]) > 0:
         for a in cls["attributes"]:
             attr = a["type"]
+            if a in builtin_types:
+                continue
             if is_class_definition(attr, classes):
                 if attr not in includes:
                     includes.append(attr)
@@ -115,6 +169,8 @@ def gather_atr_includes(cls, classes):
                     print("Invalid attribute: ", attr, ". Missing 'of' keyword")
                     exit(2)
                 if spltd[2] not in includes:
+                    if spltd[2] in builtin_types or spltd[2] == "string":
+                        continue
                     includes.append(spltd[2])
         return includes
     else:
@@ -155,6 +211,7 @@ def generate(pclasses):
 
     # first, the header
     for cls in pclasses:
+        class_name = cls["name"]
         f = open_file(eight_len_fn(cls["name"]) + ".h", "w")
         f.write("#ifndef __" + cls["name"].upper() + "_H__\n")
         f.write("#define __" + cls["name"].upper() + "_H__\n")
@@ -203,18 +260,29 @@ def generate(pclasses):
             attr = a["type"]
             if attr.find(" of ") != -1:
                 restricted = True
+                value_list = True
                 if not opp_written:
                     f.write("\n    {")
                     opp_written = True
                 spltd_type = a["type"].split('[')
                 if len(spltd_type) != 2:
-                    print("Invalid attribute: ", attr, ". Missing [ from the restriction list")
-                    exit(2)
-                list_of_values = spltd_type[1].split(",")
-                if not list_of_values[-1].endswith("]"):
+                    # See if this is the form "list of something"
+                    list_split = a["type"].split(" ")
+                    if len(list_split) == 3:
+                        if list_split[0] != "list":
+                            print("Invalid attribute: ", attr, ". Improper use of the 'of' keyword:", attr)
+                            exit(2)
+                        else:
+                            value_list = False
+                    else:
+                        print("Invalid attribute: ", attr, ". Missing [ from the restriction list in:" ,attr)
+                        exit(2)
+                if value_list:
+                    list_of_values = spltd_type[1].split(",")
+                if value_list and not list_of_values[-1].endswith("]"):
                     print("Invalid attribute: ", attr, ". Missing ] from the restriction list")
                     exit(2)
-                if len(list_of_values) > 0:
+                if value_list and len(list_of_values) > 0:
                     restrictions[cls["name"]][a["name"]] = []
                     f.write("\n        if(")
                     to_join = []
@@ -225,15 +293,14 @@ def generate(pclasses):
                             exit(2)
 
                         restrictions[cls["name"]][a["name"]].append(rv)
-                        to_join.append(a["name"] + " != " + rv)
+                        to_join.append("m_" + a["name"] + " != " + rv)
                     f.write(" && ".join(to_join))
                     f.write(")\n        {\n            ")
                     if a["type"] in builtin_types:
-                        f.write(a["name"] + " =  0")
+                        f.write("m_" + a["name"] + " =  0")
                     else:
-                        f.write(a["name"] + " = " + valid_attribute_type(a["type"], cls) + "();")
+                        f.write("m_" + a["name"] + " = " + valid_attribute_type(a["type"], cls) + "();")
                     f.write("\n        }")
-
 
         if opp_written:
             f.write("\n    }\n")
@@ -241,13 +308,24 @@ def generate(pclasses):
         if not restricted:
             f.write("\n    {}\n")
 
+        sequences = []
+
+        # Destructor
+        f.write("\n    virtual ~" + cls["name"] + "() {}\n")
+
+        # The name of the message
+        f.write("\n    virtual std::string name() const { return \"" + cls["name"] + "\";}\n")
+
         # Now the setters for the attributes
         f.write("\n    // setters\n")
         if len(cls["attributes"]) > 0:
             attr_names = [d.get("name", '') for d in cls["attributes"]]
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
-                f.write("    void set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ");\n")
+                if t != "sequence":
+                    f.write("    void set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ");\n")
+                else:
+                    sequences.append(a)
 
         # Now the getters for the attributes
         f.write("\n    // getters\n")
@@ -256,13 +334,13 @@ def generate(pclasses):
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
                 f.write("    " + valid_attribute_type(t, cls) + " get_" + a + "() const\n    {\n")
-                f.write("        return " + a + ";\n")
+                f.write("        return  m_" + a + ";\n")
                 f.write("    }\n")
 
         # serializer
         f.write("\n    // serializer\n")
-        f.write("    std::string serialize();\n")
-        f.write("    int deserialize(const char*);\n")
+        f.write("    virtual std::string serialize() const;\n")
+        f.write("    virtual int deserialize(const char*);\n")
 
         # The equality operator
         f.write("\n    // comparison\n")
@@ -275,7 +353,13 @@ def generate(pclasses):
             attr_names = [d.get("name", '') for d in cls["attributes"]]
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
-                f.write("    " + valid_attribute_type(t, cls) + " " + a + ";\n" )
+                f.write("    " + valid_attribute_type(t, cls) + " m_" + a + ";\n" )
+
+        # All the sequences
+        if len(sequences) > 0:
+            f.write("\nprivate:\n")
+            for seq in sequences:
+                f.write("    static int seq_" + seq + ";\n")
 
         f.write("};\n")
         f.write("#endif\n")
@@ -288,18 +372,29 @@ def generate(pclasses):
         f.write("#include \"ezxml.h\"\n\n")
         f.write("#include <string.h>\n\n")
 
+        if len(sequences) > 0:
+            for seq in sequences:
+                f.write("int " + cls["name"] + "::seq_" + seq + " = 0;\n")
+
         # The serializer function
-        f.write('std::string ' + cls["name"] + '::serialize()\n{\n')
+        f.write('\nstd::string ' + cls["name"] + '::serialize() const\n{\n')
         f.write('    std::string result = "<o><type>' + cls["name"] + '</type>";\n')
         if len(cls["attributes"]) > 0:
             f.write('    result += "<attributes>";\n')
             for a in cls["attributes"]:
                 f.write("    // attribute:" + a["name"] + "\n")
                 f.write('    result += "<' + a["name"] + '>";\n')
-                if a["type"] in builtin_types or a["type"].startswith("string"):
-                    f.write('    result += stringify(' + a["name"] + ');')
+                if a["type"] in builtin_types or a["type"].startswith("string") or a["type"] == "sequence":
+                    f.write('    result += stringify(m_' + a["name"] + ');')
                 else:
-                    f.write('    for(int i=0; i<' + a["name"] + '.size(); i++) result += "<item i=\\"" + stringify(i) + "\\">" + ' + a["name"] + '[i].serialize() + "</item>\";')
+                    ser_line = '    for(int i=0; i<m_' + a["name"] + '.size(); i++) result += "<item i=\\"" + stringify(i) + "\\">" + '
+                    contained_type = contained_attribute_type(a["type"], cls)
+                    if contained_type in builtin_types or contained_type == "string":
+                        ser_line += 'stringify(m_' + a["name"] + '[i]) + "</item>";'
+                    else:
+                        ser_line += "m_" + a["name"] + '[i].serialize() + "</item>\";'
+                    f.write(ser_line)
+
                 f.write('\n    result += "</' + a["name"] + '>";\n')
             f.write('    result += "</attributes>";\n')
         f.write('    result += "</o>";\n')
@@ -316,21 +411,29 @@ def generate(pclasses):
             f.write('    if(!attrs_node) return 0;\n')
             for a in cls["attributes"]:
                 f.write('    ezxml_t attr_node_' + a["name"] + ' = ezxml_child(attrs_node, "' + a["name"] + '");\n')
-                if a["type"] in builtin_types or a["type"].startswith("string"):
-                    f.write('    destringify(' + a["name"] + ', attr_node_' + a["name"] + '->txt);\n')
+                if a["type"] in builtin_types or a["type"].startswith("string") or a["type"] == "sequence":
+                    f.write('    destringify(m_' + a["name"] + ', attr_node_' + a["name"] + '->txt);\n')
                 else:
                     f.write('    for (ezxml_t item = ezxml_child(attr_node_' + a["name"] + ', "item"); item; item = item->next) {\n')
                     tdls = a["type"].split()
-                    if tdls[0] != 'list' and tdls[1] != 'of':
+                    if a["type"] != "sequence" and len(tdls) > 0 and tdls[0] != 'list' and len(tdls) > 1 and tdls[1] != 'of':
                         print("Invalid attribute: ", a["type"], ". Missing something from it ...")
                         exit(2)
-                    f.write('        ' + tdls[2] + ' l_' + tdls[2] + ';\n')
-                    f.write('        ezxml_t items_o = ezxml_child(item, "o");\n')
-                    f.write('        char * l_attr_data = ezxml_toxml(items_o);\n')
-                    f.write('        if(!l_' + tdls[2] + '.deserialize(l_attr_data))  {free(l_attr_data); return 0;}\n')
-                    f.write('        free(l_attr_data);\n')
-                    f.write('        ' + a["name"] + '.push_back(l_' + tdls[2] + ');\n')
-
+                    if len(tdls) > 2:
+                        f.write('        ' + valid_attribute_type(tdls[2], cls) + ' l_' + tdls[2] + ';\n')
+                        f.write('        ezxml_t items_o = ezxml_child(item, "o");\n')
+                        f.write('        char * l_attr_data = ezxml_toxml(items_o);\n')
+                        cont_type = contained_attribute_type(tdls[2], cls)
+                        if cont_type == "std::string" or cont_type in builtin_types:
+                            f.write('        destringify(l_' + tdls[2] + ', l_attr_data);\n')
+                        else:
+                            f.write('        if(!l_' + tdls[2] + '.deserialize(l_attr_data))  {free(l_attr_data); return 0;}\n')
+                        f.write('        free(l_attr_data);\n')
+                        f.write('        m_' + a["name"] + '.push_back(l_' + tdls[2] + ');\n')
+                    else:
+                        # possible reference to a class, make it a pointer
+                        print("Invalid attribute: ", a["type"], ". Missing something from it ...")
+                        exit(2)
 
                     f.write('\n    }')
 
@@ -341,26 +444,29 @@ def generate(pclasses):
         for e in cls["extends"]:
             f.write("    if(!" + e + "::operator ==(rhs)) return false;\n")
         for a in cls["attributes"]:
-            f.write("    if(" + a["name"] + " != " + "rhs." + a["name"] + ") return false;\n")
+            if a["type"] in builtin_types or a["type"] == "sequence" or a["type"] == "string":
+                f.write("    if(m_" + a["name"] + " != " + "rhs.m_" + a["name"] + ") return false;\n")
+            else:
+                f.write("    // Checking vector\n")
+                f.write("    if(m_" + a["name"] + ".size() != " + "rhs.m_" + a["name"] + ".size() ) return false;\n")
 
         f.write('\n    return true;\n}\n')
 
-        # setter implemented
+        # setters implemented
         if len(cls["attributes"]) > 0:
             attr_names = [d.get("name", '') for d in cls["attributes"]]
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
-                f.write("void " + cls["name"]+ "::set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ")\n")
-                f.write("{")
-                if a in restrictions[cls["name"]]:
-                    to_join = []
-                    for r in restrictions[cls["name"]][a]:
-                        to_join.append("p_" + a + " != " + r)
-                    f.write("\n    if (" + " && ".join(to_join) + ") { return; }")
-                f.write("\n    " + a + " = p_" + a + ";")
-                f.write("\n}\n")
-
-
+                if t != "sequence":
+                    f.write("void " + cls["name"]+ "::set_" + a + "(" + const_if_can_attribute_type(t, cls) + " p_" + a + ")\n")
+                    f.write("{")
+                    if a in restrictions[cls["name"]]:
+                        to_join = []
+                        for r in restrictions[cls["name"]][a]:
+                            to_join.append("p_" + a + " != " + r)
+                        f.write("\n    if (" + " && ".join(to_join) + ") { return; }")
+                    f.write("\n    m_" + a + " = p_" + a + ";")
+                    f.write("\n}\n")
         f.close()
 
 
@@ -370,7 +476,7 @@ def generate_constructor_init_list(cls, f, pclasses, default_v):
     for a in all_attributes(cls, pclasses):
         cpar = const_if_can_attribute_type(a["type"], cls) + " p_" + a["name"]
         if default_v:
-            if a["type"] in builtin_types:
+            if a["type"] in builtin_types or a["type"] == "sequence":
                 cpar += " =  0"
             else:
                 cpar += " = " + valid_attribute_type(a["type"], cls) + "()"
@@ -394,8 +500,14 @@ def generate_constructor_init_list(cls, f, pclasses, default_v):
     if len(cls["extends"]) > 0 and len(cls["attributes"]) > 0:
         f.write(", ")
     if len(cls["attributes"]) > 0:
-        attr_names = [d.get("name", '') for d in cls["attributes"]]
-        attr_par_values = ['p_' + element for element in attr_names]
+        attr_names = ["m_" + d.get("name", '') for d in cls["attributes"]]
+        attr_par_values = []
+        for a in cls["attributes"]:
+            if a["type"] != "sequence":
+                attr_par_values.append("p_" + a["name"])
+            else:
+                attr_par_values.append("++ seq_" + a["name"])
+
         result_list = [str(val1) + "(" + str(val2) + ")" for val1, val2 in zip(attr_names, attr_par_values)]
         f.write(", ".join(result_list))
 
@@ -420,10 +532,12 @@ def remove_spaces_around_character(line, character):
     return line
 
 
+#
+# Builds the structures of the IDL
+#
 def build_structures(filename):
-
+    global classes
     classes = []
-
     # open the file
     with open(filename) as file:
         lines = [line.rstrip() for line in file]
@@ -451,6 +565,10 @@ def build_structures(filename):
         line = line.strip()
 
         if len(line) == 0:
+            continue
+
+        # Lines marked with // are comments
+        if line[0] == '/':
             continue
 
         # opening an attribute list
@@ -520,6 +638,7 @@ def generate_make(pclasses):
 
     for cls in pclasses:
         f.write('    ' + eight_len_fn(cls["name"]) + ".cpp\n")
+    f.write("    protocol.cpp\n")
     f.write("\n)")
     f.close()
 
@@ -528,28 +647,31 @@ def generate_make(pclasses):
     to_join = []
     for cls in pclasses:
         to_join.append(eight_len_fn(cls["name"]) + ".o")
-    mf.write(" ".join(to_join) + "\n")
+    mf.write(" ".join(to_join) + " protocol.o\n")
     mf.close()
 
-
-
 #
-# Will generate some test cases. Just in case.
+# Creates the "generated" folder and the subfolder required in it
 #
-def generate_tests(pclasses):
+def create_generated_folder(subf):
     path = "generated"
     does_exist = os.path.exists(path)
     if not does_exist:
         # Create a new directory because it does not exist
         os.makedirs(path)
-
-    path = "generated/tests"
+    path = "generated/" + subf
     # Check whether the specified path exists or not
     does_exist = os.path.exists(path)
     if not does_exist:
         # Create a new directory because it does not exist
         os.makedirs(path)
 
+
+#
+# Will generate some test cases. Just in case.
+#
+def generate_tests(pclasses):
+    create_generated_folder("tests")
     cm = open_file("tests/CMakeLists.txt", "w")
     cm.write('''
 project("idl-test")    
@@ -624,6 +746,153 @@ catch_discover_tests(tests)
             f.write("    CHECK(randObj." + attrn + " == deseredObj." + attrn + ");\n")
         f.write("\n}\n")
 
+#
+# Breaks the string on whitespace
+#
+def break_string_on_whitespace(input_string):
+    words = input_string.split()
+    goesback = []
+    result = []
+    clen = 0
+    for word in words:
+        result.append(word)
+        clen += len(word)
+        if clen > 60 and word.startswith("p_"):
+            goesback.append(" ".join(result))
+            result = []
+            result.append("        ")
+            clen = 0
+
+    return '\n'.join(goesback)
+
+def search(attribute, attributes):
+    return [element for element in attributes if element['name'] == attribute]
+
+#
+# Will generate the message receivers and deserializers
+#
+def generate_message_receiver(pclasses):
+
+    # protocol.h
+    f = open_file("protocol.h", "w")
+    f.write("#ifndef __PROTOCOL_H__\n")
+    f.write("#define __PROTOCOL_H__\n\n")
+
+    for cls in pclasses:
+        f.write("#include <" + eight_len_fn(cls["name"]) + ".h>\n")
+
+    f.write('// Protocol message handler types\n')
+    for cls in pclasses:
+        f.write("typedef void(*" + cls["name"] + "_Handler)")
+        f.write("(const " + cls["name"] + "*);\n")
+
+    f.write("\nclass Protocol {\npublic:\n")
+
+    # Constructor
+    f.write("\n    Protocol()")
+    if len(pclasses) > 0:
+        f.write(" : ")
+        members = []
+        for cls in pclasses:
+            members.append("m_" + cls["name"] + "_handler(NULL)")
+        f.write(", ".join(members))
+    f.write("\n    {}\n\n")
+
+    empty_created = []
+
+    f.write("    // message creators with parameters\n")
+    for cls in pclasses:
+        c_attrs = []
+
+        f.write("    " + cls["name"] + "* create_" + cls["name"])
+        if len(cls["attributes"]) > 0:
+            attr_names = [d.get("name", '') for d in all_attributes(cls, pclasses)]
+            attr_types = [d.get("type", '') for d in all_attributes(cls, pclasses)]
+            for a, t in zip(attr_names, attr_types):
+
+                cel = search(a, cls["attributes"])
+                if cel and cel[0]["type"] != "sequence":
+                    c_attrs.append("" + const_if_can_attribute_type(t, cls) + " p_" + a)
+
+            f.write("(" + ", ".join(c_attrs) + ");\n")
+        else:
+            empty_created.append(cls["name"])
+            f.write("();\n")
+
+        if len(c_attrs) == 0:
+            empty_created.append(cls["name"])
+
+    f.write("    // empty message creators\n")
+    for cls in pclasses:
+        if not cls["name"] in empty_created:
+            f.write("    " + cls["name"] + "* create_" + cls["name"] + "();\n")
+
+    # message receivers
+    f.write("\nprivate:\n\n")
+    for cls in pclasses:
+        f.write("    " + cls["name"] + "_Handler m_" + cls["name"] + "_handler;\n")
+
+    for cls in pclasses:
+        f.write("    /**\n     * Handling the " + cls["name"] + " message.\n     */\n")
+        f.write("    int receive_" + cls["name"] + "(const char*);\n\n")
+
+    f.write("public:\n    /**\n     * This method is called when the TCP/IP stack received something\n     **/\n")
+    f.write("    int receive(const char*, const char*);\n")
+
+    f.write("\n};\n")
+
+    f.write("#endif\n")
+    f.close()
+
+    # protocol.cpp
+    f = open_file("protocol.cpp", "w")
+    f.write("#include \"protocol.h\"\n")
+    f.write("#include <ezxml.h>\n")
+    f.write("#include <string.h>\n\n")
+
+    # Receivers
+    for cls in pclasses:
+        f.write("\nint Protocol::receive_" + cls["name"] + "(const char* p_xml)\n{\n")
+        f.write("    if(!m_" + cls["name"] + "_handler) return 0;\n")
+        f.write("    " + cls["name"] + " obj;\n")
+        f.write("    obj.deserialize(p_xml);\n")
+        f.write("    m_" + cls["name"] + "_handler(&obj);\n")
+        f.write("    return 1;")
+        f.write("\n}\n")
+
+    f.write("\nint Protocol::receive(const char* p_message_type, const char* p_serialized_xml)\n{\n")
+    for cls in pclasses:
+        f.write('    if(!strcmp(p_message_type, "' + cls["name"] + '")) { return receive_' + cls["name"] + '(p_serialized_xml); }\n')
+    f.write("    return 1;\n}\n\n")
+
+    # Creators
+    f.write("// Default Creators\n")
+    for cls in pclasses:
+        if not cls["name"] in empty_created:
+            f.write(cls["name"] + "* Protocol::create_" + cls["name"] + "()\n{\n")
+            f.write("    return new " + cls["name"] + "();\n}\n\n")
+
+    f.write("// Creators with specific parameters\n")
+    for cls in pclasses:
+        f.write(cls["name"] + "*  Protocol::create_" + cls["name"])
+
+        if len(cls["attributes"]) > 0:
+            attr_names = [d.get("name", '') for d in all_attributes(cls, pclasses)]
+            attr_types = [d.get("type", '') for d in all_attributes(cls, pclasses)]
+            attrs = []
+            for a, t in zip(attr_names, attr_types):
+                cel = search(a, cls["attributes"])
+                if cel and cel[0]["type"] != "sequence":
+                    attrs.append("" + const_if_can_attribute_type(t, cls) + " p_" + a)
+            f.write("(" + ", ".join(attrs) + ")\n{\n")
+            f.write("    " + cls["name"] + "* l_" + cls["name"] + " = new " + cls["name"] + "();\n")
+            f.write("    return  l_" + cls["name"] + ";\n")
+
+            f.write("\n}\n")
+        else:
+            f.write("()\n{\n    return new " + cls["name"] + "();\n}\n\n")
+    f.close()
+
 
 #
 # Main
@@ -631,7 +900,10 @@ catch_discover_tests(tests)
 if __name__ == "__main__":
     classes = build_structures("main.idl")
     generate(classes)
+    print("Structures generated")
     generate_tests(classes)
+    print("Tests generated")
+    generate_message_receiver(classes)
+    print("Protocol generated")
     generate_make(classes)
-
-    print(restrictions)
+    print("Makefiles generated")

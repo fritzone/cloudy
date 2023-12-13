@@ -1,1 +1,1 @@
-util_objs = miststrm.o mstrstrm.o
+util_objs = miststrm.o mstrstrm.o cldutils.o

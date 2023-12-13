@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 
-#include "msg_prot/connectr.h"
+#include "msg_prot/protocol.h"
 
 class NetworkInterface;
 
@@ -22,12 +22,10 @@ void onDataReceived(void *object, const char* data);
   *  - the corresponding message handler handles the message, and it might call
   *    a callback function with the message data
  */
-class Protocol
+class ProtocolImpl : public Protocol
 {
-    static int messageId; // the zero based messageID used for the messages
-
 public:
-    Protocol();
+    ProtocolImpl();
 
     /**
      * Sets the network interface used in this Protocol
@@ -40,18 +38,6 @@ public:
      * @return the enveloped serialized message
      */
     std::string envelope(const Message *m);
-
-    /**
-     * @brief createConnectRequest Will create a connection request message
-     * @return
-     */
-    ConnectRequest *createConnectRequest();
-
-private:
-
-    int nextMessageId();
-
-    static char *rand_string(size_t size);
 
 private:
 

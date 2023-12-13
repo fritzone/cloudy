@@ -5,17 +5,17 @@
 class ConnectRequest: public Message
 {
 public:
-    ConnectRequest(const std::string& p_platform = std::string(), const std::string& p_unique_id = std::string(), int p_message_id =  0) : Message(p_message_id), platform(p_platform), unique_id(p_unique_id)
+    ConnectRequest(const std::string& p_platform = std::string(), const std::string& p_unique_id = std::string(), int p_message_id =  0) : Message(p_message_id), m_platform(p_platform), m_unique_id(p_unique_id)
     {
-        if(platform != "dos" && platform != "linux")
+        if(m_platform != "dos" && m_platform != "linux")
         {
-            platform = std::string();
+            m_platform = std::string();
         }
     }
 
     virtual ~ConnectRequest() {}
 
-    virtual std::string get_name() const { return "ConnectRequest";}
+    virtual std::string name() const { return "ConnectRequest";}
 
     // setters
     void set_platform(const std::string& p_platform);
@@ -24,11 +24,11 @@ public:
     // getters
     std::string get_platform() const
     {
-        return platform;
+        return  m_platform;
     }
     std::string get_unique_id() const
     {
-        return unique_id;
+        return  m_unique_id;
     }
 
     // serializer
@@ -39,7 +39,7 @@ public:
     bool operator == (const ConnectRequest&) const;
 
 private:
-    std::string platform;
-    std::string unique_id;
+    std::string m_platform;
+    std::string m_unique_id;
 };
 #endif

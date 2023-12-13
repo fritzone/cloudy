@@ -5,12 +5,12 @@
 class Authenticate: public Message
 {
 public:
-    Authenticate(const std::string& p_user_name_hash = std::string(), const std::string& p_password_hash = std::string(), int p_message_id =  0) : Message(p_message_id), user_name_hash(p_user_name_hash), password_hash(p_password_hash)
+    Authenticate(const std::string& p_user_name_hash = std::string(), const std::string& p_password_hash = std::string(), int p_message_id =  0) : Message(p_message_id), m_user_name_hash(p_user_name_hash), m_password_hash(p_password_hash)
     {}
 
     virtual ~Authenticate() {}
 
-    virtual std::string get_name() const { return "Authenticate";}
+    virtual std::string name() const { return "Authenticate";}
 
     // setters
     void set_user_name_hash(const std::string& p_user_name_hash);
@@ -19,11 +19,11 @@ public:
     // getters
     std::string get_user_name_hash() const
     {
-        return user_name_hash;
+        return  m_user_name_hash;
     }
     std::string get_password_hash() const
     {
-        return password_hash;
+        return  m_password_hash;
     }
 
     // serializer
@@ -34,7 +34,7 @@ public:
     bool operator == (const Authenticate&) const;
 
 private:
-    std::string user_name_hash;
-    std::string password_hash;
+    std::string m_user_name_hash;
+    std::string m_password_hash;
 };
 #endif

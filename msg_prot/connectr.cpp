@@ -5,17 +5,18 @@
 
 #include <string.h>
 
+
 std::string ConnectRequest::serialize() const
 {
     std::string result = "<o><type>ConnectRequest</type>";
     result += "<attributes>";
     // attribute:platform
     result += "<platform>";
-    result += stringify(platform);
+    result += stringify(m_platform);
     result += "</platform>";
     // attribute:unique_id
     result += "<unique_id>";
-    result += stringify(unique_id);
+    result += stringify(m_unique_id);
     result += "</unique_id>";
     result += "</attributes>";
     result += "</o>";
@@ -29,26 +30,27 @@ int ConnectRequest::deserialize(const char* xml)
     if(strcmp(str_type, "ConnectRequest")) return 0;    ezxml_t attrs_node = ezxml_child(x, "attributes");
     if(!attrs_node) return 0;
     ezxml_t attr_node_platform = ezxml_child(attrs_node, "platform");
-    destringify(platform, attr_node_platform->txt);
+    destringify(m_platform, attr_node_platform->txt);
     ezxml_t attr_node_unique_id = ezxml_child(attrs_node, "unique_id");
-    destringify(unique_id, attr_node_unique_id->txt);
+    destringify(m_unique_id, attr_node_unique_id->txt);
 
     return 1;
 }
 bool ConnectRequest::operator == (const ConnectRequest& rhs) const
 {
     if(!Message::operator ==(rhs)) return false;
-    if(platform != rhs.platform) return false;
-    if(unique_id != rhs.unique_id) return false;
+    // Checking vector
+    if(m_platform.size() != rhs.m_platform.size() ) return false;
+    if(m_unique_id != rhs.m_unique_id) return false;
 
     return true;
 }
 void ConnectRequest::set_platform(const std::string& p_platform)
 {
     if (p_platform != "dos" && p_platform != "linux") { return; }
-    platform = p_platform;
+    m_platform = p_platform;
 }
 void ConnectRequest::set_unique_id(const std::string& p_unique_id)
 {
-    unique_id = p_unique_id;
+    m_unique_id = p_unique_id;
 }
