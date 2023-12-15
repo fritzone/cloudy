@@ -11,7 +11,7 @@
 
 static const char* __far header_1 = "ษออออออออออออหออออออออออหออออออออออออออป";
 static const char* __far header_2 = "บ    Name    บ   Size   บ     Date     บ";
-static const char* __far header_3 = "ฬออออออออออออออออออออออออออออออออออออออน";
+static const char* __far header_3 = "ฬออออออออออออฮออออออออออฮออออออออออออออน";
 static const char* __far footer_1 = "ฬออออออออออออสอออออหออออสออออออออออออออน";
 static const char* __far format_R = "บ%12sบ%10sบ%02d/%02d/%02d-%02d:%02dบ"; // the format of one line in frame
 static const char* __far format_E = "บ            บ          บ              บ"; // the format of one line in frame
@@ -28,6 +28,14 @@ static const char* __far header_6_connect_win = "ศออออออออออออออออออออออออออออออ
 static const char* __far footer_err_1_connect = "ฬออออออออออออออออออออออออออออออออออออออออออน";
 static const char* __far footer_err_2_connect = "บ                                          บ";
 
+static const char* __far header_1_pwd_win = "ษออออออออออออออออออออออออออออออออออออออออออออออออออออออออออป";
+static const char* __far header_2_pwd_win = "บ Please enter the required credentials to access the host บ";
+static const char* __far header_3_pwd_win = "ฬออออออออออออออออออออออออออออออออออออออออออออออออออออออออออน";
+static const char* __far contnt_1_pwd_win = "บ Username:                                                บ";
+static const char* __far contnt_2_pwd_win = "บ Password:                                                บ";
+static const char* __far err_1_pwd__contn = "ฬออออออออออออออออออออออออออออออออออออออออออออออออออออออออออน";
+static const char* __far err_2_pwd__contn = "บ                                                          บ";
+static const char* __far footer_pwd_windw = "ศออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผ";
 
 /*
  * The bottom of the frame
@@ -244,10 +252,25 @@ void menu(void* scrSeg)
 
 }
 
+void password_window(void* scrSeg, char *pwd, int error, const char* errorText)
+{
+    writeString(0,0, Red, White, main_header_connect_screen, scrSeg);
+    writeString(64,0, Red, LightYellow, main_header_connect_http_screen, scrSeg);
+
+    writeString(9, 10, Blue, White, header_1_pwd_win , scrSeg);
+    writeString(9, 11, Blue, White, header_2_pwd_win , scrSeg);
+    writeString(9, 12, Blue, White, header_3_pwd_win , scrSeg);
+    writeString(9, 13, Blue, White, contnt_1_pwd_win , scrSeg);
+    writeString(9, 14, Blue, White, err_2_pwd__contn , scrSeg);
+    writeString(9, 15, Blue, White, contnt_2_pwd_win , scrSeg);
+    writeString(9, 16, Blue, White, footer_pwd_windw , scrSeg);
+
+    writeString(21, 13, Black, White, "                                             ", scrSeg);
+    writeString(21, 15, Black, White, "                                             ", scrSeg);
+}
+
 void connect_window(void* scrSeg, char *ip[], int error, const char* errorText)
 {
-
-
     writeString(0,0, Red, White, main_header_connect_screen, scrSeg);
     writeString(64,0, Red, LightYellow, main_header_connect_http_screen, scrSeg);
 
@@ -265,7 +288,7 @@ void connect_window(void* scrSeg, char *ip[], int error, const char* errorText)
     {
         writeString(18, 15, Blue, White, footer_err_1_connect, scrSeg);
         writeString(18, 16, Blue, White, footer_err_2_connect, scrSeg);
-        writeString(18, 17, Blue, White, header_6_connect_win , scrSeg);
+        writeString(18, 17, Blue, White, header_6_connect_win, scrSeg);
 
         // and the error
         writeString(19, 16, Blue, Red, errorText, scrSeg);

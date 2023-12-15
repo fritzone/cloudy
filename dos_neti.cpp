@@ -143,24 +143,19 @@ void DosMTcpIpIface::poll(void* sock, uint32_t timeout, void *data, void (*callb
     int inBufIndex = 0;
 
     clockTicks_t startTime = TIMER_GET_CURRENT( );
+    std::string r = "";
 
     while ( 1 )
     {
-
-        log_debug() << "Receiving ... ";
-
         PACKET_PROCESS_SINGLE;
         Arp::driveArp( );
         Tcp::drivePackets( );
 
         int rc = s->recv( inBuf + inBufIndex, (INBUFSIZE - inBufIndex) );
-        log_debug() << "Received, with rc:" << rc;
 
         if ( rc > 0 )
         {
-            log_debug() << "Calling back... ";
-
-            callback(data, (const char*)inBuf);
+            r += (char*)inBuf;
             memset(inBuf, INBUFSIZE, 0);
             inBufIndex = 0;
         }
@@ -169,20 +164,19 @@ void DosMTcpIpIface::poll(void* sock, uint32_t timeout, void *data, void (*callb
         {
             break;
         }
-
-        log_debug() << "After receiving ... ";
-
         uint32_t t_ms = Timer_diff( startTime, TIMER_GET_CURRENT( ) ) * TIMER_TICK_LEN;
-
-        // Timeout?
         if ( t_ms > timeout )
         {
-            log_debug() << "Breaking ... ";
-
             break;
         }
-
     }
+
+    if(!r.empty())
+    {
+        log_debug() << "Calling back... ";
+        callback(data, r.c_str());
+    }
+
     free (inBuf);
 }
 

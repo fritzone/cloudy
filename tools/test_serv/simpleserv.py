@@ -1,3 +1,4 @@
+from lxml import etree
 import socket
 import threading
 import time
@@ -7,6 +8,23 @@ IP_ADDRESS = "127.0.0.1"
 PORT = 8966
 
 
+def handle_connect_request(client_socket):
+    print("ConnectRequest")
+    response = '''<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><protocol><cld v="1.0" msg="ConnectionRequestReply"><o><type>ConnectionRequestReply</type><attributes><accepted>1</accepted><authentication_required>1</authentication_required></attributes></o></cld></protocol>'''
+    client_socket.send(response.encode('utf-8'))
+
+
+def process_xml(xml_string, client_socket):
+    # Parse the XML string
+    root = etree.fromstring(xml_string)
+    
+    # Find the 'cld' tag and check its 'msg' attribute
+    for cld in root.xpath('//cld'):
+        if 'msg' in cld.attrib and cld.attrib['msg'] == 'ConnectRequest':
+            # Call a method when 'msg' attribute is 'ConnectRequest'
+            handle_connect_request(client_socket)
+
+
 # Function to handle a client connection
 def handle_client(client_socket):
     print(f"Accepted connection from {client_socket.getpeername()}")
@@ -14,21 +32,16 @@ def handle_client(client_socket):
     try:
         while True:
             # Send the response XML to the connected client
-            response = "<?xml version=\"1.0\"?><protocol><cld v=\"1.0\"><msg t=\"welcome\"><id>12</id></msg></cld></protocol>"
-            client_socket.send(response.encode("utf-8"))
-            print("Sent...")
-
-            # Sleep for 5 seconds before sending the next response
-            time.sleep(5)
-
             # Receive data from the client
             data = client_socket.recv(1024)
             if not data:
                 break
 
             # Process the received data (you can customize this part)
-            received_data = data.decode("utf-8")
-            print(f"Received data from {client_socket.getpeername()}: {received_data}")
+            received_data = data.decode("utf-8").encode('utf-8')
+            print("Received: {}",received_data)
+
+            process_xml(received_data, client_socket)
 
     except (ConnectionResetError, ConnectionAbortedError):
         # Handle the case when the client disconnects

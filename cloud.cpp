@@ -26,6 +26,9 @@
 #include "inputip.h"
 #include "brwsfldr.h"
 #include "net_stts.h"
+#include "dos_pwds.h"
+#include "prot.h"
+#include "msg_prot/protocol.h"
 
 #include <set>
 
@@ -33,6 +36,8 @@
 
 // This is the global screen, used to hold the backbuffer
 static void* screen = 0;
+
+ProtocolImpl p;
 
 /* Will parse the arguments as came in from the command line, nothing for now */
 static void parseArgs(int argc, char* argv[])
@@ -108,44 +113,53 @@ int messager(int m, void* data)
 {
     switch(m)
     {
+
     case MSG_IP_ENTERED:
     {
-        log_info() << "Advancing network from:" << NetStatemachine::instance().currentState->name() << " data is:" << (char*)data;
         NetStatemachine::instance().advance(data);
-        log_info() << "Advanced network to:" << NetStatemachine::instance().currentState->name();
-
-        GuiStatemachine::instance().logStates();
 
         return 0;
     }
     case MSG_CONNECTED:
     {
-        log_info() << "Advancing from" << GuiStatemachine::instance().getCurrentState()->name();
-        GuiStatemachine::instance().advance(data);
-        log_info() << "Advanced gui to:" << GuiStatemachine::instance().getCurrentState()->name();
-
-        GuiStatemachine::instance().logStates();
-
-        log_info() << "Advancing network from:" << NetStatemachine::instance().currentState->name();
         NetStatemachine::instance().advance(data);
-        log_info() << "Advanced network to:" << NetStatemachine::instance().currentState->name();
-        CursorRaii::hideCursor();
-
         return 0;
     }
 
     case MSG_CONNECTION_FAILED:
     {
-        log_info() << "Recede network from:" << NetStatemachine::instance().currentState->name();
         NetStatemachine::instance().go_back(data);
-        log_info() << "Recede network to:" << NetStatemachine::instance().currentState->name();
+        return 0;
+    }
 
+    case MSG_CONNECTION_ACKNOWLEDGED:
+    {
+        ConnectionRequestReply* crrp =  (ConnectionRequestReply*)(data);
+        if(crrp->get_authentication_required())
+        {
+            GuiStatemachine::instance().advance(NULL, State_PasswordRequested);
+        }
+        else
+        {
+            GuiStatemachine::instance().advance(NULL, State_GoBrowsing);
+        }
+        CursorRaii::hideCursor();
         return 0;
     }
 
     }
 
     return 1;
+}
+
+/**
+ * @brief onConnectRequestReply is called when a a connection request reply was received
+ * @param crrp the reply objects
+ */
+static void __far onConnectRequestReply(const ConnectionRequestReply* crrp)
+{
+    log_info() << "authentication required:" << crrp->get_authentication_required();
+    messager(MSG_CONNECTION_ACKNOWLEDGED, (void*)crrp);
 }
 
 void interrupt newInt6Handler() {
@@ -172,6 +186,8 @@ void interrupt newInt6Handler() {
  */
 int main(int argc, char* argv[])
 {
+    p.set_ConnectionRequestReply_Handler(onConnectRequestReply);
+
     size_t avl_beg = _memavl(), max_meg = _memmax();
 
     log_info() << "===============================[Starting]=======================";
@@ -190,15 +206,19 @@ int main(int argc, char* argv[])
     CursorRaii cursor;
 
     // Gui statemachine
-    GuiState* brFoldState = new BrowseFoldersState(NULL, NULL);
-    GuiState* ipInputState = new InputIpState(brFoldState, NULL);
+    GuiState* brFoldState = new BrowseFoldersState();
+    GuiState* ipInputState = new GuiState_InputIp();
+    GuiState* getPasswordState = new GuiState_PasswordScreen();
 
     GuiStatemachine::instance().addState(ipInputState);
-    GuiStatemachine::instance().addState(brFoldState);;
+    GuiStatemachine::instance().addState(brFoldState);
+    GuiStatemachine::instance().addState(getPasswordState);
+
     GuiStatemachine::instance().init(ipInputState);
     GuiStatemachine::instance().getCurrentState()->setCursor(&cursor);
-    brFoldState->setrPreviousState(ipInputState);
-    ipInputState->setNextState(brFoldState);
+
+    ipInputState->setNextState(State_GoBrowsing, brFoldState);
+    ipInputState->setNextState(State_PasswordRequested, getPasswordState);
 
     // Network statemachine
     NetState* netStateNoOp = new NetState_NoOp;
@@ -225,9 +245,9 @@ int main(int argc, char* argv[])
 
     while(1)
     {
-        log_debug() << "Loop start:";
-        log_debug() << "Net:" << NetStatemachine::instance().currentState->name();
-        log_debug() << "Gui:" << GuiStatemachine::instance().getCurrentState()->name();
+        //log_debug() << "Loop start:";
+        //log_debug() << "Net:" << NetStatemachine::instance().currentState->name();
+        //log_debug() << "Gui:" << GuiStatemachine::instance().getCurrentState()->name();
 
         GuiStatemachine::instance().getCurrentState()->onRefreshContent();
 

@@ -9,10 +9,9 @@
 #include <stdlib.h>
 #include <strstream.h>
 
-InputIpState::InputIpState(GuiState* next, GuiState* prev) : GuiState(next, prev),
-    ip (new char*[4]), currentSegment(0), errorMode (0)
+GuiState_InputIp::GuiState_InputIp() : GuiState(), ip(new char*[4]), currentSegment(0), errorMode (0)
 {
-
+    // bound to 80x25 screen
     ipPositions[0] = 33; ipPositions[1] = 37; ipPositions[2] = 41; ipPositions[3] = 45;
 
     ip[0] = (char*)calloc(4, 1);
@@ -32,7 +31,7 @@ InputIpState::InputIpState(GuiState* next, GuiState* prev) : GuiState(next, prev
     ipPosCtrs[3] = 1;
 }
 
-InputIpState::~InputIpState()
+GuiState_InputIp::~GuiState_InputIp()
 {
     free(ip[0]);
     free(ip[1]);
@@ -42,7 +41,7 @@ InputIpState::~InputIpState()
     delete ip;
 }
 
-void InputIpState::paint(void *screen)
+void GuiState_InputIp::paint(void *screen)
 {
     const char* errStr = GuiStatemachine::instance().getError();
     log_debug() << "*********************' Error:" << errStr << ":" << strlen((char*)errStr);
@@ -63,7 +62,7 @@ void InputIpState::paint(void *screen)
     }
 }
 
-void InputIpState::onEnter()
+void GuiState_InputIp::onEnter()
 {
     log_info() << "Trying to advance ...........................................................";
     messager(MSG_IP_ENTERED, (void*)getIp());
@@ -71,16 +70,16 @@ void InputIpState::onEnter()
 
 }
 
-void InputIpState::onRightArrow()
+void GuiState_InputIp::onRightArrow()
 {
 }
 
-void InputIpState::onRefreshContent()
+void GuiState_InputIp::onRefreshContent()
 {
     getCursor()->placeCursor(ipPositions[currentSegment] + strlen( ip[currentSegment] ), 14);
 }
 
-void InputIpState::onChar(char c)
+void GuiState_InputIp::onChar(char c)
 {
     if(!isdigit(c) && c != '.')
     {
@@ -106,7 +105,7 @@ void InputIpState::onChar(char c)
     }
 }
 
-void InputIpState::onTab()
+void GuiState_InputIp::onTab()
 {
     currentSegment ++;
     if(currentSegment == 4)
@@ -115,7 +114,7 @@ void InputIpState::onTab()
     }
 }
 
-void InputIpState::onBackspace()
+void GuiState_InputIp::onBackspace()
 {
     if(strlen(ip[currentSegment]) >= 1)
     {
@@ -132,7 +131,7 @@ void InputIpState::onBackspace()
     }
 }
 
-const char* InputIpState::getIp()
+const char* GuiState_InputIp::getIp()
 {
     static char sip[128] = {0};
     sprintf(sip, "%s.%s.%s.%s", ip[0], ip[1], ip[2], ip[3]);

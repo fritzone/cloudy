@@ -1,11 +1,12 @@
 #include "protocol.h"
 #include <ezxml.h>
+#include <log.h>
 #include <string.h>
 
 
 int Protocol::receive_Message(const char* p_xml)
 {
-    if(!m_Message_handler) return 0;
+    if(!m_Message_handler) { log_info() << "No handler for Message"; return 0; } 
     Message obj;
     obj.deserialize(p_xml);
     m_Message_handler(&obj);
@@ -14,7 +15,7 @@ int Protocol::receive_Message(const char* p_xml)
 
 int Protocol::receive_ConnectRequest(const char* p_xml)
 {
-    if(!m_ConnectRequest_handler) return 0;
+    if(!m_ConnectRequest_handler) { log_info() << "No handler for ConnectRequest"; return 0; } 
     ConnectRequest obj;
     obj.deserialize(p_xml);
     m_ConnectRequest_handler(&obj);
@@ -23,7 +24,7 @@ int Protocol::receive_ConnectRequest(const char* p_xml)
 
 int Protocol::receive_ConnectionRequestReply(const char* p_xml)
 {
-    if(!m_ConnectionRequestReply_handler) return 0;
+    if(!m_ConnectionRequestReply_handler) { log_info() << "No handler for ConnectionRequestReply"; return 0; } 
     ConnectionRequestReply obj;
     obj.deserialize(p_xml);
     m_ConnectionRequestReply_handler(&obj);
@@ -32,7 +33,7 @@ int Protocol::receive_ConnectionRequestReply(const char* p_xml)
 
 int Protocol::receive_Authenticate(const char* p_xml)
 {
-    if(!m_Authenticate_handler) return 0;
+    if(!m_Authenticate_handler) { log_info() << "No handler for Authenticate"; return 0; } 
     Authenticate obj;
     obj.deserialize(p_xml);
     m_Authenticate_handler(&obj);
@@ -41,7 +42,7 @@ int Protocol::receive_Authenticate(const char* p_xml)
 
 int Protocol::receive_AuthenticationStatus(const char* p_xml)
 {
-    if(!m_AuthenticationStatus_handler) return 0;
+    if(!m_AuthenticationStatus_handler) { log_info() << "No handler for AuthenticationStatus"; return 0; } 
     AuthenticationStatus obj;
     obj.deserialize(p_xml);
     m_AuthenticationStatus_handler(&obj);
@@ -50,7 +51,7 @@ int Protocol::receive_AuthenticationStatus(const char* p_xml)
 
 int Protocol::receive_StatusRequest(const char* p_xml)
 {
-    if(!m_StatusRequest_handler) return 0;
+    if(!m_StatusRequest_handler) { log_info() << "No handler for StatusRequest"; return 0; } 
     StatusRequest obj;
     obj.deserialize(p_xml);
     m_StatusRequest_handler(&obj);
@@ -59,7 +60,7 @@ int Protocol::receive_StatusRequest(const char* p_xml)
 
 int Protocol::receive_Status(const char* p_xml)
 {
-    if(!m_Status_handler) return 0;
+    if(!m_Status_handler) { log_info() << "No handler for Status"; return 0; } 
     Status obj;
     obj.deserialize(p_xml);
     m_Status_handler(&obj);
@@ -68,7 +69,7 @@ int Protocol::receive_Status(const char* p_xml)
 
 int Protocol::receive_DirectoryEntry(const char* p_xml)
 {
-    if(!m_DirectoryEntry_handler) return 0;
+    if(!m_DirectoryEntry_handler) { log_info() << "No handler for DirectoryEntry"; return 0; } 
     DirectoryEntry obj;
     obj.deserialize(p_xml);
     m_DirectoryEntry_handler(&obj);
@@ -77,7 +78,7 @@ int Protocol::receive_DirectoryEntry(const char* p_xml)
 
 int Protocol::receive_DirectoryListRequest(const char* p_xml)
 {
-    if(!m_DirectoryListRequest_handler) return 0;
+    if(!m_DirectoryListRequest_handler) { log_info() << "No handler for DirectoryListRequest"; return 0; } 
     DirectoryListRequest obj;
     obj.deserialize(p_xml);
     m_DirectoryListRequest_handler(&obj);
@@ -86,7 +87,7 @@ int Protocol::receive_DirectoryListRequest(const char* p_xml)
 
 int Protocol::receive_DirectoryList(const char* p_xml)
 {
-    if(!m_DirectoryList_handler) return 0;
+    if(!m_DirectoryList_handler) { log_info() << "No handler for DirectoryList"; return 0; } 
     DirectoryList obj;
     obj.deserialize(p_xml);
     m_DirectoryList_handler(&obj);
@@ -105,6 +106,7 @@ int Protocol::receive(const char* p_message_type, const char* p_serialized_xml)
     if(!strcmp(p_message_type, "DirectoryEntry")) { return receive_DirectoryEntry(p_serialized_xml); }
     if(!strcmp(p_message_type, "DirectoryListRequest")) { return receive_DirectoryListRequest(p_serialized_xml); }
     if(!strcmp(p_message_type, "DirectoryList")) { return receive_DirectoryList(p_serialized_xml); }
+    log_info() << "Could not handle message:" << p_message_type;
     return 1;
 }
 

@@ -119,13 +119,28 @@ void MyIStringStream::readBoolean(bool &value)
     {
         value = true;
         position += 4;
+        return;
     }
-    else
-        if (buffer.substr(position, 5) == "false")
-        {
-            value = false;
-            position += 5;
-        }
+
+    if (buffer.substr(position, 1) == "1")
+    {
+        value = true;
+        position ++;
+        return;
+    }
+
+    if (buffer.substr(position, 5) == "false")
+    {
+        value = false;
+        position += 5;
+        return;
+    }
+
+    if (buffer.substr(position, 1) == "0")
+    {
+        value = false;
+        position ++;
+    }
 }
 
 MyIStringStream &MyIStringStream::operator>>(long &value)

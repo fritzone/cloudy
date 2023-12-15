@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static ProtocolImpl p;
+extern ProtocolImpl p;
 
 NetState_TryConnect::~NetState_TryConnect()
 {
@@ -161,27 +161,28 @@ NetState *NetStatemachine::go_back(void *stdata)
 
 void onDataReceived(void* object, const char* data)
 {
-    fprintf(stderr, "%s\n", data);
+    log_info() << "*************** Received: " << data;
     ezxml_t doc = ezxml_parse_str((char*)data, strlen(data));
     char* s;
     s = ezxml_toxml(doc);
-    fprintf(stderr, "%s\n", s);
+    log_info() << s;
     free(s);
 
     ezxml_t cld = ezxml_child(doc, "cld");
     if(cld == NULL)
     {
-        fprintf(stderr, "cannot get cloud tag");
+        log_error() << "cannot get cloud tag";
         return;
     }
     const char* cloud_version = ezxml_attr(cld, "v");
-    fprintf(stderr, "cloud version: %s\n", cloud_version);
+    const char* msg_t = ezxml_attr(cld, "msg");
+    log_info() << "cloud version: " << cloud_version;
+    log_info() << "message_t: " <<  msg_t;
 
-    ezxml_t msg = ezxml_child(cld, "msg");
-    const char* msg_t = ezxml_attr(msg, "t");
-    fprintf(stderr, "message_t: %s\n", msg_t);
+    ezxml_t o = ezxml_child(cld, "o");
 
-    char* msg_data = ezxml_toxml(msg);
+    char* msg_data = ezxml_toxml(o);
+    log_info() << "o msg=" << msg_data;
 
     p.receive(msg_t, msg_data);
 
@@ -201,7 +202,7 @@ int NetState_TryPoll::execute(void * d)
 
 void cb_ConnectRecuqest(void* o, const char* data)
 {
-    log_info() <<"Received:" << data;
+    log_info() <<"---------------------------- Received:" << data;
     ((NetState_ConnectRequest*)o)->received = true;
 }
 
@@ -235,7 +236,7 @@ int NetState_ConnectRequest::execute(void *d)
     if(!received)
     {
         log_info() << "Polling ..." ;
-        nsd->iface->poll(nsd->clientSocket, 300, this, &cb_ConnectRecuqest);
+        nsd->iface->poll(nsd->clientSocket, 300, this, &onDataReceived);
         return 0;
     }
 

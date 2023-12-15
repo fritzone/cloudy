@@ -12,7 +12,7 @@ class BrowseFoldersState : public GuiState
 {
 public:
 
-    BrowseFoldersState(GuiState* next, GuiState* prev);
+    BrowseFoldersState();
     ~BrowseFoldersState();
 
 

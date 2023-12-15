@@ -3,18 +3,18 @@
 
 #include <string.h>
 
-GuiState::GuiState(GuiState *next, GuiState *prev) : next(NULL), prev(NULL)
+GuiState::GuiState()
 {
 }
 
-void GuiState::setNextState(GuiState *nexts)
+void GuiState::setNextState(GuiStates state, GuiState *nexts)
 {
-    next = nexts;
+    m_nexts[state] = nexts;
 }
 
-void GuiState::setrPreviousState(GuiState *prevs)
+void GuiState::setrPreviousState(GuiStates state, GuiState *prevs)
 {
-    prev = prevs;
+    m_prevs[state] = prevs;
 }
 
 CursorRaii *GuiState::getCursor() const
@@ -51,7 +51,7 @@ void GuiStatemachine::init(GuiState *s)
     logStates();
 }
 
-int GuiStatemachine::advance(void *d)
+int GuiStatemachine::advance(void *d, GuiStates state)
 {
     logStates();
 
@@ -63,9 +63,9 @@ int GuiStatemachine::advance(void *d)
 
     log_info() << "Trying to advance from" << currentState->name();
 
-    if(currentState->next)
+    if(currentState->m_nexts.count(state) && currentState->m_nexts[state])
     {
-        currentState = currentState->next;
+        currentState = currentState->m_nexts[state];
     }
     else
     {
@@ -75,9 +75,19 @@ int GuiStatemachine::advance(void *d)
     return 0;
 }
 
-void GuiStatemachine::previous()
+int GuiStatemachine::previous(void *, GuiStates state)
 {
-    currentState = currentState->prev;
+    if(!currentState)
+    {
+        log_error() << "No current state for gui statemachine";
+        return 1;
+    }
+
+    if(currentState->m_prevs.count(state) && currentState->m_prevs[state])
+    {
+        currentState = currentState->m_prevs[state];
+    }
+    return 0;
 }
 
 void GuiStatemachine::reportError(const char *s)

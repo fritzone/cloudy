@@ -9,7 +9,7 @@
 #include <string.h>
 #include <direct.h>
 
-BrowseFoldersState::BrowseFoldersState(GuiState *next, GuiState *prev) : GuiState(next, prev),
+BrowseFoldersState::BrowseFoldersState() : GuiState(),
     workDrive(0), diskFree(0), localFiles(NULL), focusedPanel(NULL)
 {
     memset(cwd, 0, sizeof(cwd));

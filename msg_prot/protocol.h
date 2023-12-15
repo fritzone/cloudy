@@ -50,6 +50,39 @@ public:
     DirectoryListRequest* create_DirectoryListRequest();
     DirectoryList* create_DirectoryList();
 
+    // message handlers setters
+
+    void set_Message_Handler(Message_Handler p_handler) {
+        m_Message_handler = p_handler;
+    }
+    void set_ConnectRequest_Handler(ConnectRequest_Handler p_handler) {
+        m_ConnectRequest_handler = p_handler;
+    }
+    void set_ConnectionRequestReply_Handler(ConnectionRequestReply_Handler p_handler) {
+        m_ConnectionRequestReply_handler = p_handler;
+    }
+    void set_Authenticate_Handler(Authenticate_Handler p_handler) {
+        m_Authenticate_handler = p_handler;
+    }
+    void set_AuthenticationStatus_Handler(AuthenticationStatus_Handler p_handler) {
+        m_AuthenticationStatus_handler = p_handler;
+    }
+    void set_StatusRequest_Handler(StatusRequest_Handler p_handler) {
+        m_StatusRequest_handler = p_handler;
+    }
+    void set_Status_Handler(Status_Handler p_handler) {
+        m_Status_handler = p_handler;
+    }
+    void set_DirectoryEntry_Handler(DirectoryEntry_Handler p_handler) {
+        m_DirectoryEntry_handler = p_handler;
+    }
+    void set_DirectoryListRequest_Handler(DirectoryListRequest_Handler p_handler) {
+        m_DirectoryListRequest_handler = p_handler;
+    }
+    void set_DirectoryList_Handler(DirectoryList_Handler p_handler) {
+        m_DirectoryList_handler = p_handler;
+    }
+
 private:
 
     Message_Handler m_Message_handler;

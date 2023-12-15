@@ -53,6 +53,11 @@ void menu(void* scrSeg);
  */
 void connect_window(void* scrSeg, char *ip[4], int error, const char *errorText);
 
+/**
+ *The window to get the host password
+ **/
+void password_window(void* scrSeg, char* pwd, int error, const char* errorText);
+
 #endif
 
 

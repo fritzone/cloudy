@@ -40,7 +40,7 @@ compile_options = -0 -oh -q -oa -os -s -xs $(memory_model) -DCFG_H=\"cloud.cfg\"
 compile_options += -i=$(include_dir) -i=$(tcp_h_dir) -i=$(common_h_dir) -i=. -i=$(msg_prot_dir)
 
 tcpobjs = packet.o arp.o eth.o ip.o tcp.o tcpsockm.o utils.o udp.o dns.o timer.o ipasm.o trace.o
-objs = cloud.o ezxml.o dos_scrn.o dos_cgui.o dos_neti.o list.o filelist.o prot.o inputip.o guistate.o brwsfldr.o logstrm.o net_stts.o
+objs = cloud.o ezxml.o dos_scrn.o dos_cgui.o dos_neti.o list.o filelist.o prot.o inputip.o guistate.o brwsfldr.o logstrm.o net_stts.o dos_pwds.o
 
 all : clean cloud.exe
 

@@ -6,6 +6,19 @@
 #include <stdio.h>
 
 #include <vector>
+#include <map>
+
+/**
+ *  Contains all the states the GUI can go through
+ **/
+enum GuiStates
+{
+    State_PasswordRequested = 1,    // From InputIp -> InputPassword
+    State_GoBrowsing = 2,           // From InputIp -> BrowseFolders
+
+    State_Invalid = 1024
+};
+
 
 class CursorRaii;
 
@@ -16,7 +29,8 @@ class GuiState
 {
 public:
 
-    GuiState(GuiState* next, GuiState* prev);
+    GuiState();
+    virtual ~GuiState() {}
 
     virtual void onRefreshContent() = 0;
 
@@ -53,15 +67,15 @@ public:
 
 public:
 
-    void setNextState(GuiState* nexts);
-    void setrPreviousState(GuiState* prevs);
+    void setNextState(GuiStates state, GuiState* nexts);
+    void setrPreviousState(GuiStates state, GuiState* prevs);
     CursorRaii *getCursor() const;
     void setCursor(CursorRaii *newCursor);
 
 public:
 
-    GuiState* next;
-    GuiState* prev;
+    std::map<GuiStates, GuiState*> m_nexts;
+    std::map<GuiStates, GuiState*> m_prevs;
     CursorRaii* cursor;
 };
 
@@ -75,8 +89,8 @@ public:
     void logStates();
 
     void init(GuiState* s);
-    int advance(void*);
-    void previous();
+    int advance(void*, GuiStates);
+    int previous(void*, GuiStates);
 
     static void reportError(const char*);
     static const char* getError();

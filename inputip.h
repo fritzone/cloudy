@@ -4,15 +4,15 @@
 #include "guistate.h"
 
 /**
- * @brief The InputIpState class is the state in which the GUI expects for an IP to be entered in the
+ * @brief The GuiState_InputIp class is the state in which the GUI expects for an IP to be entered in the
  * right side of the frame, there is no right frame shown
  */
-class InputIpState : public GuiState
+class GuiState_InputIp : public GuiState
 {
 public:
-    InputIpState(GuiState* next, GuiState* prev);
+    GuiState_InputIp();
 
-    ~InputIpState();
+    ~GuiState_InputIp();
 
     virtual void paint(void* screen);
 
@@ -29,7 +29,7 @@ public:
 
     const char* getIp();
 
-public:
+private:
 
     char** ip;
     int currentSegment;

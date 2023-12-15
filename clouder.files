@@ -41,6 +41,8 @@ dos_cgui.cpp
 dos_cgui.h
 dos_neti.cpp
 dos_neti.h
+dos_pwds.cpp
+dos_pwds.h
 dos_scrn.cpp
 dos_scrn.h
 ezxml.c
