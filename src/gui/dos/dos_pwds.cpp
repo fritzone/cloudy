@@ -1,6 +1,7 @@
 #include "dos_pwds.h"
 #include "dos_cgui.h"
 #include "log.h"
+#include <guistmch.h>
 
 void GuiState_PasswordScreen::paint(void *screen)
 {

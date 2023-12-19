@@ -1,12 +1,7 @@
 #ifndef GUISTATE_H
 #define GUISTATE_H
 
-#include "list.h"
-
-#include <stdio.h>
-
-#include <vector>
-#include <map>
+#include <state.h>
 
 /**
  *  Contains all the states the GUI can go through
@@ -25,13 +20,14 @@ class CursorRaii;
 /**
  * @brief The GuiState class represents a class that holds the state of the current GUI
  */
-class GuiState
+class GuiState : public State
 {
 public:
 
     GuiState();
     virtual ~GuiState() {}
 
+    // called when the content of the GUI needs to be refreshed
     virtual void onRefreshContent() = 0;
 
     // called when the Enter key was pressed.
@@ -67,46 +63,16 @@ public:
 
 public:
 
-    void setNextState(GuiStates state, GuiState* nexts);
-    void setrPreviousState(GuiStates state, GuiState* prevs);
+    // cursor handling
     CursorRaii *getCursor() const;
+
+    // sets the cursor handling class
     void setCursor(CursorRaii *newCursor);
 
 public:
 
-    std::map<GuiStates, GuiState*> m_nexts;
-    std::map<GuiStates, GuiState*> m_prevs;
     CursorRaii* cursor;
 };
 
-
-class GuiStatemachine
-{
-public:
-
-    static GuiStatemachine& instance();
-
-    void logStates();
-
-    void init(GuiState* s);
-    int advance(void*, GuiStates);
-    int previous(void*, GuiStates);
-
-    static void reportError(const char*);
-    static const char* getError();
-
-    GuiState *getCurrentState() const;
-    void addState(GuiState*);
-
-private:
-
-    GuiStatemachine();
-
-private:
-
-    GuiState* currentState;
-    std::vector<GuiState*> states;
-    std::string error;
-};
 
 #endif // GUISTATE_H

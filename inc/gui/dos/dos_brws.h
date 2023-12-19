@@ -1,7 +1,9 @@
 #ifndef BRWSFLDR_H
 #define BRWSFLDR_H
 
-#include "guistate.h"
+#include <guistate.h>
+#include <list.h>
+#include <stdio.h>
 
 #include <set>
 

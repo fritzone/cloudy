@@ -1,5 +1,5 @@
 #include "dos_neti.h"
-#include "guistate.h"
+#include "guistmch.h"
 #include "log.h"
 
 #include <timer.h>
@@ -98,7 +98,7 @@ bool DosMTcpIpIface::connect(void* sock, const char* where, uint16_t port)
 
     if(rc2 < 0)
     {
-        GuiStatemachine::reportError("Connection failed, cannot resolve host?");
+        GuiStatemachine::instance().reportError("Connection failed, cannot resolve host?");
         return false;
     }
 
@@ -116,7 +116,7 @@ bool DosMTcpIpIface::connect(void* sock, const char* where, uint16_t port)
                     << (int)serverAddr[2] << "."
                     << (int)serverAddr[3] << "."
                     << ":" << port  << "/" << where << ", rc =" << rc;
-        GuiStatemachine::reportError("Connection failed, is cloudy peer running?");
+        GuiStatemachine::instance().reportError("Connection failed, is cloudy peer running?");
         return false;
     }
 

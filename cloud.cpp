@@ -21,10 +21,12 @@
 #include "messager.h"
 #include <shar_ptr.h>
 
+#include "guistmch.h"
+
 // the various states of the gui
 #include "guistate.h"
 #include "inputip.h"
-#include "brwsfldr.h"
+#include "dos_brws.h"
 #include "net_stts.h"
 #include "dos_pwds.h"
 #include "prot.h"

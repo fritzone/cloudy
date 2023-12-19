@@ -1,9 +1,10 @@
-#include "brwsfldr.h"
+#include "dos_brws.h"
 #include "filestrc.h"
 #include "filelist.h"
 #include "list.h"
 #include "dos_cgui.h"
 #include "log.h"
+#include <guistmch.h>
 
 #include <dos.h>
 #include <string.h>

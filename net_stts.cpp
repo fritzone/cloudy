@@ -3,7 +3,7 @@
 #include "guistate.h"
 #include "ezxml.h"
 #include "log.h"
-
+#include "guistmch.h"
 #include "net_ifce.h"
 #include "dos_neti.h"
 #include "prot.h"
@@ -40,7 +40,7 @@ int NetState_TryConnect::execute(void * d)
     if(netIface == NULL)
     {
         log_info() << "Network setup failed";
-        GuiStatemachine::reportError("Network setup failed");
+        GuiStatemachine::instance().reportError("Network setup failed");
         messager(MSG_CONNECTION_FAILED, NULL);
         tried = false;
         return 1;
@@ -51,7 +51,7 @@ int NetState_TryConnect::execute(void * d)
     if(netIface->setup() == false)
     {
         log_info() << "Network setup failed";
-        GuiStatemachine::reportError("Network setup failed");
+        GuiStatemachine::instance().reportError("Network setup failed");
         messager(MSG_CONNECTION_FAILED, NULL);
         tried = false;
         return 1;
@@ -62,7 +62,7 @@ int NetState_TryConnect::execute(void * d)
     if(clientSocket == NULL)
     {
         log_info() << "Network setup failed, cannot get socket";
-        GuiStatemachine::reportError("Network setup failed, cannot get socket.");
+        GuiStatemachine::instance().reportError("Network setup failed, cannot get socket.");
         messager(MSG_CONNECTION_FAILED, NULL);
         tried = false;
         return 1;

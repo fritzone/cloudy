@@ -32,6 +32,7 @@ msg_prot_dir = ./msg_prot
 include_dir = ./inc
 include_utils_dir = $(include_dir)/utils
 include_gui_dir = $(include_dir)/gui
+include_statemachine_dir = $(include_dir)/states
 include_dos_gui_dir = $(include_gui_dir)/dos
 src_dir = ./src
 
@@ -40,10 +41,10 @@ src_dir = ./src
 
 memory_model = -ml
 compile_options = -0 -oh -q -oa -os -s -xs $(memory_model) -DCFG_H=\"cloud.cfg\"
-compile_options += -i=$(include_dir) -i=$(tcp_h_dir) -i=$(common_h_dir) -i=. -i=$(msg_prot_dir) -i=$(include_utils_dir) -i=$(include_gui_dir) -i=$(include_dos_gui_dir)
+compile_options += -i=$(include_dir) -i=$(tcp_h_dir) -i=$(common_h_dir) -i=. -i=$(msg_prot_dir) -i=$(include_utils_dir) -i=$(include_gui_dir) -i=$(include_dos_gui_dir) -i=$(include_statemachine_dir)
 
 tcpobjs = packet.o arp.o eth.o ip.o tcp.o tcpsockm.o utils.o udp.o dns.o timer.o ipasm.o trace.o
-objs = cloud.o ezxml.o dos_neti.o prot.o guistate.o net_stts.o
+objs = cloud.o ezxml.o dos_neti.o prot.o net_stts.o
 
 all : clean cloud.exe
 
@@ -54,7 +55,7 @@ clean : .symbolic
 
 .asm : $(tcp_c_dir)
 
-.cpp : $(tcp_c_dir);$(msg_prot_dir);$(src_dir);$(utils_dir);$(gui_dir);$(dos_gui_dir)
+.cpp : $(tcp_c_dir);$(msg_prot_dir);$(src_dir);$(utils_dir);$(gui_dir);$(dos_gui_dir);$(states_dir)
 
 .c : $(tcp_c_dir)
 
@@ -67,6 +68,6 @@ clean : .symbolic
 .c.o :
   wpp $[* $(compile_options)
 
-cloud.exe: $(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs)
-  wlink System dos debug watcom all OPtion map OPtion eliminate OPtion stack=4096 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs)}
+cloud.exe: $(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs) $(states_objs)
+  wlink System dos debug watcom all OPtion map OPtion eliminate OPtion stack=4096 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs) $(states_objs)}
 

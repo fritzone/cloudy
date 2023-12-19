@@ -3,6 +3,7 @@
 #include "dos_scrn.h"
 #include "log.h"
 #include "messager.h"
+#include <guistmch.h>
 
 #include <ctype.h>
 #include <string.h>
