@@ -31,7 +31,7 @@ std::string timeToStr(time_t &time)
 void do_log(const std::string& msg)
 {
     std::ofstream fs;
-    fs.open("dds.log", std::ios::app | std::ios::out);
+    fs.open("clouder.log", std::ios::app | std::ios::out);
 
     std::time_t currentTime = std::time(NULL);
     std::string cts = timeToStr(currentTime);

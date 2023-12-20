@@ -7,6 +7,10 @@ GuiState::GuiState()
 {
 }
 
+GuiState::~GuiState()
+{
+}
+
 CursorRaii *GuiState::getCursor() const
 {
     return cursor;

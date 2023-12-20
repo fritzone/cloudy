@@ -25,7 +25,7 @@ class GuiState : public State
 public:
 
     GuiState();
-    virtual ~GuiState() {}
+    virtual ~GuiState();
 
     // called when the content of the GUI needs to be refreshed
     virtual void onRefreshContent() = 0;
