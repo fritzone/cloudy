@@ -1,5 +1,6 @@
 # cloudy
-For the cloudy infrastructure
+cloudy is a tool that will allow you to copy files from/to DOS systems, running 
+in 86Box or some other emulator that can emulate network cards.
 
 ## Building
 
