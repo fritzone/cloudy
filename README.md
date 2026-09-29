@@ -2,6 +2,8 @@
 cloudy is a tool that will allow you to copy files from/to DOS systems, running 
 in 86Box or some other emulator that can emulate network cards.
 
+TLDR: get the floppy image from the **dist** directory, mount, run install.
+
 ## Building
 
 cloudy is cross compiled on Linux (x86-64) with Open Watcom into a 16-bit DOS
