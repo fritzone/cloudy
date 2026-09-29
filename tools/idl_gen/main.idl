@@ -133,3 +133,19 @@ class FileWriteReply: Message
     ok: bool
     error: string
 }
+
+// DOS -> Linux, creates a directory in the parent (it is fine if it exists)
+class MakeDirectoryRequest: Message
+{
+    parent_hash: string
+    name: string
+}
+
+// Linux -> DOS, hash refers to the directory in further requests
+class MakeDirectoryReply: Message
+{
+    name: string
+    hash: string
+    ok: bool
+    error: string
+}

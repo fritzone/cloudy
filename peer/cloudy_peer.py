@@ -213,6 +213,34 @@ class Session:
             log.warning("Cannot write %s: %s", name, reply.error)
         self.send(reply)
 
+    def on_MakeDirectoryRequest(self, msg):
+        reply = proto.MakeDirectoryReply(name=msg.name)
+        parent = self.resolve(msg.parent_hash)
+        name = msg.name
+
+        if parent is None or not os.path.isdir(parent):
+            reply.error = "Unknown directory"
+        elif not name or name in (".", "..") or "/" in name or "\0" in name:
+            reply.error = "Invalid directory name"
+        else:
+            path = os.path.join(parent, name)
+            real = os.path.realpath(path)
+            if not real.startswith(self.root + os.sep):
+                reply.error = "Outside of the served directory"
+            else:
+                try:
+                    if not os.path.isdir(path):
+                        log.info("Creating %s", path)
+                        os.mkdir(path)
+                    reply.hash = self.hash_of(path)
+                    reply.ok = True
+                except OSError as e:
+                    reply.error = e.strerror or str(e)
+
+        if reply.error:
+            log.warning("Cannot create directory %s: %s", name, reply.error)
+        self.send(reply)
+
 
 class Handler(socketserver.BaseRequestHandler):
 

@@ -18,6 +18,8 @@ ezxml.c
     filedata.cpp
     filewrit.cpp
     filewr1.cpp
+    makedire.cpp
+    makedi1.cpp
     protocol.cpp
 
 )

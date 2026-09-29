@@ -234,6 +234,28 @@ class FileWriteReply(Message):
         self.message_id = next(_sequence)
 
 
+class MakeDirectoryRequest(Message):
+    NAME = "MakeDirectoryRequest"
+    FIELDS = Message.FIELDS + (("parent_hash", "string", "string"), ("name", "string", "string"), )
+
+    def __init__(self, parent_hash="", name=""):
+        self.parent_hash = parent_hash
+        self.name = name
+        self.message_id = next(_sequence)
+
+
+class MakeDirectoryReply(Message):
+    NAME = "MakeDirectoryReply"
+    FIELDS = Message.FIELDS + (("name", "string", "string"), ("hash", "string", "string"), ("ok", "bool", "bool"), ("error", "string", "string"), )
+
+    def __init__(self, name="", hash="", ok=False, error=""):
+        self.name = name
+        self.hash = hash
+        self.ok = ok
+        self.error = error
+        self.message_id = next(_sequence)
+
+
 _CLASSES = {
     "Message": Message,
     "DirectoryEntry": DirectoryEntry,
@@ -249,6 +271,8 @@ _CLASSES = {
     "FileData": FileData,
     "FileWriteRequest": FileWriteRequest,
     "FileWriteReply": FileWriteReply,
+    "MakeDirectoryRequest": MakeDirectoryRequest,
+    "MakeDirectoryReply": MakeDirectoryReply,
 }
 
 

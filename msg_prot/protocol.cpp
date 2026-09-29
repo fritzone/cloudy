@@ -102,6 +102,22 @@ int Protocol::receive(const char* p_message_type, ezxml_t p_o)
         m_FileWriteReply_handler(&obj);
         return 1;
     }
+    if(!strcmp(p_message_type, "MakeDirectoryRequest"))
+    {
+        if(!m_MakeDirectoryRequest_handler) { log_warning() << "No handler for MakeDirectoryRequest"; return 0; }
+        MakeDirectoryRequest obj;
+        if(!obj.deserialize(p_o)) { log_error() << "Cannot deserialize MakeDirectoryRequest"; return 0; }
+        m_MakeDirectoryRequest_handler(&obj);
+        return 1;
+    }
+    if(!strcmp(p_message_type, "MakeDirectoryReply"))
+    {
+        if(!m_MakeDirectoryReply_handler) { log_warning() << "No handler for MakeDirectoryReply"; return 0; }
+        MakeDirectoryReply obj;
+        if(!obj.deserialize(p_o)) { log_error() << "Cannot deserialize MakeDirectoryReply"; return 0; }
+        m_MakeDirectoryReply_handler(&obj);
+        return 1;
+    }
     log_warning() << "Unknown message:" << p_message_type;
     return 0;
 }
@@ -164,5 +180,15 @@ FileWriteRequest* Protocol::create_FileWriteRequest(const std::string& p_directo
 FileWriteReply* Protocol::create_FileWriteReply(const std::string& p_name, long p_offset, bool p_ok, const std::string& p_error)
 {
     return new FileWriteReply(p_name, p_offset, p_ok, p_error);
+}
+
+MakeDirectoryRequest* Protocol::create_MakeDirectoryRequest(const std::string& p_parent_hash, const std::string& p_name)
+{
+    return new MakeDirectoryRequest(p_parent_hash, p_name);
+}
+
+MakeDirectoryReply* Protocol::create_MakeDirectoryReply(const std::string& p_name, const std::string& p_hash, bool p_ok, const std::string& p_error)
+{
+    return new MakeDirectoryReply(p_name, p_hash, p_ok, p_error);
 }
 

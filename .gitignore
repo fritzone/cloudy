@@ -35,4 +35,3 @@
 *.map
 CLOUDER.LOG
 __pycache__/
-dist/

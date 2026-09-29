@@ -18,6 +18,8 @@
 #include <filedata.h>
 #include <filewrit.h>
 #include <filewr1.h>
+#include <makedire.h>
+#include <makedi1.h>
 
 // Protocol message handler types
 typedef void(*ConnectRequest_Handler)(const ConnectRequest*);
@@ -32,11 +34,13 @@ typedef void(*FileReadRequest_Handler)(const FileReadRequest*);
 typedef void(*FileData_Handler)(const FileData*);
 typedef void(*FileWriteRequest_Handler)(const FileWriteRequest*);
 typedef void(*FileWriteReply_Handler)(const FileWriteReply*);
+typedef void(*MakeDirectoryRequest_Handler)(const MakeDirectoryRequest*);
+typedef void(*MakeDirectoryReply_Handler)(const MakeDirectoryReply*);
 
 class Protocol {
 public:
 
-    Protocol() : m_ConnectRequest_handler(NULL), m_ConnectionRequestReply_handler(NULL), m_Authenticate_handler(NULL), m_AuthenticationStatus_handler(NULL), m_StatusRequest_handler(NULL), m_Status_handler(NULL), m_DirectoryListRequest_handler(NULL), m_DirectoryList_handler(NULL), m_FileReadRequest_handler(NULL), m_FileData_handler(NULL), m_FileWriteRequest_handler(NULL), m_FileWriteReply_handler(NULL)
+    Protocol() : m_ConnectRequest_handler(NULL), m_ConnectionRequestReply_handler(NULL), m_Authenticate_handler(NULL), m_AuthenticationStatus_handler(NULL), m_StatusRequest_handler(NULL), m_Status_handler(NULL), m_DirectoryListRequest_handler(NULL), m_DirectoryList_handler(NULL), m_FileReadRequest_handler(NULL), m_FileData_handler(NULL), m_FileWriteRequest_handler(NULL), m_FileWriteReply_handler(NULL), m_MakeDirectoryRequest_handler(NULL), m_MakeDirectoryReply_handler(NULL)
     {}
 
     virtual ~Protocol() {}
@@ -54,6 +58,8 @@ public:
     FileData* create_FileData(const std::string& p_file_hash, long p_offset, const std::string& p_data, bool p_eof, const std::string& p_error);
     FileWriteRequest* create_FileWriteRequest(const std::string& p_directory_hash, const std::string& p_name, long p_offset, const std::string& p_data, bool p_last);
     FileWriteReply* create_FileWriteReply(const std::string& p_name, long p_offset, bool p_ok, const std::string& p_error);
+    MakeDirectoryRequest* create_MakeDirectoryRequest(const std::string& p_parent_hash, const std::string& p_name);
+    MakeDirectoryReply* create_MakeDirectoryReply(const std::string& p_name, const std::string& p_hash, bool p_ok, const std::string& p_error);
 
     // message handler setters
     void set_ConnectRequest_Handler(ConnectRequest_Handler p_handler) {
@@ -92,6 +98,12 @@ public:
     void set_FileWriteReply_Handler(FileWriteReply_Handler p_handler) {
         m_FileWriteReply_handler = p_handler;
     }
+    void set_MakeDirectoryRequest_Handler(MakeDirectoryRequest_Handler p_handler) {
+        m_MakeDirectoryRequest_handler = p_handler;
+    }
+    void set_MakeDirectoryReply_Handler(MakeDirectoryReply_Handler p_handler) {
+        m_MakeDirectoryReply_handler = p_handler;
+    }
 
     /**
      * Deserializes the given <o> node as the message type and calls its handler.
@@ -113,6 +125,8 @@ private:
     FileData_Handler m_FileData_handler;
     FileWriteRequest_Handler m_FileWriteRequest_handler;
     FileWriteReply_Handler m_FileWriteReply_handler;
+    MakeDirectoryRequest_Handler m_MakeDirectoryRequest_handler;
+    MakeDirectoryReply_Handler m_MakeDirectoryReply_handler;
 
 };
 #endif

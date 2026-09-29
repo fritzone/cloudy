@@ -7,11 +7,13 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 class Status;
 class DirectoryList;
 class FileData;
 class FileWriteReply;
+class MakeDirectoryReply;
 class Transfer;
 
 /**
@@ -53,6 +55,7 @@ public:
     void onDirectoryList(const DirectoryList* dl);
     void onFileData(const FileData* fd);
     void onFileWriteReply(const FileWriteReply* r);
+    void onMakeDirectoryReply(const MakeDirectoryReply* r);
 
 private:
 
@@ -64,6 +67,23 @@ private:
 
     // copies the selected (or the current) files from the focused panel to the other one
     void startCopy();
+
+    // go to the parent directory, the cursor goes to the directory we leave
+    void localUp();
+    void remoteUp();
+
+    // reads the local directory again, keeping the cursor on the same entry
+    void refreshLocalKeepingPosition();
+
+    // asks for the listing, the cursor goes to the given entry when it arrives
+    void requestRemoteDirSelecting(const std::string& hash, const std::string& name, int row);
+
+    // where the cursor was in a directory, when we entered one of its subdirectories
+    struct Position
+    {
+        std::string name;
+        int row;
+    };
 
 public:
 
@@ -88,6 +108,14 @@ public:
     bool remoteLoading;
     std::string remoteStatus;
     unsigned long remoteFreeKB;
+
+    // the positions in the directories above the current ones
+    std::vector<Position> localHistory;
+    std::vector<Position> remoteHistory;
+
+    // the entry to select (at the row) when the remote listing arrives
+    std::string remoteSelectName;
+    int remoteSelectRow;
 
     // the running copy, if any
     Transfer* transfer;

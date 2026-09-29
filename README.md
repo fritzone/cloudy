@@ -109,8 +109,13 @@ backend, the packet driver and an mTCP config (`10.0.2.15`, host is
 into `CLOUDER.LOG` (warnings and errors only by default).
 
 Keys: `Tab` switches panels, `Enter` opens a directory, `Backspace` goes up,
-`Ins` selects, `F5` copies the selected (or the current) files to the other
-panel, `Esc` cancels a copy or quits. Directories are not copied yet.
+`Ins` selects, `F5` copies the selected (or the current) files and directories
+to the other panel, directories with everything in them, `Esc` cancels a copy
+or quits.
+
+Copying many small files is slow in DOSBox-X, about 6 files a second: its
+emulation adds a delay to every request/reply round. The same copy runs at
+over 100 files a second in 86Box, so this is not what a real machine does.
 
 ## The DOS installation package
 

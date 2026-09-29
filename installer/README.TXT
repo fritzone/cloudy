@@ -68,13 +68,16 @@ Keys:
   Tab         switch between the panels
   Enter       open a directory
   Backspace   go to the parent directory
-  Ins         select a file
-  F5          copy the selected files (or the current one) to the other panel
+  Ins         select a file or directory
+  F5          copy the selected files and directories (or the current one) to
+              the other panel, directories with everything in them
   Esc         cancel a copy, or quit
 
-Long Linux file names become DOS 8.3 names when copied to DOS. Directories
-are not copied yet. CLOUD /V or CLOUD /D writes more details into
-CLOUDER.LOG.
+Long Linux file and directory names become DOS 8.3 names when copied to DOS,
+two names which would become the same get a ~1, ~2, ... at the end. Existing
+files are overwritten, existing directories are copied into.
+
+CLOUD /V or CLOUD /D writes more details into CLOUDER.LOG.
 
 
 If it does not work

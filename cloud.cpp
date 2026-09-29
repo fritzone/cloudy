@@ -242,6 +242,11 @@ static void __far onFileWriteReply(const FileWriteReply* r)
     browseState->onFileWriteReply(r);
 }
 
+static void __far onMakeDirectoryReply(const MakeDirectoryReply* r)
+{
+    browseState->onMakeDirectoryReply(r);
+}
+
 void interrupt newInt6Handler() {
     // Your custom interrupt handling code
     printf("int6 handler!\n");
@@ -271,6 +276,7 @@ int main(int argc, char* argv[])
     p.set_DirectoryList_Handler(onDirectoryList);
     p.set_FileData_Handler(onFileData);
     p.set_FileWriteReply_Handler(onFileWriteReply);
+    p.set_MakeDirectoryReply_Handler(onMakeDirectoryReply);
 
     size_t avl_beg = _memavl(), max_meg = _memmax();
     atexit(shutdownNetwork);

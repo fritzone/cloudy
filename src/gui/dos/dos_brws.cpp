@@ -17,12 +17,86 @@
 
 extern ProtocolImpl p;
 
+// The row of the cursor in the panel, 0 is the top
+static int cursorRow(LinkedList* list)
+{
+    if(list == NULL || list->displayStart == NULL || list->currentSelected == NULL)
+    {
+        return 0;
+    }
+    int row = distance(list->displayStart, list->currentSelected);
+    return row < frameContentSize() ? row : 0;
+}
+
+// Puts the cursor on the entry with the name, at the given row if the list allows it.
+// Returns false if there is no such entry.
+static bool selectEntry(LinkedList* list, const std::string& name, int row, bool ignoreCase)
+{
+    int index = 0;
+    Node* q = list->head;
+    for(; q; q = q->next, index++)
+    {
+        const char* sname = ((FileStructure*)q->data)->sname;
+        if(ignoreCase ? !stricmp(sname, name.c_str()) : name == sname)
+        {
+            break;
+        }
+    }
+    if(q == NULL)
+    {
+        return false;
+    }
+
+    if(row < 0) row = 0;
+    if(row >= frameContentSize()) row = frameContentSize() - 1;
+    if(row > index) row = index;
+
+    Node* start = list->head;
+    for(int i = 0; i < index - row; i++)
+    {
+        start = start->next;
+    }
+    list->displayStart = start;
+    list->currentSelected = q;
+    return true;
+}
+
+// The last part of a path, the directory name
+static std::string lastPart(const std::string& path, char separator)
+{
+    std::string p = path;
+    while(p.length() > 1 && p[p.length() - 1] == separator)
+    {
+        p.erase(p.length() - 1);
+    }
+    size_t at = p.find_last_of(separator);
+    return at == std::string::npos ? p : p.substr(at + 1);
+}
+
+// Takes the saved position of the directory we leave, if there is one
+static int takePosition(std::vector<BrowseFoldersState::Position>& history, const std::string& name, bool ignoreCase)
+{
+    if(!history.empty())
+    {
+        BrowseFoldersState::Position pos = history.back();
+        history.pop_back();
+        if(ignoreCase ? !stricmp(pos.name.c_str(), name.c_str()) : pos.name == name)
+        {
+            return pos.row;
+        }
+        // it was not the one we came through, forget the rest too
+        history.clear();
+    }
+    // somewhere in the middle
+    return frameContentSize() / 2;
+}
+
 // Every remote entry takes around 100 bytes, we cannot keep huge directories
 #define MAX_REMOTE_ENTRIES 600
 
 BrowseFoldersState::BrowseFoldersState() : GuiState(),
     workDrive(0), diskFree(0), localFiles(NULL), remoteFocused(false),
-    remoteFiles(NULL), remoteLoading(false), remoteFreeKB(0),
+    remoteFiles(NULL), remoteLoading(false), remoteFreeKB(0), remoteSelectRow(0),
     transfer(NULL), lastProgressPaint(0)
 {
     memset(cwd, 0, sizeof(cwd));
@@ -120,6 +194,8 @@ void BrowseFoldersState::onDisconnected()
     remoteDirHash = "";
     remoteLoading = false;
     remoteStatus = "Not connected";
+    remoteHistory.clear();
+    remoteSelectName = "";
     remoteFocused = false;
 }
 
@@ -159,6 +235,12 @@ void BrowseFoldersState::onDirectoryList(const DirectoryList* dl)
 {
     requestRepaint();
 
+    // the listings of a directory being copied
+    if(transfer && transfer->onDirectoryList(dl))
+    {
+        return;
+    }
+
     if(!dl->get_error().empty())
     {
         remoteStatus = dl->get_error();
@@ -193,6 +275,19 @@ void BrowseFoldersState::onDirectoryList(const DirectoryList* dl)
             return;
         }
         remoteFiles->size += fs->file_size;
+    }
+
+    // back in a directory: the cursor goes where it was, unless it was moved meanwhile
+    if(!remoteSelectName.empty())
+    {
+        if(remoteFiles->currentSelected != remoteFiles->head)
+        {
+            remoteSelectName = "";
+        }
+        else if(selectEntry(remoteFiles, remoteSelectName, remoteSelectRow, false))
+        {
+            remoteSelectName = "";
+        }
     }
 
     if(remoteFiles->count >= MAX_REMOTE_ENTRIES && remoteFiles->count < dl->get_total())
@@ -234,6 +329,14 @@ void BrowseFoldersState::onFileWriteReply(const FileWriteReply* r)
     }
 }
 
+void BrowseFoldersState::onMakeDirectoryReply(const MakeDirectoryReply* r)
+{
+    if(transfer)
+    {
+        transfer->onMakeDirectoryReply(r);
+    }
+}
+
 void BrowseFoldersState::onEnter()
 {
     LinkedList* panel = focusedPanel();
@@ -250,12 +353,33 @@ void BrowseFoldersState::onEnter()
 
     if(remoteFocused)
     {
-        if(!remoteLoading)
+        if(remoteLoading)
         {
-            requestRemoteDir(fs->hash);
+            return;
         }
+        if(!strcmp(fs->sname, ".."))
+        {
+            remoteUp();
+            return;
+        }
+        Position pos;
+        pos.name = fs->sname;
+        pos.row = cursorRow(remoteFiles);
+        remoteHistory.push_back(pos);
+        requestRemoteDir(fs->hash);
         return;
     }
+
+    if(!strcmp(fs->sname, ".."))
+    {
+        localUp();
+        return;
+    }
+
+    Position pos;
+    pos.name = fs->sname;
+    pos.row = cursorRow(localFiles);
+    localHistory.push_back(pos);
 
     getcwd(cwd, PATH_MAX + 1);
     if(cwd[strlen(cwd) - 1] != '\\')
@@ -278,8 +402,9 @@ void BrowseFoldersState::paint(void *screen)
     menu(screen);
     if(!infoText.empty())
     {
-        char t[36] = {0};
-        strncpy(t, infoText.c_str(), 35);
+        // the room right of the menu
+        char t[29] = {0};
+        strncpy(t, infoText.c_str(), 28);
         writeString(79 - strlen(t), 24, White, Blue, t, screen);
     }
 
@@ -365,20 +490,63 @@ void BrowseFoldersState::onBackspace()
 
     if(remoteFocused)
     {
-        // the peer sends the parent as the first entry
-        Node* first = remoteFiles->head;
-        if(first && !remoteLoading && !strcmp(((FileStructure*)first->data)->sname, ".."))
-        {
-            requestRemoteDir(((FileStructure*)first->data)->hash);
-        }
+        remoteUp();
         return;
     }
 
-    if(strlen(cwd) > 3)
+    localUp();
+}
+
+void BrowseFoldersState::localUp()
+{
+    if(strlen(cwd) <= 3)
     {
-        _chdir("..");
-        refreshLocal();
+        return;
     }
+
+    std::string left = lastPart(cwd, '\\');
+    int row = takePosition(localHistory, left, true);
+
+    _chdir("..");
+    refreshLocal();
+    selectEntry(localFiles, left, row, true);
+}
+
+void BrowseFoldersState::remoteUp()
+{
+    // the peer sends the parent as the first entry
+    Node* first = remoteFiles->head;
+    if(first == NULL || remoteLoading || strcmp(((FileStructure*)first->data)->sname, ".."))
+    {
+        return;
+    }
+
+    std::string left = lastPart(remoteDirName, '/');
+    int row = takePosition(remoteHistory, left, false);
+    requestRemoteDirSelecting(((FileStructure*)first->data)->hash, left, row);
+}
+
+void BrowseFoldersState::refreshLocalKeepingPosition()
+{
+    std::string name;
+    int row = cursorRow(localFiles);
+    if(localFiles && localFiles->currentSelected)
+    {
+        name = ((FileStructure*)localFiles->currentSelected->data)->sname;
+    }
+
+    refreshLocal();
+    if(!name.empty())
+    {
+        selectEntry(localFiles, name, row, true);
+    }
+}
+
+void BrowseFoldersState::requestRemoteDirSelecting(const std::string& hash, const std::string& name, int row)
+{
+    requestRemoteDir(hash);
+    remoteSelectName = name;
+    remoteSelectRow = row;
 }
 
 void BrowseFoldersState::onTab()
@@ -442,10 +610,8 @@ void BrowseFoldersState::startCopy()
         return;
     }
 
-    // the selected files, or the current one if none is selected
+    // the selected files and directories, or the current one if none is selected
     std::vector<Transfer::Item> items;
-    int skipped = 0;
-    bool anySelected = false;
     for(Node* q = panel->head; q; q = q->next)
     {
         FileStructure* fs = (FileStructure*)q->data;
@@ -453,41 +619,33 @@ void BrowseFoldersState::startCopy()
         {
             continue;
         }
-        anySelected = true;
         fs->is_selected = false;
 
-        if(fs->is_dir)
-        {
-            skipped++;
-            continue;
-        }
         Transfer::Item it;
         it.name = fs->sname;
         it.hash = fs->hash ? fs->hash : "";
         it.size = fs->file_size;
+        it.isDir = fs->is_dir;
         items.push_back(it);
     }
 
-    if(!anySelected && panel->currentSelected)
+    if(items.empty() && panel->currentSelected)
     {
         FileStructure* fs = (FileStructure*)panel->currentSelected->data;
-        if(fs->is_dir)
-        {
-            skipped++;
-        }
-        else
+        if(strcmp(fs->sname, ".."))
         {
             Transfer::Item it;
             it.name = fs->sname;
             it.hash = fs->hash ? fs->hash : "";
             it.size = fs->file_size;
+            it.isDir = fs->is_dir;
             items.push_back(it);
         }
     }
 
     if(items.empty())
     {
-        infoText = skipped ? "Copying directories is not supported yet" : "Nothing to copy";
+        infoText = "Nothing to copy";
         return;
     }
 
@@ -511,13 +669,19 @@ void BrowseFoldersState::onRefreshContent()
         delete transfer;
         transfer = NULL;
 
+        // the copied entries show up, the cursors stay where they were
         if(d == Transfer::Download)
         {
-            refreshLocal();
+            refreshLocalKeepingPosition();
         }
         else
         {
-            requestRemoteDir(remoteDirHash);
+            std::string name;
+            if(remoteFiles->currentSelected)
+            {
+                name = ((FileStructure*)remoteFiles->currentSelected->data)->sname;
+            }
+            requestRemoteDirSelecting(remoteDirHash, name, cursorRow(remoteFiles));
         }
         requestRepaint();
         return;
