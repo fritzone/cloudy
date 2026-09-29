@@ -2,10 +2,14 @@
 #define __AUTHENTICATE_H__
 #include "message.h"
 #include <string>
+#include "ezxml.h"
 class Authenticate: public Message
 {
 public:
-    Authenticate(const std::string& p_user_name_hash = std::string(), const std::string& p_password_hash = std::string(), int p_message_id =  0) : Message(p_message_id), m_user_name_hash(p_user_name_hash), m_password_hash(p_password_hash)
+    Authenticate() : Message(), m_user_name_hash(), m_password_hash()
+    {}
+
+    Authenticate(const std::string& p_user_name_hash, const std::string& p_password_hash) : Message(), m_user_name_hash(p_user_name_hash), m_password_hash(p_password_hash)
     {}
 
     virtual ~Authenticate() {}
@@ -17,11 +21,11 @@ public:
     void set_password_hash(const std::string& p_password_hash);
 
     // getters
-    std::string get_user_name_hash() const
+    const std::string& get_user_name_hash() const
     {
         return  m_user_name_hash;
     }
-    std::string get_password_hash() const
+    const std::string& get_password_hash() const
     {
         return  m_password_hash;
     }
@@ -29,9 +33,14 @@ public:
     // serializer
     virtual std::string serialize() const;
     virtual int deserialize(const char*);
+    virtual int deserialize(ezxml_t);
 
     // comparison
     bool operator == (const Authenticate&) const;
+
+protected:
+    void serialize_attributes(std::string&) const;
+    int deserialize_attributes(ezxml_t);
 
 private:
     std::string m_user_name_hash;

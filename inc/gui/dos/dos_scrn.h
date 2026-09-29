@@ -4,6 +4,11 @@
 #include <types.h>
 
 /**
+ * Switches to the 80x25 color text mode
+ */
+void setTextMode();
+
+/**
  * Clears the screen at the given segment
  */
 void clearscr(void * scrSeg);

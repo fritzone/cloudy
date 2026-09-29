@@ -1,90 +1,122 @@
 #include "status.h"
 #include "strngify.h"
 
-#include "ezxml.h"
-
 #include <string.h>
+#include <stdlib.h>
 
 
 std::string Status::serialize() const
 {
     std::string result = "<o><type>Status</type>";
     result += "<attributes>";
+    serialize_attributes(result);
+    result += "</attributes></o>";
+    return result;
+}
+
+void Status::serialize_attributes(std::string& result) const
+{
+    Message::serialize_attributes(result);
     // attribute:host_platform
     result += "<host_platform>";
-    result += stringify(m_host_platform);
+    result += xml_escape(m_host_platform);
     result += "</host_platform>";
     // attribute:drives
     result += "<drives>";
-    for(int i=0; i<m_drives.size(); i++) result += "<item i=\"" + stringify(i) + "\">" + stringify(m_drives[i]) + "</item>";
+    for(size_t i=0; i<m_drives.size(); i++)
+    {
+        result += "<item>" + xml_escape(m_drives[i]) + "</item>";
+    }
     result += "</drives>";
     // attribute:free_space
     result += "<free_space>";
-    for(int i=0; i<m_free_space.size(); i++) result += "<item i=\"" + stringify(i) + "\">" + stringify(m_free_space[i]) + "</item>";
+    for(size_t i=0; i<m_free_space.size(); i++)
+    {
+        result += "<item>" + stringify(m_free_space[i]) + "</item>";
+    }
     result += "</free_space>";
     // attribute:working_directories
     result += "<working_directories>";
-    for(int i=0; i<m_working_directories.size(); i++) result += "<item i=\"" + stringify(i) + "\">" + stringify(m_working_directories[i]) + "</item>";
+    for(size_t i=0; i<m_working_directories.size(); i++)
+    {
+        result += "<item>" + xml_escape(m_working_directories[i]) + "</item>";
+    }
     result += "</working_directories>";
     // attribute:current__work_index
     result += "<current__work_index>";
     result += stringify(m_current__work_index);
     result += "</current__work_index>";
-    result += "</attributes>";
-    result += "</o>";
-    return result;
 }
+
 int Status::deserialize(const char* xml)
 {
-    ezxml_t x = ezxml_parse_str((char*)xml, strlen(xml));
+    size_t len = strlen(xml);
+    char* copy = (char*)malloc(len + 1);
+    if(!copy) return 0;
+    memcpy(copy, xml, len + 1);
+    ezxml_t x = ezxml_parse_str(copy, len);
+    int result = deserialize(x);
+    ezxml_free(x);
+    free(copy);
+    return result;
+}
+
+int Status::deserialize(ezxml_t x)
+{
+    if(!x) return 0;
     ezxml_t type_node = ezxml_child(x, "type");
-    const char* str_type = type_node->txt;
-    if(strcmp(str_type, "Status")) return 0;    ezxml_t attrs_node = ezxml_child(x, "attributes");
+    if(!type_node || strcmp(type_node->txt, "Status")) return 0;
+    return deserialize_attributes(ezxml_child(x, "attributes"));
+}
+
+int Status::deserialize_attributes(ezxml_t attrs_node)
+{
     if(!attrs_node) return 0;
+    if(!Message::deserialize_attributes(attrs_node)) return 0;
     ezxml_t attr_node_host_platform = ezxml_child(attrs_node, "host_platform");
-    destringify(m_host_platform, attr_node_host_platform->txt);
+    if(attr_node_host_platform) m_host_platform = attr_node_host_platform->txt;
     ezxml_t attr_node_drives = ezxml_child(attrs_node, "drives");
-    for (ezxml_t item = ezxml_child(attr_node_drives, "item"); item; item = item->next) {
-        std::string l_string;
-        ezxml_t items_o = ezxml_child(item, "o");
-        char * l_attr_data = ezxml_toxml(items_o);
-        destringify(l_string, l_attr_data);
-        free(l_attr_data);
-        m_drives.push_back(l_string);
-
-    }    ezxml_t attr_node_free_space = ezxml_child(attrs_node, "free_space");
-    for (ezxml_t item = ezxml_child(attr_node_free_space, "item"); item; item = item->next) {
-        int l_int;
-        ezxml_t items_o = ezxml_child(item, "o");
-        char * l_attr_data = ezxml_toxml(items_o);
-        destringify(l_int, l_attr_data);
-        free(l_attr_data);
-        m_free_space.push_back(l_int);
-
-    }    ezxml_t attr_node_working_directories = ezxml_child(attrs_node, "working_directories");
-    for (ezxml_t item = ezxml_child(attr_node_working_directories, "item"); item; item = item->next) {
-        std::string l_string;
-        ezxml_t items_o = ezxml_child(item, "o");
-        char * l_attr_data = ezxml_toxml(items_o);
-        destringify(l_string, l_attr_data);
-        free(l_attr_data);
-        m_working_directories.push_back(l_string);
-
-    }    ezxml_t attr_node_current__work_index = ezxml_child(attrs_node, "current__work_index");
-    destringify(m_current__work_index, attr_node_current__work_index->txt);
-
+    m_drives.clear();
+    for(ezxml_t item = ezxml_child(attr_node_drives, "item"); item; item = item->next)
+    {
+        std::string l_item;
+        l_item = item->txt;
+        m_drives.push_back(l_item);
+    }
+    ezxml_t attr_node_free_space = ezxml_child(attrs_node, "free_space");
+    m_free_space.clear();
+    for(ezxml_t item = ezxml_child(attr_node_free_space, "item"); item; item = item->next)
+    {
+        long l_item;
+        l_item = atol(item->txt);
+        m_free_space.push_back(l_item);
+    }
+    ezxml_t attr_node_working_directories = ezxml_child(attrs_node, "working_directories");
+    m_working_directories.clear();
+    for(ezxml_t item = ezxml_child(attr_node_working_directories, "item"); item; item = item->next)
+    {
+        std::string l_item;
+        l_item = item->txt;
+        m_working_directories.push_back(l_item);
+    }
+    ezxml_t attr_node_current__work_index = ezxml_child(attrs_node, "current__work_index");
+    if(attr_node_current__work_index) m_current__work_index = atoi(attr_node_current__work_index->txt);
     return 1;
 }
+
 bool Status::operator == (const Status& rhs) const
 {
     if(!Message::operator ==(rhs)) return false;
     if(m_host_platform != rhs.m_host_platform) return false;
-    // Checking vector
     if(m_drives.size() != rhs.m_drives.size() ) return false;
-    // Checking vector
+    for(size_t i_drives = 0; i_drives < m_drives.size(); i_drives++)
+        if(!(m_drives[i_drives] == rhs.m_drives[i_drives])) return false;
     if(m_free_space.size() != rhs.m_free_space.size() ) return false;
-    // Checking vector
+    for(size_t i_free_space = 0; i_free_space < m_free_space.size(); i_free_space++)
+        if(!(m_free_space[i_free_space] == rhs.m_free_space[i_free_space])) return false;
     if(m_working_directories.size() != rhs.m_working_directories.size() ) return false;
+    for(size_t i_working_directories = 0; i_working_directories < m_working_directories.size(); i_working_directories++)
+        if(!(m_working_directories[i_working_directories] == rhs.m_working_directories[i_working_directories])) return false;
     if(m_current__work_index != rhs.m_current__work_index) return false;
 
     return true;
@@ -97,7 +129,7 @@ void Status::set_drives(const std::vector<std::string>& p_drives)
 {
     m_drives = p_drives;
 }
-void Status::set_free_space(const std::vector<int>& p_free_space)
+void Status::set_free_space(const std::vector<long>& p_free_space)
 {
     m_free_space = p_free_space;
 }

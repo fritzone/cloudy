@@ -14,6 +14,10 @@
 // one step either to enter password screen or the folder browser screen
 #define MSG_CONNECTION_ACKNOWLEDGED     0x04
 
+// Emitted by the Connected network state when the peer closed the connection. Network and Gui go back
+// to the IP input
+#define MSG_DISCONNECTED                0x05
+
 int messager(int, void *data);
 
 #endif // MESSAGER_H

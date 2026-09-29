@@ -55,6 +55,26 @@ static void __far frameTop(int x, int fgc, int bgc, void*scrSeg)
   writeString(x, 2, bgc, fgc, header_3, scrSeg);
 }
 
+/*
+ * Writes the title centered on the top of the frame, if it is too long only its end is shown
+ */
+static void __far frameTitle(int x, int fgc, int bgc, const char* title, void* scrSeg)
+{
+  char t[48] = {0};
+  int len = strlen(title);
+  if(len > 36)
+  {
+    strcpy(t, "...");
+    strcat(t, title + len - 33);
+    len = 36;
+  }
+  else
+  {
+    strcpy(t, title);
+  }
+  writeString(x + 20 - len / 2, 0, bgc, fgc, t, scrSeg);
+}
+
 
 /*
  * Renders the footer of the frame wit hthe given data
@@ -62,25 +82,25 @@ static void __far frameTop(int x, int fgc, int bgc, void*scrSeg)
 static void __far footer(int col, int fg, int bg, LinkedList* files,
                          const std::set<char>& drives,
                          unsigned workDrive,
-                         unsigned long diskFree,
+                         const char* freeStr,
                          unsigned selectedCount,
                          unsigned long selectedBytes,
                          void* scrSeg)
 {
   char s[128] = {0};
-  sprintf(s, "ºTot:%3d   %8sºSel:%3d   %8lubº",
-             files ? files->count : 0 , files ? renderHumanReadableSize(files->size) : "0K",
-             selectedCount, selectedBytes
-             //renderHumanReadableSize(selectedBytes)
-  );
-
+  sprintf(s, "\xBATot:%3d   %8s\xBASel:%3d   %9s\xBA",
+             files ? files->count : 0 , renderHumanReadableSize(files ? (unsigned long)files->size : 0),
+             selectedCount, "");
   writeString(col, 22, bg, fg, s, scrSeg);
+  // the static buffer of renderHumanReadableSize is reused, so this goes separately
+  sprintf(s, "%9s", renderHumanReadableSize(selectedBytes));
+  writeString(col + 30, 22, bg, fg, s, scrSeg);
 
   // disk free status
   char dfree[128] = {0};
-  sprintf(dfree, "º                  º  %c Free: %7s  º",
+  sprintf(dfree, "\xBA                  \xBA  %c Free: %7s  \xBA",
     workDrive == 0 ? ' ' : workDrive + 'A' - 1,
-    renderHumanReadableSize(diskFree)
+    freeStr
   );
 
   writeString(col, 23, bg, fg, dfree, scrSeg);
@@ -122,7 +142,15 @@ static void __far renderString(char* dest, FileStructure* fs)
 {
   if(fs)
   {
-    sprintf(dest, format_R, fs->sname,
+    // long (remote) names do not fit, show their beginning with a ~ at the end
+    char name[13] = {0};
+    strncpy(name, fs->sname, 12);
+    if(strlen(fs->sname) > 12)
+    {
+      name[11] = '~';
+    }
+
+    sprintf(dest, format_R, name,
                 fs->is_dir ? "     <DIR>" : renderHumanReadableSize(fs->file_size),
                 fs->year % 100,
                 fs->month, fs->day, fs->hour, fs->minute);
@@ -133,21 +161,13 @@ static void __far renderString(char* dest, FileStructure* fs)
   }
 }
 
-
 /*
- * Draws the left frame, the local computer
+ * Draws the rows of the files in a frame, and returns the selected count and size
  */
-void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
-               const std::set<char>& drives,
-               unsigned workDrive,
-               unsigned long diskFree)
+static void __far drawRows(void* scrSeg, int col, int fg, int bg, LinkedList* files, bool focused,
+                           unsigned* selectedCount, unsigned long* selectedBytes)
 {
-  frameTop(0, BrightWhite, Blue, scrSeg);
-
-  // draw the current directory on top
-  int cwdlen = strlen(cwd);
-  writeString(20 - cwdlen / 2, 0, White, Blue, cwd, scrSeg);
-  Node* q = files->displayStart;
+  Node* q = files ? files->displayStart : NULL;
   int ctr = 0;
   while(ctr < frameContentSize() && q)
   {
@@ -155,25 +175,16 @@ void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
     FileStructure* fs =((FileStructure*)(q->data));
     renderString(rendered, fs);
 
-    if(q != files->currentSelected)
+    if(q != files->currentSelected || !focused)
     {
-      if(fs->is_selected)
-      {
-        writeString(0, 3 + ctr, Blue, Yellow, rendered, scrSeg);
-        writeString(0, 3 + ctr, Blue, BrightWhite, "º", scrSeg);
-        writeString(39, 3 + ctr, Blue, BrightWhite, "º", scrSeg);
-      }
-      else
-      {
-        writeString(0, 3 + ctr, Blue, BrightWhite, rendered, scrSeg);
-      }
+      writeString(col, 3 + ctr, bg, fs->is_selected ? Yellow : fg, rendered, scrSeg);
     }
     else
     {
-      writeString(0, 3 + ctr, Yellow, BrightWhite, rendered, scrSeg);
-      writeString(0, 3 + ctr, Blue, BrightWhite, "º", scrSeg);
-      writeString(39, 3 + ctr, Blue, BrightWhite, "º", scrSeg);
+      writeString(col, 3 + ctr, Aqua, fs->is_selected ? Yellow : Black, rendered, scrSeg);
     }
+    writeString(col, 3 + ctr, bg, fg, "\xBA", scrSeg);
+    writeString(col + 39, 3 + ctr, bg, fg, "\xBA", scrSeg);
 
     q = q->next;
     ctr ++;
@@ -183,52 +194,80 @@ void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
   {
     char rendered[128] = {0};
     renderString(rendered, NULL);
-    writeString(0, 3 + ctr, Blue, BrightWhite, rendered, scrSeg);
+    writeString(col, 3 + ctr, bg, fg, rendered, scrSeg);
     ctr ++;
   }
 
-  files->displayEnd = q;
-  frameBottom(0, BrightWhite, Blue, scrSeg);
+  if(files)
+  {
+    files->displayEnd = q;
+  }
+
   // identify the selected items
-  unsigned selectedCount = 0;
-  unsigned long selectedBytes = 0;
-  Node* q1 = files->head;
+  *selectedCount = 0;
+  *selectedBytes = 0;
+  Node* q1 = files ? files->head : NULL;
   while(q1)
   {
     FileStructure* fs =((FileStructure*)(q1->data));
     if(fs->is_selected)
     {
-      selectedCount ++;
-      selectedBytes += fs->file_size;
+      (*selectedCount) ++;
+      *selectedBytes += fs->file_size;
     }
     q1 = q1->next;
   }
+}
+
+
+/*
+ * Draws the left frame, the local computer
+ */
+void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
+               const std::set<char>& drives,
+               unsigned workDrive,
+               unsigned long diskFree,
+               bool focused)
+{
+  frameTop(0, BrightWhite, Blue, scrSeg);
+  frameTitle(0, focused ? Black : White, focused ? Aqua : Blue, cwd, scrSeg);
+
+  unsigned selectedCount = 0;
+  unsigned long selectedBytes = 0;
+  drawRows(scrSeg, 0, BrightWhite, Blue, files, focused, &selectedCount, &selectedBytes);
+
+  frameBottom(0, BrightWhite, Blue, scrSeg);
   // the footer with various infos
-  footer(0, BrightWhite, Blue, files, drives, workDrive, diskFree, selectedCount, selectedBytes, scrSeg);
-
-
+  char freeStr[16] = {0};
+  strcpy(freeStr, renderHumanReadableSize(diskFree));
+  footer(0, BrightWhite, Blue, files, drives, workDrive, freeStr, selectedCount, selectedBytes, scrSeg);
 }
 
 /*
  * Draws the right frame, the data from the remote computer
  */
-void rightFrame(void* scrSeg, const char* rwd)
+void rightFrame(void* scrSeg, const char* rwd, LinkedList* files, bool focused,
+                unsigned long freeKB, const char* status)
 {
-  frameTop(40, White, Red, scrSeg);
-  frameBottom(40, White, Red, scrSeg);
-  int ctr = 0;
+  frameTop(40, BrightWhite, Red, scrSeg);
+  frameTitle(40, focused ? Black : White, focused ? Aqua : Red, rwd ? rwd : "", scrSeg);
 
-  while(ctr < frameContentSize())
+  unsigned selectedCount = 0;
+  unsigned long selectedBytes = 0;
+  drawRows(scrSeg, 40, BrightWhite, Red, files, focused, &selectedCount, &selectedBytes);
+
+  frameBottom(40, BrightWhite, Red, scrSeg);
+  char freeStr[16] = {0};
+  strcpy(freeStr, freeKB ? renderHumanReadableSizeKB(freeKB) : "?");
+  footer(40, BrightWhite, Red, files, std::set<char>(), 0, freeStr, selectedCount, selectedBytes, scrSeg);
+
+  // loading, errors, ... in the free line of the footer
+  if(status && *status)
   {
-    static char rendered[64] = {0};
-    renderString(rendered, NULL);
-    writeString(40, 3 + ctr, Red, White, rendered, scrSeg);
-    ctr ++;
+    char st[19] = {0};
+    strncpy(st, status, 18);
+    writeString(41, 23, Red, Yellow, st, scrSeg);
   }
-
-  footer(40, White, Red, NULL, std::set<char>(), 0, 0, 0, 0, scrSeg);
-
-
 }
 
 /*
@@ -244,12 +283,62 @@ int frameContentSize()
  */
 void menu(void* scrSeg)
 {
-  writeString(0, 24, White, White, "                                                                                         ", scrSeg);
-  writeString(1, 24, White, Red, "F1", scrSeg);
-  writeString(3, 24, White, Black, " Help", scrSeg);
-  writeString(9, 24, White, Red, "F2", scrSeg);
-  writeString(11, 24, White, Black, " Drive", scrSeg);
+  static const char* keys[] = {"Tab", "Ins", "F5", "Bksp", "Esc", NULL};
+  static const char* texts[] = {" Switch ", " Select ", " Copy ", " Up ", " Quit ", NULL};
 
+  writeString(0, 24, White, Black, "                                                                                ", scrSeg);
+  int x = 1;
+  for(int i = 0; keys[i]; i++)
+  {
+    writeString(x, 24, White, Red, keys[i], scrSeg);
+    x += strlen(keys[i]);
+    writeString(x, 24, White, Black, texts[i], scrSeg);
+    x += strlen(texts[i]) + 1;
+  }
+}
+
+/*
+ * A window in the middle of the screen, with a progress bar
+ */
+void progress_window(void* scrSeg, const char* title, const char* line, unsigned long done, unsigned long total)
+{
+  static const int x = 14;
+  static const int w = 52;
+  char row[64];
+
+  // the frame
+  memset(row, '\xCD', w);
+  row[0] = '\xC9'; row[w - 1] = '\xBB'; row[w] = 0;
+  writeString(x, 9, Blue, BrightWhite, row, scrSeg);
+  memset(row, ' ', w);
+  row[0] = '\xBA'; row[w - 1] = '\xBA';
+  for(int y = 10; y < 14; y++)
+  {
+    writeString(x, y, Blue, BrightWhite, row, scrSeg);
+  }
+  memset(row, '\xCD', w);
+  row[0] = '\xC8'; row[w - 1] = '\xBC';
+  writeString(x, 14, Blue, BrightWhite, row, scrSeg);
+
+  // the texts
+  char t[64] = {0};
+  strncpy(t, title, w - 4);
+  writeString(x + 2, 10, Blue, Yellow, t, scrSeg);
+  memset(t, 0, sizeof(t));
+  strncpy(t, line, w - 4);
+  writeString(x + 2, 11, Blue, BrightWhite, t, scrSeg);
+
+  // the bar
+  int barLen = w - 4;
+  int filled = total ? (int)((double)done * barLen / total) : barLen;
+  if(filled > barLen) filled = barLen;
+  memset(row, '\xB0', barLen);
+  memset(row, '\xDB', filled);
+  row[barLen] = 0;
+  writeString(x + 2, 12, Blue, LightAqua, row, scrSeg);
+
+  sprintf(t, "%lu / %lu bytes", done, total);
+  writeString(x + 2, 13, Blue, White, t, scrSeg);
 }
 
 void password_window(void* scrSeg, char *pwd, int error, const char* errorText)

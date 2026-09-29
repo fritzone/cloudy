@@ -30,9 +30,34 @@ typedef union
 } TimeUnion;
 
 
+FileStructure* newFileStructure(const char* name, const char* hash)
+{
+  // one block: the structure, the name, then the hash
+  size_t nameLen = strlen(name) + 1;
+  size_t hashLen = hash ? strlen(hash) + 1 : 0;
+  FileStructure* fs = (FileStructure*)calloc(1, sizeof(FileStructure) + nameLen + hashLen);
+  if(fs == NULL)
+  {
+    return NULL;
+  }
+
+  fs->sname = (char*)(fs + 1);
+  memcpy(fs->sname, name, nameLen);
+  if(hash)
+  {
+    fs->hash = fs->sname + nameLen;
+    memcpy(fs->hash, hash, hashLen);
+  }
+  return fs;
+}
+
 FileStructure* createFileStructure(struct find_t* fi)
 {
-  FileStructure* fs = (FileStructure*)malloc(sizeof(FileStructure));
+  FileStructure* fs = newFileStructure(fi->name, NULL);
+  if(fs == NULL)
+  {
+    return NULL;
+  }
 
   fs->is_dir = fi->attrib & _A_SUBDIR;
 
@@ -48,8 +73,6 @@ FileStructure* createFileStructure(struct find_t* fi)
   fs->minute = tu.t.mins;
   fs->sec = tu.t.sec2 * 2;
 
-  fs->sname = (char*)calloc(strlen(fi->name) + 1, 1);
-  strcpy(fs->sname, fi->name);
   fs->file_size = fi->size;
   fs->is_selected = false;
 
@@ -69,9 +92,13 @@ LinkedList* createFileList(const char* cwd)
     if(! (fileinfo.attrib & _A_SUBDIR))
     {
       FileStructure* fs = createFileStructure(&fileinfo);
-      insertAtBeginning(fls, (void*)fs);
+      if(fs == NULL || !insertAtBeginning(fls, (void*)fs))
+      {
+        if(fs) deleteFileStructure(fs);
+        break;
+      }
+      fls->size = fls->size + fileinfo.size;
     }
-    fls->size = fls->size + fileinfo.size;
     rc = _dos_findnext(&fileinfo);
   }
   _dos_findclose(&fileinfo);
@@ -95,7 +122,10 @@ LinkedList* createFileList(const char* cwd)
       if(fileinfo.name[0] != '.')
       {
         FileStructure* fs = createFileStructure(&fileinfo);
-        insertAtBeginning(fls, (void*)fs);
+        if(fs && !insertAtBeginning(fls, (void*)fs))
+        {
+          deleteFileStructure(fs);
+        }
       }
 
       if(!strcmp(fileinfo.name, ".."))
@@ -110,7 +140,10 @@ LinkedList* createFileList(const char* cwd)
   if(strlen(cwd) > 3)
   {
     FileStructure* fs = createFileStructure(&parentDir);
-    insertAtBeginning(fls, (void*)fs);
+    if(fs && !insertAtBeginning(fls, (void*)fs))
+    {
+      deleteFileStructure(fs);
+    }
   }
 
   _dos_findclose(&fileinfo);
@@ -122,7 +155,7 @@ LinkedList* createFileList(const char* cwd)
 
 void deleteFileStructure(void* p)
 {
-  free( ((FileStructure*)p)->sname );
+  free(p);
 }
 
 

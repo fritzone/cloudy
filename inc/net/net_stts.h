@@ -6,24 +6,25 @@
 
 #include <vector>
 
-struct NetStateData
-{
-    NetworkInterface* iface;
-    void* clientSocket;
-};
-
 class NetState
 {
 public:
-    NetState(NetState* next = NULL, NetState* prev = NULL) : nextState(next), prevState(prev)
+    NetState(NetState* next = NULL, NetState* prev = NULL) : stateData(NULL), nextState(next), prevState(prev)
     {
     }
 
+    virtual ~NetState() {}
+
     /**
-     * @brief execute
+     * @brief execute is called from the main loop while this is the current state
      * @return  0 in case of success, otherwise something else, that needs to be dealt with
      */
     virtual int execute(void*) = 0;
+
+    /**
+     * Called when the state machine enters this state
+     */
+    virtual void onEnter() {}
 
     virtual const char* name() const = 0;
 
@@ -46,7 +47,7 @@ inline void *NetState::getStateData() const
 
 inline void NetState::setStateData(void *newStateData)
 {
-    log_info() << "Setting state data for " << name() << "as" << newStateData;
+    log_debug() << "Setting state data for " << name() << "as" << newStateData;
     stateData = newStateData;
 }
 
@@ -58,7 +59,6 @@ class NetState_NoOp : public NetState
 public:
     virtual int execute(void*)
     {
-        log_info() << "execute";
         return 0;
     }
 
@@ -67,62 +67,42 @@ public:
 };
 
 /**
- * Will try to connect to the cloud server specified in the IP
+ * Will try to connect to the cloud server specified in the IP, and once
+ * connected sends the ConnectRequest.
  **/
 class NetState_TryConnect : public NetState
 {
 public:
-    NetState_TryConnect() : tried(false), netIface(NULL), clientSocket(NULL), nsd(NULL)
+    NetState_TryConnect() : tried(false), netIface(NULL)
     {
-        tried = false;
     }
     ~NetState_TryConnect();
 
     virtual int execute(void*);
+    virtual void onEnter() { tried = false; }
 
     virtual const char* name() const {return "TryConnect"; }
+
+    /**
+     * Closes the connection and shuts down the network stack
+     */
+    void disconnect();
 
 private:
 
     bool tried;
     NetworkInterface *netIface;
-    void* clientSocket;
-    NetStateData* nsd;
 };
 
 /**
- * Polls the server to see if there is anything
+ * We are connected, pumps the network and dispatches the received messages
  **/
-class NetState_TryPoll : public NetState
+class NetState_Connected : public NetState
 {
 public:
-    NetState_TryPoll()
-    {
-    }
-
     virtual int execute(void*);
 
-    virtual const char* name() const {return "TryPoll"; }
-
-
-};
-
-class NetState_ConnectRequest : public NetState
-{
-public:
-    NetState_ConnectRequest() : sent(false), received(false)
-    {
-    }
-
-    virtual int execute(void*);
-
-    virtual const char* name() const {return "ConnectRequest"; }
-    friend void cb_ConnectRecuqest(void* o, const char* data);
-
-private:
-
-    bool sent;
-    bool received;
+    virtual const char* name() const {return "Connected"; }
 };
 
 /**
@@ -149,14 +129,8 @@ public:
     void setCurrentState(NetState* s)
     {
         currentState = s;
-
-        log_debug() << "CurrentState:" << s->name() << " at " << (void*)s;
-
-        for(int i=0; i<states.size(); i++)
-        {
-            log_debug() << "State:" << states[i]->name() << " at " << (void*)states[i];
-        }
-
+        log_debug() << "CurrentState:" << s->name();
+        currentState->onEnter();
     }
 
     void addState(NetState* s)
@@ -167,18 +141,10 @@ public:
     NetState* advance(void* stdata);
     NetState* go_back(void* stdata);
 
-    void onNext(NetState* s, int(*cb)(void*))
-    {
-        log_info() << "Set callback for" << s->name() << " as " << (void*)cb;
-        stateNextOps[s] = cb;
-    }
-
 public:
 
     NetState* currentState;
     std::vector<NetState*> states;
-    std::map<NetState*, int(*)(void*)> stateNextOps;
-
 };
 
 #endif // NET_STATE_H

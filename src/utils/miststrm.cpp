@@ -156,7 +156,7 @@ void MyIStringStream::readLong(long &value)
         ++position;
     }
 
-    int result = 0;
+    long result = 0;
     bool isNegative = false;
 
     if (buffer[position] == '-')

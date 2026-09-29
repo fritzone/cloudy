@@ -7,12 +7,15 @@
 #define __PRETTY_FUNCTION__ __FUNCTION__
 #endif
 
-#define log_emergency()     logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_EMERGENCY)
-#define log_critical()      logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_CRITICAL)
-#define log_error()         logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_ERROR)
-#define log_warning()       logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_WARNING)
-#define log_info()          logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_INFORMATION)
-#define log_debug()         logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_DEBUG)
-#define log_trace()         logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, LOG_TRACE)
+// When the level is disabled nothing after the << is evaluated
+#define LOG_AT(level) if((level) > g_logLevel) ; else logstream(__LINE__, __FILE__, __PRETTY_FUNCTION__, level)
+
+#define log_emergency()     LOG_AT(LOG_EMERGENCY)
+#define log_critical()      LOG_AT(LOG_CRITICAL)
+#define log_error()         LOG_AT(LOG_ERROR)
+#define log_warning()       LOG_AT(LOG_WARNING)
+#define log_info()          LOG_AT(LOG_INFORMATION)
+#define log_debug()         LOG_AT(LOG_DEBUG)
+#define log_trace()         LOG_AT(LOG_TRACE)
 
 #endif  // LOGSTREAMHELPER_H

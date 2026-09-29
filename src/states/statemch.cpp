@@ -1,6 +1,7 @@
 #include "statemch.h"
 #include "state.h"
 #include "log.h"
+#include "guistate.h"
 
 void Statemachine::reportError(const char *s)
 {
@@ -32,6 +33,7 @@ int Statemachine::advance(void *data, int state)
     {
         const std::map<int, State*> & nexts = m_currentState->nexts();
         m_currentState = ((std::map<int, State *>&)nexts)[state];
+        requestRepaint();
     }
     else
     {
@@ -58,7 +60,6 @@ int Statemachine::previous(void *data, int state)
 
 State *Statemachine::getCurrentState() const
 {
-    log_info() << "Returns:" <<(void*)m_currentState;
     return m_currentState;
 }
 
@@ -69,14 +70,12 @@ void Statemachine::addState(State *s)
 
 void Statemachine::logStates()
 {
-    log_info() << "----- StateCount:" << m_states.size();
+    log_debug() << "----- StateCount:" << m_states.size();
     for(int i=0; i<m_states.size(); i++)
     {
-        log_info() << "State:" << m_states[i]->name() << " at " << (void*)m_states[i]
+        log_debug() << "State:" << m_states[i]->name() << " at " << (void*)m_states[i]
                    <<  (m_states[i] == m_currentState ? " ***" : "");
     }
-    log_info() << "----- StateCount:" << m_states.size();
-
 }
 
 Statemachine::Statemachine()

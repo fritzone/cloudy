@@ -6,7 +6,6 @@
 #include <time.h>
 #include <malloc.h>
 #include <conio.h>
-#include <graph.h>
 #include <direct.h>
 
 #include <types.h>
@@ -30,6 +29,7 @@
 #include "net_stts.h"
 #include "dos_pwds.h"
 #include "prot.h"
+#include "dos_neti.h"
 #include "msg_prot/protocol.h"
 
 #include <set>
@@ -41,9 +41,46 @@ static void* screen = 0;
 
 ProtocolImpl p;
 
-/* Will parse the arguments as came in from the command line, nothing for now */
+// The states the message handlers need to reach
+static GuiState* ipInputState = NULL;
+static BrowseFoldersState* browseState = NULL;
+static NetState_TryConnect* netStateTryConnect = NULL;
+static NetState* netStateNoOp = NULL;
+
+// mTCP hooks interrupts, so it must be shut down whatever way we exit
+static void shutdownNetwork()
+{
+    if(netStateTryConnect)
+    {
+        netStateTryConnect->disconnect();
+    }
+}
+
+// The IP given in the command line, we connect to it right away
+static char autoConnectIp[64] = {0};
+
+/* Will parse the arguments as came in from the command line:
+ *   -v        log informational messages too
+ *   -d        log debug messages too
+ *   <ip>      connect to this peer right away
+ */
 static void parseArgs(int argc, char* argv[])
 {
+    for(int i = 1; i < argc; i++)
+    {
+        if(!strcmp(argv[i], "-v") || !strcmp(argv[i], "/v"))
+        {
+            g_logLevel = LOG_INFORMATION;
+        }
+        else if(!strcmp(argv[i], "-d") || !strcmp(argv[i], "/d"))
+        {
+            g_logLevel = LOG_DEBUG;
+        }
+        else
+        {
+            strncpy(autoConnectIp, argv[i], sizeof(autoConnectIp) - 1);
+        }
+    }
 }
 
 
@@ -91,7 +128,7 @@ static void testRun()
 
 int asciitable()
 {
-    _setvideomode( _TEXTC80 );
+    setTextMode();
 
     int cc = 0;
     for (int i=0; i< 16; i++)
@@ -137,6 +174,14 @@ int messager(int m, void* data)
     case MSG_CONNECTION_ACKNOWLEDGED:
     {
         ConnectionRequestReply* crrp =  (ConnectionRequestReply*)(data);
+        if(!crrp->get_accepted())
+        {
+            GuiStatemachine::instance().reportError("The peer refused the connection");
+            netStateTryConnect->disconnect();
+            NetStatemachine::instance().setCurrentState(netStateNoOp);
+            return 0;
+        }
+
         if(crrp->get_authentication_required())
         {
             GuiStatemachine::instance().advance(NULL, State_PasswordRequested);
@@ -144,8 +189,20 @@ int messager(int m, void* data)
         else
         {
             GuiStatemachine::instance().advance(NULL, State_GoBrowsing);
+            browseState->onConnected(crrp->get_host_name());
         }
         CursorRaii::hideCursor();
+        return 0;
+    }
+
+    case MSG_DISCONNECTED:
+    {
+        netStateTryConnect->disconnect();
+        NetStatemachine::instance().setCurrentState(netStateNoOp);
+        browseState->onDisconnected();
+        GuiStatemachine::instance().reportError("The connection to the peer was lost");
+        GuiStatemachine::instance().init(ipInputState);
+        requestRepaint();
         return 0;
     }
 
@@ -162,6 +219,27 @@ static void __far onConnectRequestReply(const ConnectionRequestReply* crrp)
 {
     log_info() << "authentication required:" << crrp->get_authentication_required();
     messager(MSG_CONNECTION_ACKNOWLEDGED, (void*)crrp);
+}
+
+// The rest of the messages go to the browser
+static void __far onStatus(const Status* st)
+{
+    browseState->onStatus(st);
+}
+
+static void __far onDirectoryList(const DirectoryList* dl)
+{
+    browseState->onDirectoryList(dl);
+}
+
+static void __far onFileData(const FileData* fd)
+{
+    browseState->onFileData(fd);
+}
+
+static void __far onFileWriteReply(const FileWriteReply* r)
+{
+    browseState->onFileWriteReply(r);
 }
 
 void interrupt newInt6Handler() {
@@ -189,14 +267,25 @@ void interrupt newInt6Handler() {
 int main(int argc, char* argv[])
 {
     p.set_ConnectionRequestReply_Handler(onConnectRequestReply);
+    p.set_Status_Handler(onStatus);
+    p.set_DirectoryList_Handler(onDirectoryList);
+    p.set_FileData_Handler(onFileData);
+    p.set_FileWriteReply_Handler(onFileWriteReply);
 
     size_t avl_beg = _memavl(), max_meg = _memmax();
+    atexit(shutdownNetwork);
 
     log_info() << "===============================[Starting]=======================";
 
      _dos_setvect(6, newInt6Handler);
     // read command line, act accordingly
     parseArgs(argc, argv);
+
+    // no point in starting without a network, and here the messages can be read
+    if(!DosMTcpIpIface::checkEnvironment(argv[0]))
+    {
+        return 1;
+    }
 
     screen = calloc(4000, 2); // the size of the screen: 80 x 25, 1 uint16 for each position
     if(screen == NULL)
@@ -208,8 +297,9 @@ int main(int argc, char* argv[])
     CursorRaii cursor;
 
     // Gui statemachine
-    GuiState* brFoldState = new BrowseFoldersState();
-    GuiState* ipInputState = new GuiState_InputIp();
+    browseState = new BrowseFoldersState();
+    GuiState* brFoldState = browseState;
+    ipInputState = new GuiState_InputIp();
     GuiState* getPasswordState = new GuiState_PasswordScreen();
 
     GuiStatemachine::instance().addState(ipInputState);
@@ -223,99 +313,98 @@ int main(int argc, char* argv[])
     ipInputState->setNextState(State_PasswordRequested, getPasswordState);
 
     // Network statemachine
-    NetState* netStateNoOp = new NetState_NoOp;
-    NetState* netStateTryConnect = new NetState_TryConnect;
-    NetState* netStateTryPoll = new NetState_TryPoll;
-    NetState* netStateConnectRequest = new NetState_ConnectRequest;
+    netStateNoOp = new NetState_NoOp;
+    netStateTryConnect = new NetState_TryConnect;
+    NetState* netStateConnected = new NetState_Connected;
     netStateNoOp->setNext(netStateTryConnect);
-    netStateTryConnect->setNext(netStateConnectRequest);
+    netStateTryConnect->setNext(netStateConnected);
     netStateTryConnect->setPrev(netStateNoOp);
+    netStateConnected->setPrev(netStateNoOp);
 
     NetStatemachine::instance().addState(netStateNoOp);
     NetStatemachine::instance().addState(netStateTryConnect);
-    NetStatemachine::instance().addState(netStateTryPoll);
-    NetStatemachine::instance().addState(netStateConnectRequest);
+    NetStatemachine::instance().addState(netStateConnected);
     NetStatemachine::instance().setCurrentState(netStateNoOp);
 
     // current working directory
     char startupDir[PATH_MAX + 1] = {0};
     getcwd(startupDir, PATH_MAX + 1);
 
-    _setvideomode( _TEXTC80 );
+    setTextMode();
 
     // show the gui, the code below goes to the gui part after connect
 
+    if(autoConnectIp[0])
+    {
+        messager(MSG_IP_ENTERED, autoConnectIp);
+    }
+
     while(1)
     {
-        //log_debug() << "Loop start:";
-        //log_debug() << "Net:" << NetStatemachine::instance().currentState->name();
-        //log_debug() << "Gui:" << GuiStatemachine::instance().getCurrentState()->name();
+        GuiState* state = GuiStatemachine::instance().getCurrentState();
+        state->onRefreshContent();
 
-        GuiStatemachine::instance().getCurrentState()->onRefreshContent();
-
-        clearscr(screen);
-        GuiStatemachine::instance().getCurrentState()->paint(screen);
-        flip(screen);
+        if(takeRepaintRequest())
+        {
+            clearscr(screen);
+            GuiStatemachine::instance().getCurrentState()->paint(screen);
+            flip(screen);
+        }
 
         if(kbhit())
         {
-            log_debug() << "Keypress";
+            requestRepaint();
 
             int c = getch();
 
             if(c == 27) // Escape
             {
-                break;
+                if(!state->onEscape())
+                {
+                    break;
+                }
             }
-
-            if(c== 9) // Tab
+            else if(c == 9) // Tab
             {
-                GuiStatemachine::instance().getCurrentState()->onTab();
+                state->onTab();
             }
-
-            if(c== 8) // Backspace
+            else if(c == 8) // Backspace
             {
-                GuiStatemachine::instance().getCurrentState()->onBackspace();
+                state->onBackspace();
             }
-
-            if(c == 13) // Enter?
+            else if(c == 13) // Enter
             {
-                GuiStatemachine::instance().getCurrentState()->onEnter();
+                state->onEnter();
             }
-
-            if(isprint(c))
-            {
-                GuiStatemachine::instance().getCurrentState()->onChar(c);
-            }
-
-            // special key?
-            if(c == 0)
+            else if(c == 0 || c == 0xE0) // special key, the scan code follows
             {
                 c = getch();
 
-                //fprintf(stdout, "%d\n", c);
-                //break;
-
-                if(c == 82) // Insert - Select/Deselect, usually used only in the browse panel
+                if(c == Key_Insert) // Select/Deselect, usually used only in the browse panel
                 {
-                    GuiStatemachine::instance().getCurrentState()->onInsert();
-                    c = 80; // and move to the next element
+                    state->onInsert();
+                    state->onDownArrow(); // and move to the next element
                 }
-
-                if(c == 80) // Down arrow
+                else if(c == Key_Down)
                 {
-                    GuiStatemachine::instance().getCurrentState()->onDownArrow();
+                    state->onDownArrow();
                 }
-
-                if(c == 72) // Up arrow
+                else if(c == Key_Up)
                 {
-                    GuiStatemachine::instance().getCurrentState()->onUpArrow();
+                    state->onUpArrow();
                 }
-
-                if(c==72) // right
+                else if(c == Key_Right)
                 {
-                    GuiStatemachine::instance().getCurrentState()->onRightArrow();
+                    state->onRightArrow();
                 }
+                else
+                {
+                    state->onSpecialKey(c);
+                }
+            }
+            else if(isprint(c))
+            {
+                state->onChar(c);
             }
         }
 
@@ -323,18 +412,18 @@ int main(int argc, char* argv[])
         {
             NetStatemachine::instance().currentState->execute(NetStatemachine::instance().currentState->stateData);
         }
-        else
-        {
-            log_info() << "Null net state";
-        }
-
-
     }
+
+    // leave the network in a clean state, mTCP hooks interrupts
+    netStateTryConnect->disconnect();
 
     delete brFoldState;
     delete ipInputState;
-
-  //  netIface.shutdown();
+    delete getPasswordState;
+    delete netStateTryConnect;
+    netStateTryConnect = NULL;
+    delete netStateConnected;
+    delete netStateNoOp;
 
     free(screen);
 

@@ -54,6 +54,12 @@ public:
     // the backspace was pressed
     virtual void onBackspace() = 0;
 
+    // a key with an extended scan code (F keys, PgUp, ...) was pressed
+    virtual void onSpecialKey(int scancode) {}
+
+    // Escape was pressed, return true if it was handled, otherwise the application quits
+    virtual bool onEscape() { return false; }
+
     // Draws the current gui state on the backbuffer
     // The parameter is the addres of the screen we paint to
     virtual void paint(void*) = 0;
@@ -72,6 +78,25 @@ public:
 public:
 
     CursorRaii* cursor;
+};
+
+/**
+ * Asks the main loop to paint the screen again
+ */
+void requestRepaint();
+
+/**
+ * Returns true if a repaint was requested since the last call, and clears the request
+ */
+bool takeRepaintRequest();
+
+// scan codes of the extended keys
+enum ScanCodes
+{
+    Key_F1 = 59, Key_F2 = 60, Key_F3 = 61, Key_F4 = 62, Key_F5 = 63,
+    Key_F6 = 64, Key_F7 = 65, Key_F8 = 66, Key_F9 = 67, Key_F10 = 68,
+    Key_Home = 71, Key_Up = 72, Key_PgUp = 73, Key_Left = 75, Key_Right = 77,
+    Key_End = 79, Key_Down = 80, Key_PgDn = 81, Key_Insert = 82, Key_Delete = 83
 };
 
 

@@ -13,12 +13,18 @@ struct find_t;
 LinkedList* createFileList(const char* cwd);
 
 /**
+ * Creates an empty file structure with the given name and hash (which can be NULL),
+ * everything in one memory block. Returns NULL if there is no memory.
+ */
+FileStructure* newFileStructure(const char* name, const char* hash);
+
+/**
  * Create a filestructure
  */
 FileStructure* createFileStructure(struct find_t* fi);
 
 /**
- * Will free the memory allocated to the sname of the file structure
+ * Will free the memory allocated to the file structure
  */
 void deleteFileStructure(void*);
 

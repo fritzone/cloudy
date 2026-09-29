@@ -36,12 +36,20 @@ int frameContentSize();
 void leftFrame(void* scrSeg, const char* cwd, LinkedList* files,
                const std::set<char>& drives,
                unsigned workDrive,
-               unsigned long diskFree);
+               unsigned long diskFree,
+               bool focused);
 
 /**
- * Will draw the right frame with the files from the remote machine's actual directory
+ * Will draw the right frame with the files from the remote machine's actual directory.
+ * The status (loading, errors) is shown in the footer.
  */
-void rightFrame(void* scrSeg, const char* rwd);
+void rightFrame(void* scrSeg, const char* rwd, LinkedList* files, bool focused,
+                unsigned long freeKB, const char* status);
+
+/**
+ * A window with a progress bar, for the file transfers
+ */
+void progress_window(void* scrSeg, const char* title, const char* line, unsigned long done, unsigned long total);
 
 /**
  * Draws the menu of the application, bottom line

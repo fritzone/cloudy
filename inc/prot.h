@@ -9,18 +9,19 @@
 
 class NetworkInterface;
 
-void onDataReceived(void *object, const char* data);
+/**
+ * How many bytes of DOS memory are still free
+ */
+unsigned long freeDosMemory();
 
 /**
   * The way this works is like:
   *
-  *  - in the main receiver function we get XML data
-  *  - we parse out a message from it
-  *  - we send it to the Protocol.message
-  *  - that identifies the message type
+  *  - the network interface hands over the '\0' terminated frames it received
+  *    to onFrameReceived
+  *  - that parses the XML envelope and gets the message type out of it
+  *  - Protocol::receive deserializes the message
   *  - and calls the corresponding function pointer which was registered
-  *  - the corresponding message handler handles the message, and it might call
-  *    a callback function with the message data
  */
 class ProtocolImpl : public Protocol
 {
@@ -28,9 +29,12 @@ public:
     ProtocolImpl();
 
     /**
-     * Sets the network interface used in this Protocol
+     * Sets the network interface and the socket used for sending messages
      */
-    void setNetworkInterface(NetworkInterface* iface);
+    void setNetworkInterface(NetworkInterface* iface, void* socket);
+
+    NetworkInterface* networkInterface() const { return network; }
+    void* socket() const { return sock; }
 
     /**
      * @brief envelope will pack the serialized message m into an XML envelop, ready to be sent
@@ -39,10 +43,25 @@ public:
      */
     std::string envelope(const Message *m);
 
+    /**
+     * Sends the message to the peer. Returns false if it could not.
+     */
+    bool send(const Message* m);
+
+    /**
+     * Polls the network for timeout milliseconds and dispatches what came
+     */
+    void poll(unsigned long timeout);
+
+    /**
+     * Handles one received frame
+     */
+    void onFrameReceived(char* frame);
+
 private:
 
     NetworkInterface* network;
+    void* sock;
 };
 
 #endif
-

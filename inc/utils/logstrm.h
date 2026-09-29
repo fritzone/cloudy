@@ -4,7 +4,6 @@
 #include "logtypes.h"
 #include <mstrstrm.h>
 
-#include <sstream>
 #include <string>
 
 class logstream

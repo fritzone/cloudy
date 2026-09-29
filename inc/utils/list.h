@@ -16,6 +16,9 @@ struct LinkedList {
 
   // the head of the list
   struct Node *head;
+
+  // the last element, for quick appends
+  struct Node *tail;
   
   // where the displaying of the list elements starts
   struct Node* displayStart;
@@ -39,14 +42,16 @@ struct LinkedList {
 struct LinkedList* createLinkedList();
 
 /**
- * Will insert a new element in the given list at the beginning
+ * Will insert a new element in the given list at the beginning.
+ * Returns 0 if there is no memory for it.
  */
-void insertAtBeginning(struct LinkedList *list, void *data);
+int insertAtBeginning(struct LinkedList *list, void *data);
 
 /**
  * Will insert the given data at the of the list
+ * Returns 0 if there is no memory for it.
  */
-void insertAtEnd(struct LinkedList *list, void *data) ;
+int insertAtEnd(struct LinkedList *list, void *data) ;
 
 /**
  * Free the linked list

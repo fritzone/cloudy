@@ -19,7 +19,7 @@ public:
     virtual void onChar(char c);
     virtual void onTab();
     virtual void onBackspace();
-    virtual const char* name() const {return "IpInput";}
+    virtual const char* name() const {return "PasswordScreen";}
 
 private:
 

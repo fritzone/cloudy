@@ -18,33 +18,36 @@ struct LinkedList* createLinkedList()
       perror("Memory allocation error");
       exit(1);
   }
-  newList->head = newList->currentSelected = newList->displayStart = newList->previousSelected = NULL;
+  newList->head = newList->tail = newList->currentSelected = newList->displayStart = newList->previousSelected = NULL;
   return newList;
 }
 
-void insertAtBeginning(struct LinkedList *list, void *data)
+int insertAtBeginning(struct LinkedList *list, void *data)
 {
   Node *newNode = allocate<Node>();
   if (newNode == NULL)
   {
-      perror("Memory allocation error");
-      exit(1);
+      return 0;
   }
   newNode->data = data;
   newNode->next = list->head;
+  if(list->head == NULL)
+  {
+    list->tail = newNode;
+  }
   list->head = newNode;
   list->displayStart = list->head;
   list->currentSelected = list->head;
   list->count ++;
+  return 1;
 }
 
-void insertAtEnd(struct LinkedList *list, void *data)
+int insertAtEnd(struct LinkedList *list, void *data)
 {
   Node *newNode = allocate<Node>();
   if (newNode == NULL)
   {
-    perror("Memory allocation error");
-    exit(1);
+    return 0;
   }
   newNode->data = data;
   newNode->next = NULL;
@@ -54,14 +57,11 @@ void insertAtEnd(struct LinkedList *list, void *data)
   }
   else
   {
-    struct Node *current = list->head;
-    while (current->next != NULL)
-    {
-      current = current->next;
-    }
-    current->next = newNode;
+    list->tail->next = newNode;
   }
+  list->tail = newNode;
   list->count ++;
+  return 1;
 }
 
 void freeLinkedList(struct LinkedList *list, void (*destructor)(void*) )
@@ -73,7 +73,7 @@ void freeLinkedList(struct LinkedList *list, void (*destructor)(void*) )
         current = current->next;
         if(destructor)
         {
-          destructor(temp);
+          destructor(temp->data);
         }
         free(temp);
     }

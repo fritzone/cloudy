@@ -1,99 +1,111 @@
 #include "net_stts.h"
 #include "messager.h"
-#include "guistate.h"
-#include "ezxml.h"
 #include "log.h"
 #include "guistmch.h"
 #include "net_ifce.h"
 #include "dos_neti.h"
 #include "prot.h"
+#include "cldutils.h"
 
 #include <string.h>
 #include <stdlib.h>
 
 extern ProtocolImpl p;
 
+// The TCP port the cloudy peer listens on
+#define CLOUDY_PORT 8966
+
 NetState_TryConnect::~NetState_TryConnect()
 {
+    disconnect();
     delete netIface;
-    delete nsd;
+}
+
+void NetState_TryConnect::disconnect()
+{
+    p.setNetworkInterface(NULL, NULL);
+    if(netIface)
+    {
+        netIface->shutdown();
+    }
 }
 
 int NetState_TryConnect::execute(void * d)
 {
-    log_info() << "Trying to connect d=" << (d ? (char*)d  : "NULL" )<< " stateData:" << (char*)stateData;
     if(tried)
     {
-        log_info() << "Already tried, not trying again";
         return 1;
     }
-    log_debug() << "Creating interface";
-
     tried = true;
+
+    log_info() << "Trying to connect to" << (d ? (char*)d  : "NULL");
 
     if(netIface == NULL)
     {
         netIface = new DosMTcpIpIface;
     }
-    log_debug() << "Created " << (void*)netIface;
 
-    if(netIface == NULL)
-    {
-        log_info() << "Network setup failed";
-        GuiStatemachine::instance().reportError("Network setup failed");
-        messager(MSG_CONNECTION_FAILED, NULL);
-        tried = false;
-        return 1;
-    }
-
-    log_debug() << "Setting it up for " << (void*)netIface;
     // the network interface
-    if(netIface->setup() == false)
+    if(netIface == NULL || netIface->setup() == false)
     {
-        log_info() << "Network setup failed";
-        GuiStatemachine::instance().reportError("Network setup failed");
+        log_error() << "Network setup failed";
+        GuiStatemachine::instance().reportError("Network setup failed, see CLOUDER.LOG");
         messager(MSG_CONNECTION_FAILED, NULL);
-        tried = false;
         return 1;
     }
 
-    log_debug() << "Interface setup complete, getting socket";
-    clientSocket = netIface->provide_socket();
+    void* clientSocket = netIface->provide_socket();
     if(clientSocket == NULL)
     {
-        log_info() << "Network setup failed, cannot get socket";
+        log_error() << "Network setup failed, cannot get socket";
         GuiStatemachine::instance().reportError("Network setup failed, cannot get socket.");
         messager(MSG_CONNECTION_FAILED, NULL);
-        tried = false;
         return 1;
     }
 
-    log_debug() << "Socket acquisitioned, got socket:" <<(void*)clientSocket;
-
-    if(!netIface->connect(clientSocket, (char*)d, 8966))
+    if(!netIface->connect(clientSocket, (char*)d, CLOUDY_PORT))
     {
-        log_info() << "Cannot connect";
+        log_error() << "Cannot connect";
         messager(MSG_CONNECTION_FAILED, NULL);
-        tried = false;
         return 1;
     }
 
     log_info() << "Connected";
+    GuiStatemachine::instance().reportError("");
+    p.setNetworkInterface(netIface, clientSocket);
 
-    nsd = new NetStateData;
-    nsd->clientSocket = clientSocket;
-    nsd->iface = netIface;
+    ConnectRequest* cr = p.create_ConnectRequest("dos", rand_string(9));
+    bool sent = p.send(cr);
+    delete cr;
 
-    log_info() << "Advancing with" << (void*)nsd;
-    messager(MSG_CONNECTED, nsd);
-    log_info() << "And done";
+    if(!sent)
+    {
+        GuiStatemachine::instance().reportError("Cannot talk to the cloudy peer");
+        disconnect();
+        messager(MSG_CONNECTION_FAILED, NULL);
+        return 1;
+    }
+
+    messager(MSG_CONNECTED, NULL);
+    return 0;
+}
+
+int NetState_Connected::execute(void *)
+{
+    NetworkInterface* iface = p.networkInterface();
+    if(iface == NULL || !iface->isConnected(p.socket()))
+    {
+        log_warning() << "The peer closed the connection";
+        messager(MSG_DISCONNECTED, NULL);
+        return 1;
+    }
+
+    p.poll(0);
     return 0;
 }
 
 NetState *NetStatemachine::advance(void *stdata)
 {
-    log_info() << "Enter, this:" << (void*)this << "currentState:" <<(void*)currentState;
-
     if(currentState == NULL)
     {
         log_critical() << "NULL state here";
@@ -102,27 +114,15 @@ NetState *NetStatemachine::advance(void *stdata)
             log_critical() << "No states at all";
             exit(1);
         }
-        currentState = states.at(0);
-        if(currentState == NULL)
-        {
-            log_critical() << "Still NULL state here";
-        }
+        setCurrentState(states.at(0));
         return currentState;
     }
-    else
-    {
-        for(int i=0; i<states.size(); i++)
-        {
-            log_debug() << "State:" << states[i]->name() << " at " << (void*)states[i];
-        }
-        if(currentState && currentState->nextState)
-        {
-            log_info() << "Advancing from" << currentState->name() << "with"<< (void*)stdata << "to" << currentState->nextState->name();
-            currentState = currentState->nextState;
 
-            currentState->setStateData(stdata);
-            log_info() << "Advancing to" << currentState->name() << "done";
-        }
+    if(currentState->nextState)
+    {
+        log_info() << "Advancing from" << currentState->name() << "to" << currentState->nextState->name();
+        currentState->nextState->setStateData(stdata);
+        setCurrentState(currentState->nextState);
     }
     return currentState;
 }
@@ -136,109 +136,15 @@ NetState *NetStatemachine::go_back(void *stdata)
             log_critical() << "No states at all";
             exit(1);
         }
-        currentState = states.at(0);
+        setCurrentState(states.at(0));
         return currentState;
     }
-    else
-    {
-        for(int i=0; i<states.size(); i++)
-        {
-            log_debug() << "State:" << states[i]->name() << " at " << (void*)states[i];
-        }
-        if(currentState && currentState->prevState)
-        {
-            log_info() << "Going back from" << currentState->name() << "with"<< (void*)stdata << "to" << currentState->prevState->name();
-            currentState = currentState->prevState;
 
-            currentState->setStateData(stdata);
-            log_info() << "Going back from " << currentState->name() << "done";
-        }
+    if(currentState->prevState)
+    {
+        log_info() << "Going back from" << currentState->name() << "to" << currentState->prevState->name();
+        currentState->prevState->setStateData(stdata);
+        setCurrentState(currentState->prevState);
     }
     return currentState;
-
-}
-
-
-void onDataReceived(void* object, const char* data)
-{
-    log_info() << "*************** Received: " << data;
-    ezxml_t doc = ezxml_parse_str((char*)data, strlen(data));
-    char* s;
-    s = ezxml_toxml(doc);
-    log_info() << s;
-    free(s);
-
-    ezxml_t cld = ezxml_child(doc, "cld");
-    if(cld == NULL)
-    {
-        log_error() << "cannot get cloud tag";
-        return;
-    }
-    const char* cloud_version = ezxml_attr(cld, "v");
-    const char* msg_t = ezxml_attr(cld, "msg");
-    log_info() << "cloud version: " << cloud_version;
-    log_info() << "message_t: " <<  msg_t;
-
-    ezxml_t o = ezxml_child(cld, "o");
-
-    char* msg_data = ezxml_toxml(o);
-    log_info() << "o msg=" << msg_data;
-
-    p.receive(msg_t, msg_data);
-
-    free(msg_data);
-
-    ezxml_free(doc);
-
-}
-
-int NetState_TryPoll::execute(void * d)
-{
-    log_info() << "running, d is" << d << "stateData is" << stateData;
-    NetStateData* nsd = (NetStateData*)d;
-    nsd->iface->poll(nsd->clientSocket, 300, NULL, onDataReceived);
-    return 0;
-}
-
-void cb_ConnectRecuqest(void* o, const char* data)
-{
-    log_info() <<"---------------------------- Received:" << data;
-    ((NetState_ConnectRequest*)o)->received = true;
-}
-
-int NetState_ConnectRequest::execute(void *d)
-{
-    log_info() << "running, d is" << d << "stateData is" << stateData << "sent:" << sent << "received:" << received;
-
-    if(sent && received)
-    {
-        return 0;
-    }
-
-    NetStateData* nsd = (NetStateData*)d;
-
-    if(!sent)
-    {
-
-        ConnectRequest* cr = p.create_ConnectRequest();
-
-        std::string scr = p.envelope(cr);
-        log_info() << "Sending" << scr;
-
-        nsd->iface->send(nsd->clientSocket, scr.c_str(), scr.length());
-        sent = true;
-
-        delete cr;
-
-        return 0;
-    }
-
-    if(!received)
-    {
-        log_info() << "Polling ..." ;
-        nsd->iface->poll(nsd->clientSocket, 300, this, &onDataReceived);
-        return 0;
-    }
-
-    return 1;
 }

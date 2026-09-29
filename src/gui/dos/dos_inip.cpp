@@ -45,7 +45,6 @@ GuiState_InputIp::~GuiState_InputIp()
 void GuiState_InputIp::paint(void *screen)
 {
     const char* errStr = GuiStatemachine::instance().getError();
-    log_debug() << "*********************' Error:" << errStr << ":" << strlen((char*)errStr);
 
     connect_window(screen, ip, errorMode, errStr);
 

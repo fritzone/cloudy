@@ -4,7 +4,6 @@
 #include <i86.h>
 #include <types.h>
 #include <dos.h>
-#include <graph.h>
 #include <conio.h>
 
 short CursorRaii::previousCursor = 0;
@@ -41,24 +40,50 @@ void writeString(int x, int y, char bck, char col, const char* s, void* seg)
     }
 }
 
+// The screen handling goes through the video BIOS, graph.lib would cost 25K
+
+void setTextMode()
+{
+    union REGS r;
+    r.w.ax = 0x0003; // 80x25 color text
+    int86(0x10, &r, &r);
+}
+
+static void setCursorShape(unsigned short shape)
+{
+    union REGS r;
+    r.h.ah = 0x01;
+    r.w.cx = shape;
+    int86(0x10, &r, &r);
+}
+
 void CursorRaii::hideCursor()
 {
-    _settextcursor(0x2000);
+    setCursorShape(0x2000);
 }
 
 void CursorRaii::showCursor()
 {
-    _settextcursor(previousCursor);
+    setCursorShape(previousCursor);
 }
 
 void CursorRaii::placeCursor(short x, short y)
 {
-    _settextposition(y + 1, x + 1);
+    union REGS r;
+    r.h.ah = 0x02;
+    r.h.bh = 0;
+    r.h.dh = (unsigned char)y;
+    r.h.dl = (unsigned char)x;
+    int86(0x10, &r, &r);
 }
 
 CursorRaii::CursorRaii()
 {
-    previousCursor = _gettextcursor();
+    union REGS r;
+    r.h.ah = 0x03;
+    r.h.bh = 0;
+    int86(0x10, &r, &r);
+    previousCursor = r.w.cx;
     hideCursor();
 }
 

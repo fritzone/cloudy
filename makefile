@@ -22,6 +22,9 @@ include_ezxml_ext_dir = $(include_ext_dir)/ezxml
 !include $(src_dir)/makefile
 !include $(ext_dir)/makefile
 
+# debug info in the executable, "wmake link_debug=" leaves it out (for releases)
+link_debug = debug watcom all
+
 memory_model = -ml
 compile_options = -0 -oh -q -oa -os -s -xs $(memory_model) -DCFG_H=\"cloud.cfg\"
 compile_options += -i=$(tcp_h_dir) -i=$(common_h_dir) -i=. -i=$(include_dir) -i=$(protocol_dir) -i=$(include_utils_dir) -i=$(include_gui_dir) -i=$(include_dos_gui_dir) -i=$(include_statemachine_dir) -i=$(include_net_dir) -i=$(include_dos_net_dir) -i=$(include_ezxml_ext_dir)
@@ -52,5 +55,5 @@ clean : .symbolic
   wpp $[* $(compile_options)
 
 cloud.exe: $(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs) $(states_objs) $(ezxml_objs) $(dos_net_objs) $(net_objs) $(src_objs)
-  wlink System dos debug watcom all OPtion map OPtion eliminate OPtion stack=4096 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs) $(states_objs) $(ezxml_objs) $(dos_net_objs) $(net_objs) $(src_objs)}
+  wlink System dos $(link_debug) OPtion map OPtion eliminate OPtion stack=16384 Name $@ File {$(tcpobjs) $(objs) $(protocol_objs) $(util_objs) $(gui_objs) $(dos_gui_objs) $(states_objs) $(ezxml_objs) $(dos_net_objs) $(net_objs) $(src_objs)}
 

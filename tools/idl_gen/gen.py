@@ -30,15 +30,14 @@ builtin_types = ["bool", "char", "unsigned char", "short", "unsigned short", "fl
 
 restrictions = {}
 
-def open_file(fn, mode):
-    path = "generated"
-    does_exist = os.path.exists(path)
-    if not does_exist:
-        # Create a new directory because it does not exist
-        os.makedirs(path)
+output_dir = "generated"
 
-    fn_with_path = os.getcwd() + "/generated/" + fn
-    return open(fn_with_path, mode)
+
+def open_file(fn, mode):
+    path = os.path.dirname(os.path.join(output_dir, fn))
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return open(os.path.join(output_dir, fn), mode)
 
 # returns the 8 character long filename for the given message name, to be used as the header name
 # limited to 8.3 under DOS
@@ -79,6 +78,59 @@ def eight_len_fn(name):
                     print("Too many identifiers used:", eight_names)
                     exit(2)
 
+
+
+# True for the types which are serialized as a single text node (not lists)
+def is_scalar(attr):
+    return attr.strip().startswith("string") or attr in builtin_types or attr == "sequence"
+
+
+# For "list of X" returns X
+def list_item_type(attr):
+    spltd = attr.split()
+    if len(spltd) != 3 or spltd[0] != "list" or spltd[1] != "of":
+        print("Invalid attribute: ", attr, ". Expected 'list of <type>'")
+        exit(2)
+    return spltd[2]
+
+
+# The C++ expression which turns the given scalar member into XML text
+def to_xml_text(attr, member):
+    if attr.strip().startswith("string"):
+        return "xml_escape(" + member + ")"
+    if attr == "bool":
+        return 'std::string(' + member + ' ? "1" : "0")'
+    return "stringify(" + member + ")"
+
+
+# The C++ statement which reads the given scalar member from XML text
+def from_xml_text(attr, member, txt):
+    if attr.strip().startswith("string"):
+        return member + " = " + txt
+    if attr == "bool":
+        return member + " = xml_to_bool(" + txt + ")"
+    if attr in ["int", "short", "sequence"]:
+        return member + " = atoi(" + txt + ")"
+    if attr in ["long", "long long"]:
+        return member + " = atol(" + txt + ")"
+    if attr.startswith("unsigned"):
+        return member + " = strtoul(" + txt + ", NULL, 10)"
+    if attr in ["float", "double", "long double"]:
+        return member + " = atof(" + txt + ")"
+    if attr == "char":
+        return member + " = " + txt + "[0]"
+    print("Cannot deserialize type:", attr)
+    exit(2)
+
+
+# True if the class is a message, ie. Message or something derived from it
+def is_message(cls, pclasses):
+    if cls["name"] == "Message":
+        return True
+    for e in cls["extends"]:
+        if is_message(cfn(e, pclasses), pclasses):
+            return True
+    return False
 
 # Used for the member declarations
 def contained_attribute_type(attr, cls):
@@ -236,7 +288,8 @@ def generate(pclasses):
                         needs_to_be_included.append("<vector>")
 
         for tbi in needs_to_be_included:
-            f.write("#include " + eight_len_fn(tbi) + "\n")
+            f.write("#include " + tbi + "\n")
+        f.write("#include \"ezxml.h\"\n")
 
         # The class declaration
         f.write("class " + cls["name"])
@@ -250,10 +303,22 @@ def generate(pclasses):
 
         restrictions[cls["name"]] = {}
 
-        # Constructor
-        f.write("    " + cls["name"] + "(")
-        generate_constructor_init_list(cls, f, pclasses, True)
-        # let's see if any of the values are restricted to something
+        # Constructors. There are no default arguments on purpose: Open Watcom
+        # silently drops the construction of objects whose constructor has
+        # std::vector temporaries as default arguments.
+        own_params = [a for a in cls["attributes"] if a["type"] != "sequence"]
+        init = [e + "()" for e in cls["extends"]]
+        for a in cls["attributes"]:
+            init.append("m_" + a["name"] + ("(++ seq_" + a["name"] + ")" if a["type"] == "sequence" else "()"))
+        f.write("    " + cls["name"] + "()" + (" : " + ", ".join(init) if init else "") + "\n    {}\n")
+        if own_params:
+            f.write("\n    " + cls["name"] + "(" + ", ".join(const_if_can_attribute_type(a["type"], cls) + " p_" + a["name"] for a in own_params) + ")")
+            init = [e + "()" for e in cls["extends"]]
+            for a in cls["attributes"]:
+                init.append("m_" + a["name"] + ("(++ seq_" + a["name"] + ")" if a["type"] == "sequence" else "(p_" + a["name"] + ")"))
+            f.write(" : " + ", ".join(init))
+        # let's see if any of the values are restricted to something, these checks go into the body
+        # of the constructor with parameters
         restricted = False
         opp_written = False
         for a in cls["attributes"]:
@@ -305,7 +370,7 @@ def generate(pclasses):
         if opp_written:
             f.write("\n    }\n")
 
-        if not restricted:
+        if not restricted and own_params:
             f.write("\n    {}\n")
 
         sequences = []
@@ -333,7 +398,11 @@ def generate(pclasses):
             attr_names = [d.get("name", '') for d in cls["attributes"]]
             attr_types = [d.get("type", '') for d in cls["attributes"]]
             for a, t in zip(attr_names, attr_types):
-                f.write("    " + valid_attribute_type(t, cls) + " get_" + a + "() const\n    {\n")
+                # strings and lists by reference, copying them is expensive on DOS
+                rt = valid_attribute_type(t, cls)
+                if rt.startswith("std::"):
+                    rt = "const " + rt + "&"
+                f.write("    " + rt + " get_" + a + "() const\n    {\n")
                 f.write("        return  m_" + a + ";\n")
                 f.write("    }\n")
 
@@ -341,12 +410,17 @@ def generate(pclasses):
         f.write("\n    // serializer\n")
         f.write("    virtual std::string serialize() const;\n")
         f.write("    virtual int deserialize(const char*);\n")
+        f.write("    virtual int deserialize(ezxml_t);\n")
 
         # The equality operator
         f.write("\n    // comparison\n")
         f.write('    bool operator == (const ' + cls["name"] + "&) const;\n")
 
         # Now the attributes
+
+        f.write("\nprotected:\n")
+        f.write("    void serialize_attributes(std::string&) const;\n")
+        f.write("    int deserialize_attributes(ezxml_t);\n")
 
         f.write("\nprivate:\n")
         if len(cls["attributes"]) > 0:
@@ -369,8 +443,8 @@ def generate(pclasses):
         f = open_file(eight_len_fn(cls["name"]) + ".cpp", "w")
         f.write("#include \"" + eight_len_fn(cls["name"]) + ".h\"\n")
         f.write("#include \"strngify.h\"\n\n")
-        f.write("#include \"ezxml.h\"\n\n")
-        f.write("#include <string.h>\n\n")
+        f.write("#include <string.h>\n")
+        f.write("#include <stdlib.h>\n\n")
 
         if len(sequences) > 0:
             for seq in sequences:
@@ -379,76 +453,83 @@ def generate(pclasses):
         # The serializer function
         f.write('\nstd::string ' + cls["name"] + '::serialize() const\n{\n')
         f.write('    std::string result = "<o><type>' + cls["name"] + '</type>";\n')
-        if len(cls["attributes"]) > 0:
-            f.write('    result += "<attributes>";\n')
-            for a in cls["attributes"]:
-                f.write("    // attribute:" + a["name"] + "\n")
-                f.write('    result += "<' + a["name"] + '>";\n')
-                if a["type"] in builtin_types or a["type"].startswith("string") or a["type"] == "sequence":
-                    f.write('    result += stringify(m_' + a["name"] + ');')
-                else:
-                    ser_line = '    for(int i=0; i<m_' + a["name"] + '.size(); i++) result += "<item i=\\"" + stringify(i) + "\\">" + '
-                    contained_type = contained_attribute_type(a["type"], cls)
-                    if contained_type in builtin_types or contained_type == "string":
-                        ser_line += 'stringify(m_' + a["name"] + '[i]) + "</item>";'
-                    else:
-                        ser_line += "m_" + a["name"] + '[i].serialize() + "</item>\";'
-                    f.write(ser_line)
-
-                f.write('\n    result += "</' + a["name"] + '>";\n')
-            f.write('    result += "</attributes>";\n')
-        f.write('    result += "</o>";\n')
+        f.write('    result += "<attributes>";\n')
+        f.write('    serialize_attributes(result);\n')
+        f.write('    result += "</attributes></o>";\n')
         f.write('    return result;\n}\n')
 
-        # The deserializer function
-        f.write('int ' + cls["name"] + '::deserialize(const char* xml)\n{\n')
-        f.write('    ezxml_t x = ezxml_parse_str((char*)xml, strlen(xml));\n')
-        f.write('    ezxml_t type_node = ezxml_child(x, "type");\n')
-        f.write('    const char* str_type = type_node->txt;\n')
-        f.write('    if(strcmp(str_type, "' + cls["name"] + '")) return 0;')
-        if len(cls["attributes"]) > 0:
-            f.write('    ezxml_t attrs_node = ezxml_child(x, "attributes");\n')
-            f.write('    if(!attrs_node) return 0;\n')
-            for a in cls["attributes"]:
-                f.write('    ezxml_t attr_node_' + a["name"] + ' = ezxml_child(attrs_node, "' + a["name"] + '");\n')
-                if a["type"] in builtin_types or a["type"].startswith("string") or a["type"] == "sequence":
-                    f.write('    destringify(m_' + a["name"] + ', attr_node_' + a["name"] + '->txt);\n')
+        # The attributes, the ones of the base classes first
+        f.write('\nvoid ' + cls["name"] + '::serialize_attributes(std::string& result) const\n{\n')
+        for e in cls["extends"]:
+            f.write('    ' + e + '::serialize_attributes(result);\n')
+        for a in cls["attributes"]:
+            f.write("    // attribute:" + a["name"] + "\n")
+            f.write('    result += "<' + a["name"] + '>";\n')
+            if is_scalar(a["type"]):
+                f.write('    result += ' + to_xml_text(a["type"], "m_" + a["name"]) + ';\n')
+            else:
+                contained_type = list_item_type(a["type"])
+                f.write('    for(size_t i=0; i<m_' + a["name"] + '.size(); i++)\n    {\n')
+                if is_scalar(contained_type):
+                    f.write('        result += "<item>" + ' + to_xml_text(contained_type, "m_" + a["name"] + "[i]") + ' + "</item>";\n')
                 else:
-                    f.write('    for (ezxml_t item = ezxml_child(attr_node_' + a["name"] + ', "item"); item; item = item->next) {\n')
-                    tdls = a["type"].split()
-                    if a["type"] != "sequence" and len(tdls) > 0 and tdls[0] != 'list' and len(tdls) > 1 and tdls[1] != 'of':
-                        print("Invalid attribute: ", a["type"], ". Missing something from it ...")
-                        exit(2)
-                    if len(tdls) > 2:
-                        f.write('        ' + valid_attribute_type(tdls[2], cls) + ' l_' + tdls[2] + ';\n')
-                        f.write('        ezxml_t items_o = ezxml_child(item, "o");\n')
-                        f.write('        char * l_attr_data = ezxml_toxml(items_o);\n')
-                        cont_type = contained_attribute_type(tdls[2], cls)
-                        if cont_type == "std::string" or cont_type in builtin_types:
-                            f.write('        destringify(l_' + tdls[2] + ', l_attr_data);\n')
-                        else:
-                            f.write('        if(!l_' + tdls[2] + '.deserialize(l_attr_data))  {free(l_attr_data); return 0;}\n')
-                        f.write('        free(l_attr_data);\n')
-                        f.write('        m_' + a["name"] + '.push_back(l_' + tdls[2] + ');\n')
-                    else:
-                        # possible reference to a class, make it a pointer
-                        print("Invalid attribute: ", a["type"], ". Missing something from it ...")
-                        exit(2)
+                    f.write('        result += "<item>" + m_' + a["name"] + '[i].serialize() + "</item>";\n')
+                f.write('    }\n')
+            f.write('    result += "</' + a["name"] + '>";\n')
+        f.write('}\n')
 
-                    f.write('\n    }')
+        # The deserializer from a string, parses it and hands over to the node one
+        f.write('\nint ' + cls["name"] + '::deserialize(const char* xml)\n{\n')
+        f.write('    size_t len = strlen(xml);\n')
+        f.write('    char* copy = (char*)malloc(len + 1);\n')
+        f.write('    if(!copy) return 0;\n')
+        f.write('    memcpy(copy, xml, len + 1);\n')
+        f.write('    ezxml_t x = ezxml_parse_str(copy, len);\n')
+        f.write('    int result = deserialize(x);\n')
+        f.write('    ezxml_free(x);\n')
+        f.write('    free(copy);\n')
+        f.write('    return result;\n}\n')
 
-        f.write('\n    return 1;\n}\n')
+        # The deserializer from an already parsed <o> node
+        f.write('\nint ' + cls["name"] + '::deserialize(ezxml_t x)\n{\n')
+        f.write('    if(!x) return 0;\n')
+        f.write('    ezxml_t type_node = ezxml_child(x, "type");\n')
+        f.write('    if(!type_node || strcmp(type_node->txt, "' + cls["name"] + '")) return 0;\n')
+        f.write('    return deserialize_attributes(ezxml_child(x, "attributes"));\n}\n')
+
+        f.write('\nint ' + cls["name"] + '::deserialize_attributes(ezxml_t attrs_node)\n{\n')
+        f.write('    if(!attrs_node) return 0;\n')
+        for e in cls["extends"]:
+            f.write('    if(!' + e + '::deserialize_attributes(attrs_node)) return 0;\n')
+        for a in cls["attributes"]:
+            node = 'attr_node_' + a["name"]
+            f.write('    ezxml_t ' + node + ' = ezxml_child(attrs_node, "' + a["name"] + '");\n')
+            if is_scalar(a["type"]):
+                f.write('    if(' + node + ') ' + from_xml_text(a["type"], "m_" + a["name"], node + "->txt") + ';\n')
+            else:
+                contained_type = list_item_type(a["type"])
+                f.write('    m_' + a["name"] + '.clear();\n')
+                f.write('    for(ezxml_t item = ezxml_child(' + node + ', "item"); item; item = item->next)\n    {\n')
+                f.write('        ' + valid_attribute_type(contained_type, cls) + ' l_item;\n')
+                if is_scalar(contained_type):
+                    f.write('        ' + from_xml_text(contained_type, "l_item", "item->txt") + ';\n')
+                else:
+                    f.write('        if(!l_item.deserialize(ezxml_child(item, "o"))) return 0;\n')
+                f.write('        m_' + a["name"] + '.push_back(l_item);\n')
+                f.write('    }\n')
+        f.write('    return 1;\n}\n\n')
 
         # Comparison operator implemented
         f.write('bool ' + cls["name"] + '::operator == (const ' + cls["name"] + "& rhs) const\n{\n")
         for e in cls["extends"]:
             f.write("    if(!" + e + "::operator ==(rhs)) return false;\n")
         for a in cls["attributes"]:
-            if a["type"] in builtin_types or a["type"] == "sequence" or a["type"] == "string":
+            if is_scalar(a["type"]):
                 f.write("    if(m_" + a["name"] + " != " + "rhs.m_" + a["name"] + ") return false;\n")
             else:
-                f.write("    // Checking vector\n")
                 f.write("    if(m_" + a["name"] + ".size() != " + "rhs.m_" + a["name"] + ".size() ) return false;\n")
+                f.write("    for(size_t i_" + a["name"] + " = 0; i_" + a["name"] + " < m_" + a["name"] + ".size(); i_" + a["name"] + "++)\n")
+                f.write("        if(!(m_" + a["name"] + "[i_" + a["name"] + "] == rhs.m_" + a["name"] + "[i_" + a["name"] + "])) return false;\n")
 
         f.write('\n    return true;\n}\n')
 
@@ -654,12 +735,12 @@ def generate_make(pclasses):
 # Creates the "generated" folder and the subfolder required in it
 #
 def create_generated_folder(subf):
-    path = "generated"
+    path = output_dir
     does_exist = os.path.exists(path)
     if not does_exist:
         # Create a new directory because it does not exist
         os.makedirs(path)
-    path = "generated/" + subf
+    path = os.path.join(output_dir, subf)
     # Check whether the specified path exists or not
     does_exist = os.path.exists(path)
     if not does_exist:
@@ -773,16 +854,24 @@ def search(attribute, attributes):
 #
 def generate_message_receiver(pclasses):
 
+    messages = [cls for cls in pclasses if cls["name"] != "Message" and is_message(cls, pclasses)]
+
+    # the parameters of the create_ functions: the own, non sequence attributes
+    def creator_params(cls):
+        return [a for a in cls["attributes"] if a["type"] != "sequence"]
+
     # protocol.h
     f = open_file("protocol.h", "w")
     f.write("#ifndef __PROTOCOL_H__\n")
     f.write("#define __PROTOCOL_H__\n\n")
+    f.write("// Generated by tools/idl_gen/gen.py from main.idl, do not edit\n\n")
+    f.write("#include \"ezxml.h\"\n")
 
     for cls in pclasses:
         f.write("#include <" + eight_len_fn(cls["name"]) + ".h>\n")
 
-    f.write('// Protocol message handler types\n')
-    for cls in pclasses:
+    f.write('\n// Protocol message handler types\n')
+    for cls in messages:
         f.write("typedef void(*" + cls["name"] + "_Handler)")
         f.write("(const " + cls["name"] + "*);\n")
 
@@ -790,120 +879,243 @@ def generate_message_receiver(pclasses):
 
     # Constructor
     f.write("\n    Protocol()")
-    if len(pclasses) > 0:
+    if len(messages) > 0:
         f.write(" : ")
-        members = []
-        for cls in pclasses:
-            members.append("m_" + cls["name"] + "_handler(NULL)")
-        f.write(", ".join(members))
+        f.write(", ".join(["m_" + cls["name"] + "_handler(NULL)" for cls in messages]))
     f.write("\n    {}\n\n")
+    f.write("    virtual ~Protocol() {}\n\n")
 
-    empty_created = []
+    f.write("    // message creators, the caller owns the returned object\n")
+    for cls in messages:
+        params = [const_if_can_attribute_type(a["type"], cls) + " p_" + a["name"] for a in creator_params(cls)]
+        f.write("    " + cls["name"] + "* create_" + cls["name"] + "(" + ", ".join(params) + ");\n")
 
-    f.write("    // message creators with parameters\n")
-    for cls in pclasses:
-        c_attrs = []
+    f.write("\n    // message handler setters\n")
+    for cls in messages:
+        f.write("    void set_" + cls["name"] + "_Handler(" + cls["name"] + "_Handler p_handler) {\n")
+        f.write("        m_" + cls["name"] + "_handler = p_handler;\n    }\n")
 
-        f.write("    " + cls["name"] + "* create_" + cls["name"])
-        if len(cls["attributes"]) > 0:
-            attr_names = [d.get("name", '') for d in all_attributes(cls, pclasses)]
-            attr_types = [d.get("type", '') for d in all_attributes(cls, pclasses)]
-            for a, t in zip(attr_names, attr_types):
+    f.write("\n    /**\n     * Deserializes the given <o> node as the message type and calls its handler.\n")
+    f.write("     * Returns 1 if the message was handled, 0 otherwise.\n     **/\n")
+    f.write("    int receive(const char* p_message_type, ezxml_t p_o);\n")
 
-                cel = search(a, cls["attributes"])
-                if cel and cel[0]["type"] != "sequence":
-                    c_attrs.append("" + const_if_can_attribute_type(t, cls) + " p_" + a)
-
-            f.write("(" + ", ".join(c_attrs) + ");\n")
-        else:
-            empty_created.append(cls["name"])
-            f.write("();\n")
-
-        if len(c_attrs) == 0:
-            empty_created.append(cls["name"])
-
-    f.write("    // empty message creators\n")
-    for cls in pclasses:
-        if not cls["name"] in empty_created:
-            f.write("    " + cls["name"] + "* create_" + cls["name"] + "();\n")
-
-    # message receivers
     f.write("\nprivate:\n\n")
-    for cls in pclasses:
+    for cls in messages:
         f.write("    " + cls["name"] + "_Handler m_" + cls["name"] + "_handler;\n")
 
-    for cls in pclasses:
-        f.write("    /**\n     * Handling the " + cls["name"] + " message.\n     */\n")
-        f.write("    int receive_" + cls["name"] + "(const char*);\n\n")
-
-    f.write("public:\n    /**\n     * This method is called when the TCP/IP stack received something\n     **/\n")
-    f.write("    int receive(const char*, const char*);\n")
-
     f.write("\n};\n")
-
     f.write("#endif\n")
     f.close()
 
     # protocol.cpp
     f = open_file("protocol.cpp", "w")
+    f.write("// Generated by tools/idl_gen/gen.py from main.idl, do not edit\n\n")
     f.write("#include \"protocol.h\"\n")
-    f.write("#include <ezxml.h>\n")
+    f.write("#include <log.h>\n")
     f.write("#include <string.h>\n\n")
 
-    # Receivers
-    for cls in pclasses:
-        f.write("\nint Protocol::receive_" + cls["name"] + "(const char* p_xml)\n{\n")
-        f.write("    if(!m_" + cls["name"] + "_handler) return 0;\n")
-        f.write("    " + cls["name"] + " obj;\n")
-        f.write("    obj.deserialize(p_xml);\n")
-        f.write("    m_" + cls["name"] + "_handler(&obj);\n")
-        f.write("    return 1;")
-        f.write("\n}\n")
+    f.write("int Protocol::receive(const char* p_message_type, ezxml_t p_o)\n{\n")
+    for cls in messages:
+        n = cls["name"]
+        f.write('    if(!strcmp(p_message_type, "' + n + '"))\n    {\n')
+        f.write('        if(!m_' + n + '_handler) { log_warning() << "No handler for ' + n + '"; return 0; }\n')
+        f.write('        ' + n + ' obj;\n')
+        f.write('        if(!obj.deserialize(p_o)) { log_error() << "Cannot deserialize ' + n + '"; return 0; }\n')
+        f.write('        m_' + n + '_handler(&obj);\n')
+        f.write('        return 1;\n    }\n')
+    f.write('    log_warning() << "Unknown message:" << p_message_type;\n')
+    f.write("    return 0;\n}\n\n")
 
-    f.write("\nint Protocol::receive(const char* p_message_type, const char* p_serialized_xml)\n{\n")
-    for cls in pclasses:
-        f.write('    if(!strcmp(p_message_type, "' + cls["name"] + '")) { return receive_' + cls["name"] + '(p_serialized_xml); }\n')
-    f.write("    return 1;\n}\n\n")
-
-    # Creators
-    f.write("// Default Creators\n")
-    for cls in pclasses:
-        if not cls["name"] in empty_created:
-            f.write(cls["name"] + "* Protocol::create_" + cls["name"] + "()\n{\n")
-            f.write("    return new " + cls["name"] + "();\n}\n\n")
-
-    f.write("// Creators with specific parameters\n")
-    for cls in pclasses:
-        f.write(cls["name"] + "*  Protocol::create_" + cls["name"])
-
-        if len(cls["attributes"]) > 0:
-            attr_names = [d.get("name", '') for d in all_attributes(cls, pclasses)]
-            attr_types = [d.get("type", '') for d in all_attributes(cls, pclasses)]
-            attrs = []
-            for a, t in zip(attr_names, attr_types):
-                cel = search(a, cls["attributes"])
-                if cel and cel[0]["type"] != "sequence":
-                    attrs.append("" + const_if_can_attribute_type(t, cls) + " p_" + a)
-            f.write("(" + ", ".join(attrs) + ")\n{\n")
-            f.write("    " + cls["name"] + "* l_" + cls["name"] + " = new " + cls["name"] + "();\n")
-            f.write("    return  l_" + cls["name"] + ";\n")
-
-            f.write("\n}\n")
-        else:
-            f.write("()\n{\n    return new " + cls["name"] + "();\n}\n\n")
+    for cls in messages:
+        params = creator_params(cls)
+        decl = [const_if_can_attribute_type(a["type"], cls) + " p_" + a["name"] for a in params]
+        f.write(cls["name"] + "* Protocol::create_" + cls["name"] + "(" + ", ".join(decl) + ")\n{\n")
+        f.write("    return new " + cls["name"] + "(" + ", ".join(["p_" + a["name"] for a in params]) + ");\n}\n\n")
     f.close()
+
+
+#
+# Generates the python module used by the Linux peer
+#
+def generate_python(pclasses, out_file):
+    def py_kind(attr):
+        if attr.strip().startswith("string"):
+            return "string"
+        if attr == "bool":
+            return "bool"
+        if attr in ["float", "double", "long double"]:
+            return "float"
+        if is_scalar(attr):
+            return "int"
+        return "list"
+
+    def py_default(attr):
+        return {"string": '""', "bool": "False", "float": "0.0", "int": "0", "list": "None"}[py_kind(attr)]
+
+    f = open(out_file, "w")
+    f.write(PY_RUNTIME_HEAD)
+
+    for cls in pclasses:
+        base = cls["extends"][0] if cls["extends"] else "_Object"
+        fields = []
+        for a in cls["attributes"]:
+            kind = py_kind(a["type"])
+            item = kind
+            if kind == "list":
+                it = list_item_type(a["type"])
+                item = it if is_class_definition(it, pclasses) else py_kind(it)
+            fields.append('("' + a["name"] + '", "' + kind + '", "' + item + '"), ')
+        f.write("\n\nclass " + cls["name"] + "(" + base + "):\n")
+        f.write('    NAME = "' + cls["name"] + '"\n')
+        f.write("    FIELDS = " + base + ".FIELDS + (" + "".join(fields) + ")\n")
+
+        all_attrs = all_attributes(cls, pclasses)
+        args = ["self"] + [a["name"] + "=" + py_default(a["type"]) for a in all_attrs if a["type"] != "sequence"]
+        f.write("\n    def __init__(" + ", ".join(args) + "):\n")
+        body = []
+        for a in all_attrs:
+            if a["type"] == "sequence":
+                body.append("        self." + a["name"] + " = next(_sequence)")
+            elif py_kind(a["type"]) == "list":
+                body.append("        self." + a["name"] + " = " + a["name"] + " if " + a["name"] + " is not None else []")
+            else:
+                body.append("        self." + a["name"] + " = " + a["name"])
+        f.write("\n".join(body) if body else "        pass")
+        f.write("\n")
+
+    f.write("\n\n_CLASSES = {\n")
+    for cls in pclasses:
+        f.write('    "' + cls["name"] + '": ' + cls["name"] + ",\n")
+    f.write("}\n")
+    f.write(PY_RUNTIME_TAIL)
+    f.close()
+
+
+PY_RUNTIME_HEAD = """# Generated by tools/idl_gen/gen.py from main.idl, do not edit
+\"\"\"The cloudy message protocol, Python side.\"\"\"
+
+import itertools
+import xml.etree.ElementTree as ET
+from xml.sax.saxutils import escape
+
+_ENVELOPE_HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><protocol><cld v="1.0" msg="'
+
+_sequence = itertools.count(1)
+
+
+class _Object:
+    NAME = ""
+    # (attribute name, kind, item class name or kind for lists)
+    FIELDS = ()
+
+    def serialize(self):
+        out = ["<o><type>", self.NAME, "</type><attributes>"]
+        for name, kind, item in self.FIELDS:
+            value = getattr(self, name)
+            out.append("<" + name + ">")
+            if kind == "list":
+                for v in value:
+                    out.append("<item>" + _to_text(item, v) + "</item>")
+            else:
+                out.append(_to_text(kind, value))
+            out.append("</" + name + ">")
+        out.append("</attributes></o>")
+        return "".join(out)
+
+    @classmethod
+    def from_node(cls, o):
+        if o is None or o.findtext("type") != cls.NAME:
+            return None
+        attrs = o.find("attributes")
+        if attrs is None:
+            return None
+        obj = cls()
+        for name, kind, item in cls.FIELDS:
+            node = attrs.find(name)
+            if node is None:
+                continue
+            if kind == "list":
+                setattr(obj, name, [_from_item(item, i) for i in node.findall("item")])
+            else:
+                setattr(obj, name, _from_text(kind, node.text))
+        return obj
+
+    def __repr__(self):
+        return self.NAME + "(" + ", ".join(n + "=" + repr(getattr(self, n)) for n, _, _ in self.FIELDS) + ")"
+
+
+def _to_text(kind, value):
+    if kind in _CLASSES:
+        return value.serialize()
+    if kind == "string":
+        return escape(value or "")
+    if kind == "bool":
+        return "1" if value else "0"
+    return str(value)
+
+
+def _from_text(kind, text):
+    text = text or ""
+    if kind == "string":
+        return text
+    if kind == "bool":
+        return text.strip() in ("1", "true")
+    if kind == "float":
+        return float(text or 0)
+    return int(text or 0)
+
+
+def _from_item(kind, node):
+    if kind in _CLASSES:
+        return _CLASSES[kind].from_node(node.find("o"))
+    return _from_text(kind, node.text)
+"""
+
+PY_RUNTIME_TAIL = """
+
+def envelope(msg):
+    \"\"\"Returns the bytes to send for the message, including the terminating NUL.\"\"\"
+    return (_ENVELOPE_HEAD + msg.NAME + '">' + msg.serialize() + "</cld></protocol>").encode("utf-8") + b"\\0"
+
+
+def parse(frame):
+    \"\"\"Parses one frame (without the NUL), returns the message object or None.\"\"\"
+    root = ET.fromstring(frame)
+    cld = root if root.tag == "cld" else root.find("cld")
+    if cld is None:
+        return None
+    cls = _CLASSES.get(cld.get("msg", ""))
+    if cls is None:
+        return None
+    return cls.from_node(cld.find("o"))
+"""
 
 
 #
 # Main
 #
 if __name__ == "__main__":
-    classes = build_structures("main.idl")
+    import argparse
+    here = os.path.dirname(os.path.abspath(__file__))
+    project = os.path.normpath(os.path.join(here, "..", ".."))
+    parser = argparse.ArgumentParser(description="Generates the cloudy protocol code from the IDL")
+    parser.add_argument("idl", nargs="?", default=os.path.join(here, "main.idl"))
+    parser.add_argument("--cpp-out", default=os.path.join(project, "msg_prot"))
+    parser.add_argument("--py-out", default=os.path.join(project, "peer", "cldproto.py"))
+    parser.add_argument("--tests", action="store_true", help="also generate the Catch2 tests")
+    args = parser.parse_args()
+
+    output_dir = args.cpp_out
+    classes = build_structures(args.idl)
     generate(classes)
     print("Structures generated")
-    generate_tests(classes)
-    print("Tests generated")
+    if args.tests:
+        generate_tests(classes)
+        print("Tests generated")
     generate_message_receiver(classes)
     print("Protocol generated")
     generate_make(classes)
     print("Makefiles generated")
+    os.makedirs(os.path.dirname(args.py_out), exist_ok=True)
+    generate_python(classes, args.py_out)
+    print("Python module generated")

@@ -3,7 +3,21 @@
 
 #include <string.h>
 
-GuiState::GuiState()
+static bool repaintRequested = true;
+
+void requestRepaint()
+{
+    repaintRequested = true;
+}
+
+bool takeRepaintRequest()
+{
+    bool r = repaintRequested;
+    repaintRequested = false;
+    return r;
+}
+
+GuiState::GuiState() : cursor(NULL)
 {
 }
 

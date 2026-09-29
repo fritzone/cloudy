@@ -1,9 +1,24 @@
 #include "logstrm.h"
 
-#include <fstream>
-#include <iomanip>
-#include <sstream>
+#include <stdio.h>
 #include <time.h>
+
+LogLevel g_logLevel = LOG_WARNING;
+
+const char* logLevelName(LogLevel level)
+{
+    switch(level)
+    {
+    case LOG_EMERGENCY: return "EMERGENCY   ";
+    case LOG_CRITICAL: return "CRITICAL    ";
+    case LOG_ERROR: return "ERROR       ";
+    case LOG_WARNING: return "WARNING     ";
+    case LOG_INFORMATION: return "INFORMATION ";
+    case LOG_DEBUG: return "DEBUG       ";
+    case LOG_TRACE: return "TRACE       ";
+    }
+    return "            ";
+}
 
 logstream::logstream(int line, const char *pFile, const char *pFunc, LogLevel level) :
     mOutputStream(),
@@ -30,22 +45,23 @@ std::string timeToStr(time_t &time)
 // Definition of do_log function
 void do_log(const std::string& msg)
 {
-    std::ofstream fs;
-    fs.open("clouder.log", std::ios::app | std::ios::out);
+    // opened and closed every time, so the log survives a crash
+    FILE* fs = fopen("clouder.log", "a");
+    if(fs == NULL)
+    {
+        return;
+    }
 
     std::time_t currentTime = std::time(NULL);
-    std::string cts = timeToStr(currentTime);
-    cts = "[" + cts + "]" + msg;
-    fs << cts.c_str();
-    fs.flush();
-    fs.close();
+    fprintf(fs, "[%s]%s", timeToStr(currentTime).c_str(), msg.c_str());
+    fclose(fs);
 }
 
 logstream::~logstream()
 {
     MyStringStream arguments;
 
-    arguments << errstrings[mLevel]
+    arguments << logLevelName(mLevel)
               << mFile.substr(mFile.find_last_of('/') + 1)
               << ":" << mLine << " (" << mFunc << ")" << mOutputStream.str() << "\n";
 

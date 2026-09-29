@@ -3,15 +3,23 @@
 
 #include <types.h>
 
+/**
+ * Called for each complete frame received. The frame is '\0' terminated and
+ * the callee may modify it in place, but must not keep a pointer to it.
+ */
+typedef void (*FrameCallback)(void* data, char* frame);
+
 /*
  * This class will handle the network setup, each system will have to derive from it
- * in order to properly initialize its network capabilities
+ * in order to properly initialize its network capabilities.
+ *
+ * On the wire the messages are separated by a '\0' byte.
  */
 class NetworkInterface
 {
 public:
 
-    NetworkInterface() : connected(true) {}
+    NetworkInterface() {}
     virtual ~NetworkInterface() {}
 
     /**
@@ -36,19 +44,20 @@ public:
     virtual bool connect(void* sock, const char* where, uint16_t port) = 0;
 
     /**
-   * Polls the socket, waiting for the specific timeout, upon data it calls the callback
+   * Returns false once the other side closed the connection
    */
-    virtual void poll(void *sock, uint32_t timeout, void* data, void(*callback)(void*, const char*) ) = 0;
+    virtual bool isConnected(void* sock) = 0;
 
     /**
-   * Will send the data through the socket
+   * Processes the network for at most timeout milliseconds (0: just once) and
+   * calls the callback for every complete frame that arrived.
    */
-    virtual void send(void* sock, const char* data, unsigned short length) = 0;
+    virtual void poll(void *sock, uint32_t timeout, void* data, FrameCallback callback) = 0;
 
-private:
-
-    bool connected;
+    /**
+   * Sends all the data through the socket, returns false if it could not.
+   */
+    virtual bool send(void* sock, const char* data, uint16_t length) = 0;
 };
 
 #endif
-

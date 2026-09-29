@@ -1,0 +1,135 @@
+// The cloudy message protocol.
+//
+// Regenerate the C++ (msg_prot/) and Python (peer/cldproto.py) code with:
+//     python3 tools/idl_gen/gen.py
+//
+// On the wire every message is an XML document, terminated by a '\0' byte:
+//   <?xml ...?><protocol><cld v="1.0" msg="Name"><o>...</o></cld></protocol>
+//
+// Keep in mind that the DOS side is 16 bit: int is 16 bit, long is 32 bit.
+// Directories and files on the Linux side are referenced by a hash the peer
+// hands out, so DOS never has to deal with long Linux paths.
+
+// Base of all the messages
+class Message
+{
+    message_id: sequence
+}
+
+// A file or directory in a listing, not a message on its own
+class DirectoryEntry
+{
+    // the full name on the host
+    name: string
+    // YYYYMMDD
+    date: long
+    // HHMMSS
+    time: long
+    // in bytes, clamped to 2GB
+    size: long
+    // "d" for directories, empty for files
+    attrs: string
+    // use this to refer to the entry in further requests
+    hash: string
+}
+
+// DOS -> Linux, the first message after the TCP connection is up
+class ConnectRequest: Message
+{
+    platform: string of ["dos","linux"]
+    unique_id: string
+}
+
+// Linux -> DOS
+class ConnectionRequestReply: Message
+{
+    accepted: bool
+    authentication_required: bool
+    host_name: string
+}
+
+// Not used for now, the peer never asks for authentication
+class Authenticate: Message
+{
+    user_name_hash: string
+    password_hash: string
+}
+
+class AuthenticationStatus: Message
+{
+    success: bool
+    rights: string
+}
+
+// DOS -> Linux
+class StatusRequest: Message
+{
+}
+
+// Linux -> DOS
+class Status: Message
+{
+    host_platform: string
+    drives: list of string
+    // in kilobytes, one for each drive
+    free_space: list of long
+    working_directories: list of string
+    current__work_index: int
+}
+
+// DOS -> Linux, an empty hash means the peer's start directory.
+// The reply is paged, start is the index of the first entry wanted.
+class DirectoryListRequest: Message
+{
+    directory_hash: string
+    start: int
+}
+
+// Linux -> DOS, holds entries [start, start + count of entries) of total
+class DirectoryList: Message
+{
+    directory_name: string
+    directory_hash: string
+    start: int
+    total: int
+    error: string
+    entries: list of DirectoryEntry
+}
+
+// DOS -> Linux, asks for a piece of a file
+class FileReadRequest: Message
+{
+    file_hash: string
+    offset: long
+    length: int
+}
+
+// Linux -> DOS, data is base64 encoded
+class FileData: Message
+{
+    file_hash: string
+    offset: long
+    data: string
+    eof: bool
+    error: string
+}
+
+// DOS -> Linux, writes a piece of a file into a directory. The piece at
+// offset 0 creates (or truncates) the file. Data is base64 encoded.
+class FileWriteRequest: Message
+{
+    directory_hash: string
+    name: string
+    offset: long
+    data: string
+    last: bool
+}
+
+// Linux -> DOS
+class FileWriteReply: Message
+{
+    name: string
+    offset: long
+    ok: bool
+    error: string
+}

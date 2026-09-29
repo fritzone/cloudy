@@ -9,4 +9,4 @@ net_dir = ./src/net
 !include $(states_dir)/makefile
 !include $(net_dir)/makefile
 
-src_objs = prot.o
+src_objs = prot.o transfer.o

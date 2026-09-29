@@ -5,7 +5,11 @@
  */
 struct FileStructure
 {
+    // the name of the file, for remote files this is the full (long) name
     char* sname;
+
+    // for remote files the hash the peer uses to identify it, NULL for local files
+    char* hash;
 
     unsigned long file_size;
 

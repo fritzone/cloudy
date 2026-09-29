@@ -2,10 +2,14 @@
 #define __AUTHENTICATIONSTATUS_H__
 #include "message.h"
 #include <string>
+#include "ezxml.h"
 class AuthenticationStatus: public Message
 {
 public:
-    AuthenticationStatus(bool p_success =  0, const std::string& p_rights = std::string(), int p_message_id =  0) : Message(p_message_id), m_success(p_success), m_rights(p_rights)
+    AuthenticationStatus() : Message(), m_success(), m_rights()
+    {}
+
+    AuthenticationStatus(bool p_success, const std::string& p_rights) : Message(), m_success(p_success), m_rights(p_rights)
     {}
 
     virtual ~AuthenticationStatus() {}
@@ -21,7 +25,7 @@ public:
     {
         return  m_success;
     }
-    std::string get_rights() const
+    const std::string& get_rights() const
     {
         return  m_rights;
     }
@@ -29,9 +33,14 @@ public:
     // serializer
     virtual std::string serialize() const;
     virtual int deserialize(const char*);
+    virtual int deserialize(ezxml_t);
 
     // comparison
     bool operator == (const AuthenticationStatus&) const;
+
+protected:
+    void serialize_attributes(std::string&) const;
+    int deserialize_attributes(ezxml_t);
 
 private:
     bool m_success;

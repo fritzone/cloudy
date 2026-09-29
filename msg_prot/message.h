@@ -1,10 +1,11 @@
 #ifndef __MESSAGE_H__
 #define __MESSAGE_H__
 #include <string>
+#include "ezxml.h"
 class Message
 {
 public:
-    Message(int p_message_id =  0) : m_message_id(++ seq_message_id)
+    Message() : m_message_id(++ seq_message_id)
     {}
 
     virtual ~Message() {}
@@ -22,9 +23,14 @@ public:
     // serializer
     virtual std::string serialize() const;
     virtual int deserialize(const char*);
+    virtual int deserialize(ezxml_t);
 
     // comparison
     bool operator == (const Message&) const;
+
+protected:
+    void serialize_attributes(std::string&) const;
+    int deserialize_attributes(ezxml_t);
 
 private:
     int m_message_id;

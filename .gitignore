@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Build and run output
+*.map
+CLOUDER.LOG
+__pycache__/
+dist/
